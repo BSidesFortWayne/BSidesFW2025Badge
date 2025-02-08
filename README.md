@@ -64,7 +64,7 @@ This section contains the accelerometer (LIS3DHTR) and the associated connection
 
 Datasheet:
 
-https://atta.szlcsc.com/upload/public/pdf/source/20170502/1493709336456.pdf
+https://www.st.com/resource/en/datasheet/lis3dh.pdf
 
 ### Battery Monitor
 
