@@ -9,7 +9,7 @@ This section describes the technical specifications of the board to aid in devel
 
 ## Schematic Overview
 
-Within the board-version-1.pdf schematic you will find the electrical schematic of the device including the part numbers and connections between components identified as net labels. Each section of the schematic will be described below and applicable datasheets will be linked.
+Within the schematics/BSides Badge V1 Schematic.pdf you will find the electrical schematic of the device including the part numbers and connections between components identified as net labels. Each section of the schematic will be described below and applicable datasheets will be linked.
 
 ### ESP32-WROOM-32-N4
 
