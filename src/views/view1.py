@@ -8,8 +8,8 @@ class View(views.view.View):
     """
     Tetris
 
-    SW4 - Rotate
-    SW3 - Drop
+    SW4 - Drop
+    SW3 - Rotate
     SW2 - Right
     SW1 - Left
     SW1 Hold - Home
@@ -84,37 +84,38 @@ class View(views.view.View):
             # Move right
             self.move_block_horizontal(1)
             self.draw_scene()
-        elif button == 3:
+        elif button == 4:
             # Drop the current block all the way down
             self.drop_current_block()
             self.draw_scene()
-        elif button == 4:
+        elif button == 3:
             # Rotate block and immediately redraw
             self.rotate_current_block()
             self.draw_scene()
 
     def update_stats(self):
         self.views.displays.display2.fill(self.views.displays.gc9a01.BLACK)
-        x = round(self.views.displays.display2.width()/4)
-        y = 60
-        self.views.displays.display2.fill_rect(x-5, y-5, (len(self.next_block[0]) * self.next_block_size)+10, (len(self.next_block) * self.next_block_size)+10, self.views.displays.gc9a01.color565(20, 20, 20))
-        for row_number, row in enumerate(self.next_block):
-            for column_number, cell in enumerate(row):
-                if cell:
-                    self.views.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, self.views.displays.gc9a01.RED)
-                else:
-                    self.views.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, self.views.displays.gc9a01.BLACK)
-                x += self.next_block_size
+        if not self.is_game_over:
             x = round(self.views.displays.display2.width()/4)
-            y += self.next_block_size
-        self.views.displays.display2.text(
-            font_small,
-            "Next",
-            round(self.views.displays.display2.width()/4),
-            60 - font_small.HEIGHT,
-            self.views.displays.gc9a01.WHITE,
-            self.views.displays.gc9a01.BLACK
-        )
+            y = 60
+            self.views.displays.display2.fill_rect(x-5, y-5, (len(self.next_block[0]) * self.next_block_size)+10, (len(self.next_block) * self.next_block_size)+10, self.views.displays.gc9a01.color565(20, 20, 20))
+            for row_number, row in enumerate(self.next_block):
+                for column_number, cell in enumerate(row):
+                    if cell:
+                        self.views.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, self.views.displays.gc9a01.RED)
+                    else:
+                        self.views.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, self.views.displays.gc9a01.BLACK)
+                    x += self.next_block_size
+                x = round(self.views.displays.display2.width()/4)
+                y += self.next_block_size
+            self.views.displays.display2.text(
+                font_small,
+                "Next",
+                round(self.views.displays.display2.width()/4),
+                60 - font_small.HEIGHT,
+                self.views.displays.gc9a01.WHITE,
+                self.views.displays.gc9a01.BLACK
+            )
         self.views.displays.display2.text(
             font_small,
             f"Score: {self.score}",
@@ -330,7 +331,6 @@ class View(views.view.View):
         self.views.neopixel.fill((40, 0, 0))
         self.views.neopixel.write()
         self.views.displays.display1.fill(self.views.displays.gc9a01.BLACK)
-        self.views.displays.display2.fill(self.views.displays.gc9a01.BLACK)
         self.views.displays.display_center_text(font, "Game Over", self.views.displays.display1, self.views.displays.gc9a01.RED, self.views.displays.gc9a01.BLACK)
         self.views.displays.display1.text(
             font_small,
@@ -340,5 +340,6 @@ class View(views.view.View):
             self.views.displays.gc9a01.RED,
             self.views.displays.gc9a01.BLACK
         )
+        self.update_stats()
         while self.is_game_over:
             time.sleep(0.05)
