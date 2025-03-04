@@ -1,23 +1,20 @@
 # BSidesFW2025Badge
 BSides Fort Wayne Badge Programming
 
-# Technical Specifications
+# Technical Specifications V2
 
 This section describes the technical specifications of the board to aid in development.
 
 ## Schematic Overview
 
-Within the [schematics/BSides Badge V1 Schematic.pdf](https://github.com/Bgilsing/BSidesFW2025Badge/blob/7ddf00d19111eac93513fafc470cc44a914eef10/schematics/BSides%20Badge%20V1%20Schematic.pdf) you will find the electrical schematic of the device including the part numbers and connections between components identified as net labels. Each section of the schematic will be described below and applicable datasheets will be linked.
+Within the [schematics/BSides Badge V2 Schematic.pdf](https://github.com/commputethis/BSidesFW2025Badge/blob/68bb887bfc6d0544537c8bf179ed645db8c0f13b/schematics/BSides%20Badge%20V2%20Schematic.pdf) you will find the electrical schematic of the device including the part numbers and connections between components identified as net labels. Each section of the schematic will be described below and applicable datasheets will be linked.
 
-### ESP32-WROOM-32-N4
+### ESP32-WROVER-E-N8R8
 
-This section contains the ESP32-WROOM-32-N4 itself, the decoupling capacitors, the pullup resistors required for operation of the I2C Bus, and the net labels associated with the GPIO pins of the ESP32. 
-
-Note: In version 1 we are using the ESP32-WROOM-32-N4, version 2 is planned to use the ESP32-WROVER-E-N8R8 to allow more PSRAM for use in displaying images and animations without needing to read from flash as often.
+This section contains the ESP32-WROVER-E-N8R8 itself, the decoupling capacitors, the pullup resistors required for operation of the I2C Bus, and the net labels associated with the GPIO pins of the ESP32. 
+The ESP32-WROVER-E-N8R8 has a 240Mhz Dual Core processor with 8Mb of Flash and 8Mb of RAM available on the SPI bus.
 
 Datasheets:
-
-https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf
 https://www.espressif.com.cn/sites/default/files/documentation/esp32-wrover-e_esp32-wrover-ie_datasheet_en.pdf
 
 ### USB-Serial
@@ -30,9 +27,9 @@ This section contains the USB-C shell connector and associated netlabels. CC1 an
 
 ### WS2812B
 
-This section contains the 4 RGB LEDs that are connected to IO26. Nothing much more to say about this... Treat it like a small LED strip.
+This section contains the 7 RGB LEDs that are connected to IO26. Nothing much more to say about this... Treat it like a small LED strip.
 
-Note: The 5V switching power supply is disabled by default as a power management feature. It's operation is described in the Voltage Boost 3.3V to 5V section.
+Note: The 5V switching power supply is present on the V2 schematic, but has been disabled. The red jumper on H3 is providing 3.3V to the 5V bus. There is no need to enable the 5v power supply, stuff just works.
 
 https://www.lcsc.com/product-detail/RGB-LEDs-Built-in-IC_Worldsemi-WS2812B-B-T_C2761795.html
 
@@ -42,15 +39,19 @@ This section contains a dual transistor package which is used to place the ESP32
 
 ### Boot/Function Buttons
 
-These are the 4 buttons across the top of the device to the right of the ESP32. SW1 is dual purpose. During normal operation, it serves as a simple button attached to IO0. However, IO0 is a strapping pin dedicated to placing the ESP32 into the boot (programming) mode. If SW1 is held during startup, the device will be manually placed into boot mode. This should not be required during normal programming sessions as the RTS/DTR circuit should handle this function, but it is available if needed in special circumstances. SW2, SW3, and SW4 are basic buttons connected directly to GPIO lines. All lines are pulled high and are active low.
+These are the 4 buttons across the top of the device to the right of the ESP32 and two gaming buttons. SW1 is dual purpose. During normal operation, it serves as a simple button attached to IO0. However, IO0 is a strapping pin dedicated to placing the ESP32 into the boot (programming) mode. If SW1 is held during startup, the device will be manually placed into boot mode. This should not be required during normal programming sessions as the RTS/DTR circuit should handle this function, but it is available if needed in special circumstances. SW2, SW3, SW4, SW7, and SW8 are basic buttons connected to a PCA9535 IO expander at address 0x20 on the I2C bus. All lines are pulled high and are active low.
 
 SW1 > IO0
 
-SW2 > IO33
+SW2 > IO1_2
 
-SW3 > IO35
+SW3 > IO1_1
 
-SW4 > IO34
+SW4 > IO1_0
+
+SW7 > IO0_2
+
+SW8 > IO0_1
 
 ### Reset Button
 
@@ -58,7 +59,7 @@ Connected to the EN pin of the ESP32. Pressing this will reset the device.
 
 ### LIS3DHTR Accelerometer I2C Address 0x18
 
-This section contains the accelerometer (LIS3DHTR) and the associated connections. The datasheet is linked for reference, and that reference will probably be needed. The I2C data lines are connected to IO25 (SCL) and IO17 (SDA) on the ESP32, and the accelerometer can be accessed at I2C address 0x18. IO13 is also dedicated to a programmable interrupt pin on the accelerometer for possible use. An example of this device would be for power saving. If no motion is detected for an interval, the device could be put into a reduced power state and then later woken up using the interrupt pin. Of course, there are plenty of other fun things that can be accomplished using the three-axis output of the accelerometer.
+This section contains the accelerometer (LIS3DHTR) and the associated connections. The datasheet is linked for reference, and that reference will probably be needed. The I2C data lines are connected to IO22 (SCL) and IO21 (SDA) on the ESP32, and the accelerometer can be accessed at I2C address 0x18. IO34 is also dedicated to a programmable interrupt pin on the accelerometer for possible use. An example of this device would be for power saving. If no motion is detected for an interval, the device could be put into a reduced power state and then later woken up using the interrupt pin. Of course, there are plenty of other fun things that can be accomplished using the three-axis output of the accelerometer. The unused interrupts and ADC inputs are wired to the expansion headers for future use.
 
 Datasheet:
 
@@ -66,7 +67,7 @@ https://www.st.com/resource/en/datasheet/lis3dh.pdf
 
 ### Battery Monitor
 
-This is a very simple voltage divider that represents the current voltage of the LIPO 3.7v nominal battery. It is read into the ESP32 on IO32. The divider ratio is 27:100, resulting in a fully charged battery at 4.2v sending 3.3V to IO32, and a fully discharged battery at 3.0v will result in 2.36v at IO32. Admittedly, this is not the best method of determining battery charge status, but it's better than nothing, and with some simple code to average the readings then, it can be effective at gauging basic SOC levels.
+This is a very simple voltage divider that represents the current voltage of the LIPO 3.7v nominal battery. It is read via ADC1 on the Accelerometer on the I2C bus. The divider ratio is 27:100, resulting in a fully charged battery at 4.2v sending 3.3V to ADC1, and a fully discharged battery at 3.0v will result in 2.36v at ADC1. Admittedly, this is not the best method of determining battery charge status, but it's better than nothing, and with some simple code to average the readings then, it can be effective at gauging basic SOC levels.
 
 ### DW01A Battery Protection
 
@@ -84,15 +85,15 @@ Note: This device is not designed to operate without a battery. The battery prov
 
 ### Voltage Boost 3.3V to 5V
 
-This switching power supply is provided for the operation of the WS2812B RGB LEDs, which require 5V for reliable operation. The input for this module is 3.3V from the Boost Buck converter and the output is 5V. This power supply module is controlled via IO16 net label 5VEN. When IO16 is pulled high the power supply will be enabled and will output 5V. Basically if you want to use the RGB LEDs, then pull IO16 high to enable the power. If you want to save power then set IO16 low.
+No longer used.
 
 ### Power Switch
 
 Simple... Its a switch. Turn it on to use it.
 
-### Screen Headers
+### Display Headers
 
-Forgot to label this section, but these are the 7pin female headers that the screens plug into.
+These are the 7pin female headers that the screens plug into as well as transistors that control power to the displays. The DISP_EN network is connected to IO32. IO32 controls the power status of the displays. Bringing IO32 high will enable the displays, and bringing it low will disable the displays can can be used to save power when not in use. By default IO32 is pulled low and the displays will be normally off.
 
 The Screens are both connected to the SPI data bus, and can operate independantly via software using the Data Control, Reset, and Chip Select Pins. Pinouts below...
 
@@ -104,64 +105,74 @@ CLK > IO18
 
 Screen 1 Pins:
 
-DC1 > IO22
+DC1 > IO19
 
 RST1 > IO14
 
-CS1 > IO5
+CS1 > IO33
 
 Screen 2 Pins:
 
-DC2 > IO21
+DC2 > IO25
 
 RST2 > IO27
 
-CS2 > IO4
+CS2 > IO13
 
+### Speaker
+
+Yes... V2 has audio! There is a "speaker" (really a variable frequency buzzer) You can send tones by adjusting the PWM frequency and vary the volume by adjusting the PWM duty cycle. This is connected to IO15 of the ESP32. Datasheet below:
+
+https://www.lcsc.com/product-detail/Buzzers_HYDZ-HYG-7525A-5027_C18623827.html
+
+### Expansion Headers
+
+V2 contains two expansion headers. In V3 these will not be populated with headers and will be available to anyone who wants to hack these devices and use IO that is not used by anything else on the board.
+
+### Input/Output Expander 0x20
+
+This is a PCA9535 IO expander at address 0x20 on the I2C bus IO22 (SCL) and IO21 (SDA). The PCA9535 provides an additional 16 GPIO lines via the I2C bus and in this application is used to read the status of buttons. For details about the buttons refer to the Boot/Function Buttons section. The unused IO lines are wired to the expansion headers for future use.
 
 
 ## GPIO Pin Assignments
 
-IO0    Boot/Button 1
+IO0    		Boot/Button 1 (Strapping)
 
-IO2    Strapping
+IO2    		(Strapping) Not Connected
 
-IO4    CS2
+IO4    		(Strapping) Not Connected
 
-IO5    CS1
+IO5    		(Strapping) Not Connected
 
-IO12   Strapping
+IO12   		(Strapping) Not Connected
 
-IO13   Accelerometer Interrupt
+IO13   		CS2 
 
-IO14   RST1
+IO14   		RST1
 
-IO15   Strapping
+IO15   		(Strapping) Speaker
 
-IO16   5VEN
+IO18   		CLK
 
-IO17   I2C SDA
+IO19   		DC1
 
-IO18   CLK
+IO21   		I2C SDA
 
-IO19   No Connection
+IO22   		I2C SCL
 
-IO21   DC2
+IO23   		MOSI
 
-IO22   DC1
+IO25   		DC2
 
-IO23   MOSI
+IO26   		WS2812B
 
-IO25   I2C SCL
+IO27   		RST2
 
-IO26   WS2812B
+IO32   		DISP_EN
 
-IO27   RST2
+IO33   		CS1 
 
-IO32   Battery Monitor
+IO34   		Accelerometer Interrupt
 
-IO33   Button 2
+IO35   		Not Connected
 
-IO34   Button 4
-
-IO35   Button 3
