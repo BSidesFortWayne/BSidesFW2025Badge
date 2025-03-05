@@ -79,11 +79,11 @@ class View(views.view.View):
         self.add_block()
 
     def button_press(self, button):
+        if self.is_game_over:
+            if button == 2:
+                self.__init__(self.views)
+            return
         if self.views.board_version == 1:
-            if self.is_game_over:
-                if button == 2:
-                    self.__init__(self.views)
-                return
             if button == 1:
                 # Move left
                 self.move_block_horizontal(-1)
