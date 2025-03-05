@@ -8,11 +8,19 @@ class View(views.view.View):
     """
     Tetris
 
+    V1:
+
     SW4 - Drop
     SW3 - Rotate
     SW2 - Right
     SW1 - Left
-    SW1 Hold - Home
+
+    V2:
+
+    SW3 - Rotate
+    SW5 - Right
+    SW6 - Left
+    SW4 - Drop
     """
 
     def __init__(self, views):
@@ -71,27 +79,44 @@ class View(views.view.View):
         self.add_block()
 
     def button_press(self, button):
-        if self.is_game_over:
-            if button == 2:
-                self.__init__(self.views)
-            return
-
-        if button == 1:
-            # Move left
-            self.move_block_horizontal(-1)
-            self.draw_scene()
-        elif button == 2:
-            # Move right
-            self.move_block_horizontal(1)
-            self.draw_scene()
-        elif button == 4:
-            # Drop the current block all the way down
-            self.drop_current_block()
-            self.draw_scene()
-        elif button == 3:
-            # Rotate block and immediately redraw
-            self.rotate_current_block()
-            self.draw_scene()
+        if self.views.board_version == 1:
+            if self.is_game_over:
+                if button == 2:
+                    self.__init__(self.views)
+                return
+            if button == 1:
+                # Move left
+                self.move_block_horizontal(-1)
+                self.draw_scene()
+            elif button == 2:
+                # Move right
+                self.move_block_horizontal(1)
+                self.draw_scene()
+            elif button == 4:
+                # Drop the current block all the way down
+                self.drop_current_block()
+                self.draw_scene()
+            elif button == 3:
+                # Rotate block and immediately redraw
+                self.rotate_current_block()
+                self.draw_scene()
+        else:
+            if button == 6:
+                # Move left
+                self.move_block_horizontal(-1)
+                self.draw_scene()
+            elif button == 5:
+                # Move right
+                self.move_block_horizontal(1)
+                self.draw_scene()
+            elif button == 4:
+                # Drop the current block all the way down
+                self.drop_current_block()
+                self.draw_scene()
+            elif button == 3:
+                # Rotate block and immediately redraw
+                self.rotate_current_block()
+                self.draw_scene()
 
     def update_stats(self):
         self.views.displays.display2.fill(self.views.displays.gc9a01.BLACK)

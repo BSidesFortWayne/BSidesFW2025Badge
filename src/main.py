@@ -10,14 +10,22 @@ import accelerometer
 import time
 import buttons
 import views
+import audio
 
 class Views:
     def __init__(self):
 
         # some things that the views will need
-        self.buttons = buttons.Buttons()
+        self.buttons = buttons.Buttons(accelerometer.i2c)
         self.buttons.button_callback = self.button_press
-        self.neopixel = neopixel.NeoPixel(Pin(26), 4)
+        self.neopixel = neopixel.NeoPixel(Pin(26), 7)
+        self.neopixel.fill((0, 0, 0))
+        self.neopixel.write()
+        i2c_scan = accelerometer.i2c.scan()
+        if 0x20 in i2c_scan: # IO expander was added in v2
+            self.board_version = 2
+        else:
+            self.board_version = 1
         self.displays = displays
         name_file = open('name.json')
         self.name = json.loads(name_file.read())

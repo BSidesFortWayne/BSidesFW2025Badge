@@ -5,14 +5,18 @@ import vga1_bold_16x32 as font
 SCK = 18
 MOSI = 23
 
-DC1 = 22
+DC1 = 19
 RST1 = 14
-CS1 = 5
+CS1 = 33
 
-DC2 = 21
+DC2 = 25
 RST2 = 27
-CS2 = 4
+CS2 = 13
 
+DISP_EN = 32
+
+disp_en = Pin(32, Pin.OUT)
+disp_en.value(1)
 
 spi = SPI(1, baudrate=60000000, sck=Pin(SCK), mosi=Pin(MOSI))
 
@@ -30,6 +34,16 @@ def display_center_text(font, text, display, fg, bg):
         font,
         text,
         int((display.width()/2) - ((font.WIDTH*len(text)/2))),
+        int((display.height()/2) - (font.HEIGHT/2)),
+        fg,
+        bg
+    )
+
+def display_center_write(font, text, display, fg, bg):
+    display.write(
+        font,
+        text,
+        int((display.width()/2) - ((display.write_len(font, text)/2))),
         int((display.height()/2) - (font.HEIGHT/2)),
         fg,
         bg
