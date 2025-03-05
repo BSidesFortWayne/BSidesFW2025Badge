@@ -27,9 +27,14 @@ class Views:
         else:
             self.board_version = 1
         self.displays = displays
-        name_file = open('name.json')
-        self.name = json.loads(name_file.read())
-        name_file.close()
+        if 'name.json' in os.listdir():
+            name_file = open('name.json')
+            self.name = json.loads(name_file.read())
+            name_file.close()
+        else:
+            self.name = None
+
+        self.audio_running = False
 
         self.view_objects = [
             views.view0.View,

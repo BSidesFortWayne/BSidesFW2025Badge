@@ -3,6 +3,8 @@ import random
 import time
 import vga2_bold_16x32 as font
 import vga2_8x16 as font_small
+import audio
+import _thread
 
 class View(views.view.View):
     """
@@ -24,6 +26,7 @@ class View(views.view.View):
     """
 
     def __init__(self, views):
+        self.view = 1
         self.views = views
         self.views.neopixel.fill((0, 0, 0))
         self.views.neopixel.write()
@@ -35,7 +38,8 @@ class View(views.view.View):
         self.next_block_size = 20
         self.score = 0
         self.lines = 0
-
+        if not self.views.audio_running:
+            _thread.start_new_thread(audio.play_tetris_song, (self.views,))
         self.grid = [[0 for column in range(self.columns)] for row in range(self.rows)]
         self.blocks = [
             [
