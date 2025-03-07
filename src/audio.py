@@ -13,7 +13,7 @@ class Speaker:
 
         self.pwm.duty(0)
 
-        self.speed = 2
+        self.speed = 1
 
         self.state = AUDIO_STOPPED
     
@@ -25,6 +25,8 @@ class Speaker:
         self.start_song(get_tetris_song())
 
     def start_song(self, song):
+        # TODO need to set the state to stopped and wait for the old thread to exit
+        # before starting a new one... 
         _thread.start_new_thread(self._play_song, (song,))
 
     def pause_song(self):
