@@ -1,11 +1,11 @@
 # Home
 
-import views.view
+import apps.view
 import fonts.arial32px as arial32px
 import fonts.arial16px as arial16px
-from machine import Pin, ADC
+from machine import Pin, ADC # type: ignore
 
-class View(views.view.View):
+class View(apps.view.View):
     """
     Displays name on both screens.
     The buttons go to the other 4 views.
@@ -16,18 +16,18 @@ class View(views.view.View):
         self.views = views
         if self.views.name == None:
             self.views.displays.display_center_write(
-                arial32px,
                 'NO',
-                self.views.displays.display1,
                 self.views.displays.gc9a01.WHITE,
-                self.views.displays.gc9a01.BLACK
+                self.views.displays.gc9a01.BLACK,
+                1,
+                arial32px
             )
             self.views.displays.display_center_write(
-                arial32px,
                 'NAME',
-                self.views.displays.display2,
                 self.views.displays.gc9a01.WHITE,
-                self.views.displays.gc9a01.BLACK
+                self.views.displays.gc9a01.BLACK,
+                2,
+                arial32px
             )
         else:
             # Convert hex to RGB

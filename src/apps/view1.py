@@ -1,7 +1,6 @@
 import apps.view
 import random
 import time
-from main import Controller
 import vga2_bold_16x32 as font # type: ignore
 import vga2_8x16 as font_small # type: ignore
 import audio
