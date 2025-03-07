@@ -13,7 +13,7 @@ class BSP:
         self.i2c = I2C(1, scl=Pin(22), sda=Pin(21), freq=400_000)
         self.leds = LEDs()
         self.iox = PCA9535(self.i2c)
-        self.buttons = Buttons(HardwareRev.V2, self.iox)
+        self.buttons = Buttons(hardware_version, self.iox)
         self.displays = displays
         self.imu = LIS3DH_I2C(self.i2c)
         self.speaker = Speaker()
