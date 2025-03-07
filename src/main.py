@@ -54,7 +54,7 @@ class Controller:
         print(f"Button Press {button}")
         self.bsp.leds.set_led_color(button, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
         
-        # self.current_view.button_press(button)
+        self.current_view.button_press(button)
 
 
     def button_release(self, button: int):
