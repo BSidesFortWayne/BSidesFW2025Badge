@@ -316,25 +316,6 @@ IO32.value(1)
 # Pin where WS2812 LEDs are connected
 LEDpin = machine.Pin(26)
 
-# Number of LEDs in the chain
-num_leds = 7
-
-# Create a NeoPixel object
-LED = neopixel.NeoPixel(LEDpin, num_leds)
-
-# Set the LED colors
-LED[0] = (64, 0, 0)
-LED[1] = (0, 64, 0)
-LED[2] = (0, 64, 64)
-LED[3] = (0, 0, 64)
-LED[4] = (64, 0, 0)
-LED[5] = (0, 0, 128)
-LED[6] = (0, 128, 0)
-
-# Write the data to the LEDs
-LED.write()
-
-
 # Initialize I2C on an ESP32 
 i2c = machine.I2C(1, scl=machine.Pin(22), sda=machine.Pin(21), freq=400_000)
 # If your board only has one hardware I2C, you may need to use I2C(0, ...) instead.

@@ -1,6 +1,6 @@
-import views.view
+import apps.view
 
-class View(views.view.View):
+class View(apps.view.View):
     def __init__(self, views):
         self.view = 4
         self.views = views
