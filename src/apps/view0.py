@@ -78,6 +78,6 @@ class View(apps.view.View):
             )
 
     def button_press(self, button):
-        view_mapping = [1, 6, 5, 4]
-        if button in view_mapping:
-            self.views.switch_view(view_mapping.index(button)+1)
+        # view_mapping = [1, 6, 5, 4]
+        # if button in view_mapping:
+        self.views.switch_view(button)
