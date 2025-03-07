@@ -1,4 +1,18 @@
 {
     "first": "John",
-    "last": "Doe"
+    "last": "Doe",
+    "background_image": [ // optional, needs to be jpeg
+        "display 1 filename",
+        "display 2 filename"
+    ],
+    "fg_color": [
+        "#FFFFFF",
+        "#FFFFFF"
+    ],
+    "bg_color": [
+        "#000000",
+        "#000000"
+    ],
+    "company": "Company",
+    "title": "Title"
 }

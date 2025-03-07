@@ -19,6 +19,10 @@ IO32 = Pin(32, Pin.OUT)
 # Set GPIO32 high to turn on the displays
 IO32.value(1)
 
+DISP_EN = 32
+
+disp_en = Pin(32, Pin.OUT)
+disp_en.value(1)
 
 spi = SPI(1, baudrate=60000000, sck=Pin(SCK), mosi=Pin(MOSI))
 

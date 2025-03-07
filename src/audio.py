@@ -2,7 +2,6 @@ import machine # type: ignore
 import time
 import _thread
 
-
 AUDIO_STOPPED = 0
 AUDIO_PLAYING = 1
 AUDIO_PAUSED = 2

@@ -1,7 +1,6 @@
 from hardware_rev import HardwareRev
 from machine import Pin, Timer # type: ignore
-import time
-
+import time # type: ignore
 from pca9535 import PCA9535
 
 

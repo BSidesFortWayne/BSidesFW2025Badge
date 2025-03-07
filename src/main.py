@@ -5,6 +5,9 @@ from apps import view, view0, view1, view2, view3, view4
 import random
 
 import gc
+
+from hardware_rev import HardwareRev
+
 gc.enable()
 gc.collect()
 
@@ -12,7 +15,7 @@ class Controller:
     current_view: view.View
     def __init__(self):
         # some things that the views will need
-        self.bsp = BSP()
+        self.bsp = BSP(HardwareRev.V2)
 
         self.bsp.buttons.button_pressed_callbacks.append(self.button_press)
         self.bsp.buttons.button_released_callbacks.append(self.button_release)
