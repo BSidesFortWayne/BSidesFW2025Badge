@@ -1,6 +1,6 @@
-from machine import Pin, SPI # type: ignore
-import gc9a01 # type: ignore
-import vga1_bold_16x32 # type: ignore
+from machine import Pin, SPI
+import gc9a01 
+import vga1_bold_16x32
 
 SCK = 18
 MOSI = 23
@@ -13,16 +13,14 @@ DC2 = 25
 RST2 = 27
 CS2 = 13
 
-# Create a Pin object on GPIO32 configured for output
-IO32 = Pin(32, Pin.OUT)
-
-# Set GPIO32 high to turn on the displays
-IO32.value(1)
-
 DISP_EN = 32
 
-disp_en = Pin(32, Pin.OUT)
+disp_en = Pin(DISP_EN, Pin.OUT)
 disp_en.value(1)
+
+reset = Pin(RST1, Pin.OUT)
+cs=Pin(CS1, Pin.OUT)
+dc=Pin(DC1, Pin.OUT)
 
 spi = SPI(1, baudrate=60000000, sck=Pin(SCK), mosi=Pin(MOSI))
 
@@ -40,14 +38,20 @@ display_map = {
     2: display2
 }
 
-def display_center_text(text, fg, bg, display_index: int = 1, font=vga1_bold_16x32):
+def display_center_text(text, fg = gc9a01.WHITE, bg = gc9a01.BLACK, display_index: int = 1, font=vga1_bold_16x32
+):
     display = display_map[display_index]
-    display.text(
-        font,
+    display_text(
         text,
         int((display.width()/2) - ((font.WIDTH*len(text)/2))),
         int((display.height()/2) - (font.HEIGHT/2)),
         fg,
-        bg
+        bg,
+        display_index,
+        font
     )
 
+
+def display_text(text, x, y, fg = gc9a01.WHITE, bg = gc9a01.BLACK, display_index: int = 1, font=vga1_bold_16x32):
+    display = display_map[display_index]
+    display.text(font, text, x, y, fg, bg)

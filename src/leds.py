@@ -1,5 +1,5 @@
-from machine import Pin  # type: ignore
-import neopixel # type: ignore
+from machine import Pin  
+import neopixel 
 import time
 
 # Number of LEDs in the chain
@@ -46,7 +46,7 @@ class LEDs:
             color = wheel(j & 255)
             self.leds[led_index] = scale_color(color, self.max_brightness)
             self.leds.write()
-            time.sleepsss_ms(wait) # type: ignore Delay in milliseconds
+            time.sleep_ms(wait) # Delay in milliseconds
 
 # while True:
 #     # Perform the rainbow test on LED at index 3 (change the index as needed)

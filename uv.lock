@@ -201,6 +201,39 @@ wheels = [
 ]
 
 [[package]]
+name = "micropython-esp32-stubs"
+version = "1.24.1.post1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "micropython-stdlib-stubs" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/33/7f/77fb40b99cba2904a2be10229a6661abd386b8310aa94f3fb4363757ea15/micropython_esp32_stubs-1.24.1.post1.tar.gz", hash = "sha256:7390b94f52c89293179af8d0733559d56dab53a8694c58fac4ed8edcfc445ae4", size = 94968 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/52/6b/b9e3e45457c85e9bc05014674a2875e4fe0c13cc6997860c9f2db74d53c8/micropython_esp32_stubs-1.24.1.post1-py2.py3-none-any.whl", hash = "sha256:515317389b872a74ddeb5287d2b82b74642277112668cdaacb6f625b92a5562c", size = 124225 },
+]
+
+[[package]]
+name = "micropython-stdlib-stubs"
+version = "1.24.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/29/69/346c678f2ee5f316838ca34cd45d7a46e2bfa37aa3c72f4d8837ad0ec075/micropython_stdlib_stubs-1.24.1.tar.gz", hash = "sha256:8e1ab07c34b7fe219a63918c4601bb0a90498c95cbd12038b7088c8359c3f521", size = 120452 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/96/f4f122bcf36c18e99a29e0cc6f8f962266e5770135d90d994b7bb968a179/micropython_stdlib_stubs-1.24.1-py3-none-any.whl", hash = "sha256:ca1442aaec47461cef08416824b73e3a9167ab79f36eaa86b6ca053d2bc65d45", size = 138489 },
+]
+
+[[package]]
+name = "mpremote"
+version = "1.24.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyserial" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/17/8f/1524e4ad13bb3169f10b2e859753114a2bae3ae6944e1d1e48e96838c1ce/mpremote-1.24.1.tar.gz", hash = "sha256:1a3c16d255748cfe54d4a897908651fc8286233173f7c7b2a0e56ae4b9fa940e", size = 25205 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ee/08/39e3cf836602825eefa53127e7b8d3a64cded8d3f639f9c67d823583e029/mpremote-1.24.1-py3-none-any.whl", hash = "sha256:d3ae3d0a0ae7713c537be2b6afadd11c7cde5f1750ea1260f6667bb80071b15b", size = 29291 },
+]
+
+[[package]]
 name = "mpy-cross"
 version = "1.24.1.post2"
 source = { registry = "https://pypi.org/simple" }
@@ -356,6 +389,8 @@ source = { virtual = "." }
 dependencies = [
     { name = "adafruit-ampy" },
     { name = "esptool" },
+    { name = "micropython-esp32-stubs" },
+    { name = "mpremote" },
     { name = "mpy-cross" },
     { name = "pillow" },
     { name = "rshell" },
@@ -365,6 +400,8 @@ dependencies = [
 requires-dist = [
     { name = "adafruit-ampy", specifier = ">=1.1.0" },
     { name = "esptool", specifier = ">=4.8.1" },
+    { name = "micropython-esp32-stubs", specifier = ">=1.24.1.post1" },
+    { name = "mpremote", specifier = ">=1.24.1" },
     { name = "mpy-cross", specifier = ">=1.24.1.post2" },
     { name = "pillow", specifier = ">=11.1.0" },
     { name = "rshell", specifier = ">=0.0.36" },

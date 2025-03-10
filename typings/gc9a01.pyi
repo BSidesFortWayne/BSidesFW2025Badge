@@ -1,0 +1,44 @@
+#define BLACK   0x0000
+#define BLUE    0x001F
+#define RED     0xF800
+#define GREEN   0x07E0
+#define CYAN    0x07FF
+#define MAGENTA 0xF81F
+#define YELLOW  0xFFE0
+#define WHITE   0xFFFF
+
+BLACK = 0x0000
+BLUE = 0x001F
+RED = 0xF800
+GREEN = 0x07E0
+CYAN = 0x07FF
+MAGENTA = 0xF81F
+YELLOW = 0xFFE0
+WHITE = 0xFFFF
+
+class GC9A01:
+    def __init__(self, spi, width, height, reset, cs, dc, rotation, options, buffer_size) -> None: ...
+
+    def fill(self, color) -> None: ...
+
+    def circle(self, x, y, radius, color) -> None: ...
+
+    def write(self, font, text, x, y, fg, bg) -> None: ...
+
+    def line(self, x1, y1, x2, y2, color) -> None: ...
+
+    def color565(self, r, g, b) -> int: ...
+
+    def jpg(self, filename, x, y, speed) -> None: ...
+
+    def write_len(self, font, text) -> int: ...
+
+    def text(self, font, text, x, y, fg, bg) -> None: ...
+
+    def init(self) -> None: ...
+
+    def width(self) -> int: ...
+
+    def height(self) -> int: ...
+
+    def fill_rect(self, x, y, width, height, color) -> None: ...

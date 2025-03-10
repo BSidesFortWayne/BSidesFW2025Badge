@@ -1,11 +1,11 @@
 # Home
 
-import apps.view
+from apps.view import BaseApp
 import fonts.arial32px as arial32px
 import fonts.arial16px as arial16px
-from machine import Pin, ADC # type: ignore
+from machine import Pin, ADC 
 
-class View(apps.view.View):
+class View(BaseApp):
     """
     Displays name on both screens.
     The buttons go to the other 4 views.

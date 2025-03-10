@@ -1,9 +1,7 @@
 import machine
-import neopixel
 import time
 from machine import Pin
 import gc9a01
-import time
 import math
 import vga1_bold_16x32 as font
 try:
