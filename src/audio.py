@@ -1,4 +1,4 @@
-import machine # type: ignore
+import machine
 import time
 import _thread
 

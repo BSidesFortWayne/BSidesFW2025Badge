@@ -1,6 +1,6 @@
 from hardware_rev import HardwareRev
-from machine import Pin, Timer # type: ignore
-import time # type: ignore
+from machine import Pin, Timer 
+import time 
 from pca9535 import PCA9535
 
 
@@ -76,7 +76,7 @@ class Buttons():
         inputs = self.iox.read_all_pca9535_inputs()
         self.iox_button_handler(inputs)
 
-        now = time.ticks_ms() # type: ignore
+        now = time.ticks_ms() 
         for button_index,button_pressed in enumerate(self.last_press_times):
             # We don't support long press for the GPIO buttons
             if button_index == 0:
@@ -92,7 +92,7 @@ class Buttons():
                 continue
 
             
-            time_since_pressed = time.ticks_diff(now, button_pressed) # type: ignore
+            time_since_pressed = time.ticks_diff(now, button_pressed) 
             if time_since_pressed > LONG_CLICK_DURATION_MS:
                 print(f"Long click detected for {button_index} after {time_since_pressed} ms")
                 self.last_long_press_time[button_index] = now
@@ -121,7 +121,7 @@ class Buttons():
                 else:
                     # We can
                     # last_press_time = self.last_press_times.get(button_index, 0)
-                    # press_duration = time.ticks_diff(time.ticks_ms(), last_press_time) # type: ignore
+                    # press_duration = time.ticks_diff(time.ticks_ms(), last_press_time) 
                     # print(f"You held the button down for {press_duration} ms")
                     self.button_debounce_processor(button_index, self.last_release_times, self.button_released_callbacks)
             self.last_iox_state = inputs
@@ -142,7 +142,7 @@ class Buttons():
     def button_debounce_processor(self, button_index: int, times: list[int], callbacks):
         button = button_index
         last_release_signal = times[button_index]
-        time_now = time.ticks_ms() # debounce  # type: ignore
+        time_now = time.ticks_ms() # debounce  
         if last_release_signal+self.debounce_time >= time_now:
             return
         [callback(button) for callback in callbacks]
