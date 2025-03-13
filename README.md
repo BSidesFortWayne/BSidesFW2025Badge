@@ -2,6 +2,60 @@
 
 BSides Fort Wayne Badge Programming
 
+# Development: Getting Started
+
+### Tools
+The python packages in this repository are managed by `uv`. The repository structure is as follows
+
+- `.venv`: This folder will be installed when you set up the python virtual environment with uv
+- `.vscode`: Vscode specific settings for this project
+- `schematics`: Board schematics as PDF
+- `src`: The embedded code for deployment on the target
+- `STLs`: Screen bezels, supports, and PCB STLs
+- `typings`: Custom typings for the VSCode Python Language Server in order to get better typehints and support for the micropython code
+
+
+### Setup
+Install `uv` (https://docs.astral.sh/uv/getting-started/installation/) based on your OS of choice. If on Windows, you may have a better development experience in `WSL` if you can provide access to the ESP32 chip to the WSL instance (https://learn.microsoft.com/en-us/windows/wsl/connect-usb). However, `uv` and `mpremote` both work on Windows so you can also develop natively
+
+###
+
+Once you have `uv` setup, you can simply run
+
+```shell
+uv sync
+```
+
+to get the virtual environment set up. Once you plug in and turn on your dev board, you need to give permissions (Linux only)
+
+```shell
+sudo chmod a+x /dev/ttyUSB0
+```
+
+At this point, you will need to flash our base image, which is here: https://github.com/russhughes/gc9a01_mpy/raw/refs/heads/main/firmware/ESP32_GENERIC/firmware_SPIRAM_8MiB.bin
+
+You can erase the flash and then flash the board with the above image with the following commands
+
+```shell
+uv run esptool.py erase_flash
+uv run esptool.py --baud 460800 write_flash 0x1000 <location_of_your_downloaded_bin_file>
+
+# e.g.
+uv run esptool.py --baud 460800 write_flash 0x1000 ~/Downloads/firmware_SPIRAM_8MiB.bin
+```
+
+And then you can either mount the `src` directory for the board and start in a REPL
+
+```shell
+uv run mpremote mount src
+```
+
+Or deploy the source to the board directly
+
+```shell
+uv run mpremote cp -r src/* :
+```
+
 # Technical Specifications V2
 
 This section describes the technical specifications of the board to aid in development.

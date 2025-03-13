@@ -1,7 +1,7 @@
 from hardware_rev import HardwareRev
 from machine import Pin, Timer 
 import time 
-from pca9535 import PCA9535
+from drivers.pca9535 import PCA9535
 
 
 LONG_CLICK_DURATION_MS = 1000

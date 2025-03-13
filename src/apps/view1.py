@@ -3,7 +3,7 @@ import random
 import time
 import vga2_bold_16x32 as font 
 import vga2_8x16 as font_small 
-import audio
+import drivers.audio
 import _thread
 
 class View(BaseApp):
