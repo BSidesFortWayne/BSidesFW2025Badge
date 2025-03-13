@@ -1,20 +1,9 @@
-from drivers.leds import LEDs
+from drivers.leds import LEDs, scale_color
 import time
 leds = LEDs()
 led_count = len(leds.leds)
 index = 0
 direction = 1
-while True:
-    index += direction
-    leds.set_led_color(index, (0xFF, 0xFF, 0xFF))
-    if index == 0 or index == led_count - 1:
-        direction = -direction
-    else:
-        leds.set_led_color((index - direction) % led_count, (0x00, 0x00, 0x00))
-    
-    if index == -1:
-        direction = -direction
-    elif index == led_count:
-        direction = -direction
+color = (0xFF, 0, 0)
 
-    time.sleep_ms(250)
+leds.color_bounce(color, 500)

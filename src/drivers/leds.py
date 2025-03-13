@@ -4,6 +4,8 @@ import time
 
 # Number of LEDs in the chain
 NUM_LEDS = 7
+FORWARD = 1
+BACKWARD = -1
 
 def scale_color(color, scale):
     """Scale the color values by the given scale factor."""
@@ -49,6 +51,24 @@ class LEDs:
     def turn_off_led(self, led_index):
         """Turn off the LED at the given index."""
         self.set_led_color(led_index, (0, 0, 0))
+
+
+    def color_bounce(self, color, wait):
+        """Move up and down the LED strip with the specified color
+        "Bounce" at the ends of the strip."""
+        direction = FORWARD
+        index = 0
+        while True:
+            self.set_led_color(index, color)
+            time.sleep_ms(wait)
+            self.set_led_color(index, (0, 0, 0))
+            index += direction
+            if index == NUM_LEDS:
+                direction = BACKWARD
+                index = NUM_LEDS - 2
+            elif index == -1:
+                direction = FORWARD
+                index = 1
 
     def rainbow_test_single_led(self, led_index, wait):
         """Perform the rainbow test on a specific LED."""
