@@ -1,5 +1,6 @@
 from apps.analog_clock import AnalogClock
 from apps.menu import Menu
+from apps.settings import Settings
 from apps.voltage_meter import VoltageMeter
 from bsp import BSP
 import json
@@ -110,7 +111,7 @@ def main():
     # clock = AnalogClock(controller)
     # main_menu = Menu(controller)
 
-    voltage_meter = VoltageMeter(controller)
+    settings = Settings(controller)
 
     total_times = 0
     total_counts = 0
@@ -119,7 +120,7 @@ def main():
         print("loop")
         x = time.ticks_ms()
         # clock.update()
-        voltage_meter.update()
+        settings.update()
         time.sleep(0.05)
         d = time.ticks_diff(time.ticks_ms(), x)
         total_times += d

@@ -1,11 +1,10 @@
-from hardware_rev import HardwareRev
-from leds import LEDs
-from lis3dh import LIS3DH_I2C
+from drivers.leds import LEDs
+from drivers.lis3dh import LIS3DH_I2C
 from machine import Pin, I2C
-from pca9535 import PCA9535
-from buttons import Buttons
-import displays
-from audio import Speaker
+from drivers.pca9535 import PCA9535
+from drivers.buttons import Buttons
+from drivers.audio import Speaker
+from drivers import displays
 
 
 class BSP:

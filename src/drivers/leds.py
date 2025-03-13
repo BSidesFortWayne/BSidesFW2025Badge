@@ -36,6 +36,16 @@ class LEDs:
         self.leds[led_index] = scale_color(color, self.max_brightness)
         self.leds.write()
     
+    def turn_off_all(self):
+        for led_num in range(NUM_LEDS):
+            self.leds[led_num] = (0, 0, 0)
+        
+        self.leds.write()
+
+    def turn_on_led(self, led_index):
+        self.leds[led_index] = (0xFF, 0xFF, 0xFF)
+        self.leds.write()
+
     def turn_off_led(self, led_index):
         """Turn off the LED at the given index."""
         self.set_led_color(led_index, (0, 0, 0))
@@ -47,6 +57,16 @@ class LEDs:
             self.leds[led_index] = scale_color(color, self.max_brightness)
             self.leds.write()
             time.sleep_ms(wait) # Delay in milliseconds
+    
+    def rainbow_test_all_leds(self, wait: int):
+        for j in range(255):
+            for led_num in range(NUM_LEDS):
+                index_offset = (255 // NUM_LEDS) * led_num
+                color = wheel((j + index_offset) & 255)
+                self.leds[led_num] = scale_color(color, self.max_brightness)
+                self.leds.write()
+            
+            time.sleep_ms(wait)
 
 # while True:
 #     # Perform the rainbow test on LED at index 3 (change the index as needed)

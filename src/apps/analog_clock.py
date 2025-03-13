@@ -1,4 +1,4 @@
-from apps import BaseApp
+from apps.view import BaseApp
 import gc9a01 
 import math
 from machine import RTC 
