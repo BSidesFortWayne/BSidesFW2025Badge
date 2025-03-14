@@ -1,3 +1,4 @@
+# type: ignore
 # import ure as re
 import re
 
@@ -930,7 +931,7 @@ def create_data(version, error_correction, data_list):
         bit_limit += block.data_count * 8
 
     if len(buffer) > bit_limit:
-        raise exceptions.DataOverflowError(
+        raise DataOverflowError(
             "Code length overflow. Data size (%s) > size available (%s)" %
             (len(buffer), bit_limit))
 

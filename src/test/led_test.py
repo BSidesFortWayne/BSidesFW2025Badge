@@ -1,5 +1,4 @@
-from drivers.leds import LEDs, scale_color
-import time
+from drivers.leds import LEDs
 leds = LEDs()
 led_count = len(leds.leds)
 index = 0

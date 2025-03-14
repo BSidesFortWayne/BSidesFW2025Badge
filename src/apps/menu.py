@@ -1,9 +1,9 @@
-from apps.view import BaseApp
+from apps.app import BaseApp
 import gc9a01 
 
 class Menu(BaseApp):
     def __init__(self, controller):
-        super().__init__(controller)
+        super().__init__(controller, "Main Menu")
         
         self.title_display = self.controller.bsp.displays.display1
         self.app_selection = self.controller.bsp.displays.display2
@@ -36,3 +36,5 @@ class Menu(BaseApp):
     def update(self):
         pass
 
+
+print("Menu loaded")
