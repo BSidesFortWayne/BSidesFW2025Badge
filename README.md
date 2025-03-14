@@ -26,7 +26,7 @@ Once you have `uv` setup, you can simply run
 uv sync
 ```
 
-to get the virtual environment set up. Once you plug in and turn on your dev board, you need to give permissions (Linux only)
+to get the virtual environment set up. Once you plug in and turn on your dev board, you need to change the device permissions (Linux only)
 
 ```shell
 sudo chmod a+x /dev/ttyUSB0
