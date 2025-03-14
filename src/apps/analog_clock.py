@@ -1,4 +1,4 @@
-from apps.view import BaseApp
+from apps.app import BaseApp
 import gc9a01 
 import math
 from machine import RTC 
@@ -6,7 +6,6 @@ from machine import RTC
 import framebuf
 
 import fonts.arial16px as arial16px
-import fonts.arial32px as arial32px
 
 
 FULL_REDRAW = 0
@@ -16,6 +15,7 @@ PARTIAL_REDRAW_FB = 3
 
 class AnalogClock(BaseApp):
     def __init__(self, controller):
+        super().__init__(controller, "Analog Clock")
         self.controller = controller
         self.display1 = self.controller.bsp.displays.display1
 

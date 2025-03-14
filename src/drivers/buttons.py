@@ -23,7 +23,7 @@ class Buttons():
         else:
             self.gpio_button_pins = [0]
         self.gpio_buttons = []
-        self.debounce_time = 20
+        self.debounce_time = 50
         self.button_pressed_callbacks = []
 
         # We will self-register the reset_button_long_press function 

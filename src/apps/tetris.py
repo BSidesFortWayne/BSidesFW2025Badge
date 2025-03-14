@@ -1,10 +1,8 @@
-from apps.view import BaseApp
+from apps.app import BaseApp
 import random
 import time
 import vga2_bold_16x32 as font 
 import vga2_8x16 as font_small 
-import drivers.audio
-import _thread
 
 class View(BaseApp):
     """
@@ -26,7 +24,7 @@ class View(BaseApp):
     """
 
     def __init__(self, controller):
-        self.controller = controller
+        super().__init__(controller, "Tetris")
         self.controller.neopixel.fill((0, 0, 0))
         self.controller.neopixel.write()
         self.controller.displays.display1.fill(self.controller.displays.gc9a01.BLACK)

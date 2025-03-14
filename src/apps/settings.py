@@ -1,19 +1,15 @@
-from apps.view import BaseApp
+from apps.app import BaseApp
 import gc9a01 
-import math
-from machine import RTC 
-import random
 from time import sleep_ms
 
-import fonts.arial16px as arial16px
 import fonts.arial32px as arial32px
 from lib.random_password import generate_random_password
 from lib.uQR import QRCode
 
 
-class Settings(BaseApp):
+class App(BaseApp):
     def __init__(self, controller):
-        self.controller = controller
+        super().__init__(controller, "Settings")
         self.display1 = self.controller.bsp.displays.display1
 
         self.bg_color = gc9a01.WHITE
