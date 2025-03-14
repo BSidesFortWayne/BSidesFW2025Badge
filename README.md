@@ -18,7 +18,7 @@ The python packages in this repository are managed by `uv`. The repository struc
 ### Setup
 Install `uv` (https://docs.astral.sh/uv/getting-started/installation/) based on your OS of choice. If on Windows, you may have a better development experience in `WSL` if you can provide access to the ESP32 chip to the WSL instance (https://learn.microsoft.com/en-us/windows/wsl/connect-usb). However, `uv` and `mpremote` both work on Windows so you can also develop natively
 
-###
+### Using `mpremote` for on board development
 
 Once you have `uv` setup, you can simply run
 
@@ -53,8 +53,22 @@ uv run mpremote mount src
 Or deploy the source to the board directly
 
 ```shell
+# This will deploy all src, but mpremote will check the hash of the files to determine 
 uv run mpremote cp -r src/* :
 ```
+
+Here are some other useful patterns with `mpremote` 
+```shell
+# when developing and iterating quickly, we can use this to deploy the file you are working on and then running `main` from local
+# in one command
+uv run mpremote cp -r src/apps/analog_clock.py + run main.py
+
+
+```
+
+### Using `micropico` for on board development
+
+TODO: Add details
 
 # Technical Specifications V2
 
