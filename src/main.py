@@ -6,14 +6,15 @@ from controller import Controller
 gc.enable()
 gc.collect()
 
-async def main():
+
+def test_http_server():
     import network
 
     ap = network.WLAN(network.AP_IF)
     ap.active(True)
     ap.config(essid="test123", password="abcd1234")
 
-    while ap.active() == False:
+    while not ap.active():
         pass
 
     print('Connection successful')
@@ -23,6 +24,7 @@ async def main():
     server = HTTPServer()
     server.start()
 
+async def main():
     controller = Controller()
 
     total_times = 0

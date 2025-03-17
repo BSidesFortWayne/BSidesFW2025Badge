@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "visualstudioexptteam.vscodeintellicode",
+        "ms-python.vscode-pylance",
+        "bierner.markdown-checkbox",
+        "bierner.markdown-mermaid"
+    ]
+}
