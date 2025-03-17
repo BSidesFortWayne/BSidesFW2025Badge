@@ -3,14 +3,14 @@
 	- [ ] Initial programming flowchart
 	- [ ] Software startup routines
 - Software
-	- [ ] Display
-		- [ ] Make frame buffer based display class for driver abstraction
 	- [ ] App Directory
 		- [ ] Clean+ up app directory 
 	- [ ] UI
 		- [ ] Make loading/pop up screen design for any views to use
 		- [ ] Normalize rendering around async?
-			- [ ] Have options for
+			- [ ] Have options for popups, confirmation dialogs, multi choice selections, etc
+			- [ ] "Modal" contexts
+
     - [ ] Network
 		- [ ] Add option to connect to local network
 		- [ ] Add option to set up in station mode and display QR code 
@@ -42,11 +42,15 @@
 	- [x] QR code generator/displayer
 		- [x] https://github.com/JASchilz/uQR
 	- [ ] Better abstraction functions/color functions
+	- [ ] Make frame buffer based display class for driver abstraction
 	- [ ] Dissolve/transitions between images?
 		- [ ] General animation function between frame buffers
 	- [ ] Ingest / transform image from user?
 		- [ ] Zoom/rotate (for final image tweaks?)
 		- [ ] Part of badge config
+- Performance
+	- [ ] Investigate increasing performance in underlying gc9a01 driver in base image/coming up with custom BSides base image
+	- [ ] Initial programming could then happen via image load + config file
 - Bluetooth
 	- Detect BLE beacons?
 		- CTF/special prize?
@@ -55,6 +59,12 @@
 	- Add base functionality to `App` base class which handles serialization/deserialization 
 	- Stored in `config/{module_name}/{app_name}/config.json`
 - App Ideas
+    - [ ] Badge Modes
+		- [ ] Large First + Last Name
+		- [ ] Images on both screen
+		- [ ] QR mode for contact info
+		- [ ] 
+	- [ ] 
 	- [ ] Clock
 		- [ ] Analog Clock
 		- [ ] Digital Clock
@@ -70,4 +80,6 @@
 		- [ ] Skew?
 	- [ ] Image Slideshow
 		- [ ] Scroll through selected images
-	- [ ] 
+	- [ ] Vendor sign off app
+	    - [ ] Crypto key
+		- [ ] 

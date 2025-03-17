@@ -155,13 +155,15 @@ class Controller(object):
     def button_press(self, button: int):
         print(f"Button Press {button}")
         if button == 0:
-            self.random_app()
-
+            self.switch_app("settings")
+        if button == 1:
+            self.switch_app("voltage_meter")
+        if button == 2:
+            self.switch_app("analog_clock")
 
     def button_release(self, button: int):
         print(f"Button Relased {button}")
         self.bsp.leds.turn_off_led(button)
-
 
     def update(self):
         self.current_view.update()
@@ -169,7 +171,6 @@ class Controller(object):
     def random_app(self):
         app = random.choice(self.app_directory)
         self.switch_app(app.module_name)
-
 
     def switch_app(self, app_name: str):
         if not app_name:
