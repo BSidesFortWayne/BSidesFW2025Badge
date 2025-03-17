@@ -8,6 +8,9 @@
 - Config
 - Start AP Mode
 
+## Programming Badges
+- 
+
 ## Adding custom apps
 
 - Start up badge
