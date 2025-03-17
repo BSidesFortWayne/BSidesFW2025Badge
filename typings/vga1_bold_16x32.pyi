@@ -1,0 +1,2 @@
+WIDTH: int
+HEIGHT: int

@@ -1,77 +1,46 @@
-from bsp import BSP
-import json
 import time
-from apps import view, view0, view1, view2, view3, view4
-import random
-
 import gc
 
-from hardware_rev import HardwareRev
+from controller import Controller
 
 gc.enable()
 gc.collect()
 
-class Controller:
-    current_view: view.View
-    def __init__(self):
-        # some things that the views will need
-        self.bsp = BSP(HardwareRev.V2)
 
-        self.bsp.buttons.button_pressed_callbacks.append(self.button_press)
-        self.bsp.buttons.button_released_callbacks.append(self.button_release)
+def test_http_server():
+    import network
 
-        try:
-            name_file = open('name.json')
-            self.name = json.loads(name_file.read())
-            name_file.close()
-        except:
-           self.name = {
-               'first': "Bilbo",
-               'last': "Baggins"
-           }
+    ap = network.WLAN(network.AP_IF)
+    ap.active(True)
+    ap.config(essid="test123", password="abcd1234")
 
-        self.view_objects = [
-            view0.View,
-            view1.View,
-            view2.View,
-            view3.View,
-            view4.View
-        ]
+    while not ap.active():
+        pass
 
-        self.switch_view(0)
+    print('Connection successful')
+    print(ap.ifconfig())
 
+    from web.http_server import HTTPServer
+    server = HTTPServer()
+    server.start()
 
-    # TODO temporary shadow property for backwards compatibility
-    @property
-    def displays(self):
-        return self.bsp.displays
+async def main():
+    controller = Controller()
 
-    @property
-    def neopixel(self):
-        return self.bsp.leds.leds
-    
-    def button_press(self, button: int):
-        print(f"Button Press {button}")
-        self.bsp.leds.set_led_color(button, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-        
-        self.current_view.button_press(button)
+    total_times = 0
+    total_counts = 0
+    while True:
+        x = time.ticks_ms()
+        controller.current_view.update()
+        await asyncio.sleep(0.05)
+        d = time.ticks_diff(time.ticks_ms(), x)
+        total_times += d
+        total_counts += 1
+        if total_counts % 100 == 0:
+            average = total_times/total_counts
+            print(f"Average: {average} ms")
+            print(f"Average Hz: {int(1000/average)} Hz")
 
-
-    def button_release(self, button: int):
-        print(f"Button Relased {button}")
-        self.bsp.leds.turn_off_led(button)
-
-
-    def update(self):
-        self.current_view.update()
-
-
-    def switch_view(self, view: int):
-        print("Switch View")
-        self.current_view = self.view_objects[view](self)
-
-v = Controller()
-
-while True:
-    v.update()
-    time.sleep(0.05)
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

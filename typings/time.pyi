@@ -1,0 +1,13 @@
+from time import *
+
+def ticks_ms() -> int:
+    ...
+
+def sleep_ms(ms: int) -> None:
+    ...
+
+def sleep(us: float) -> None:
+    ...
+
+def ticks_diff(t1: int, t2: int) -> int:
+    ...

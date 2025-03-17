@@ -180,14 +180,16 @@ class LIS3DH:
         total_accel = math.sqrt(sum(map(lambda x: x * x, avg)))
         return total_accel > shake_threshold
 
-    def read_adc_raw(self, adc):
-        """Retrieve the raw analog to digital converter value.  ADC must be a
+    def read_adc_raw(self, adc: int) -> int:
+        """Retrieve the raw analog to digital converter value. ADC must be a
         value 1, 2, or 3.
         """
         if adc < 1 or adc > 3:
-            raise ValueError('ADC must be a value 1 to 3!')
+            raise ValueError("ADC must be a value 1 to 3!")
 
-        return struct.unpack('<h', self._read_register((_REG_OUTADC1_L+((adc-1)*2)) | 0x80, 2))[0]
+        return struct.unpack(
+            "<h", self._read_register((_REG_OUTADC1_L + ((adc - 1) * 2)) | 0x80, 2)[0:2]
+        )[0]
 
     def read_adc_mV(self, adc): 
         """Read the specified analog to digital converter value in millivolts.
