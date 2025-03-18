@@ -43,8 +43,8 @@ class HTTPServer:
                 line = cl_file.readline()
                 if not line or line == b'\r\n':
                     break
-            cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-            cl.send(html)
+            cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n') # type: ignore TODO why doesn't this type work?
+            cl.send(html) # type: ignore TODO why doesn't this type work?
             cl.close()
         
         self.s.close()

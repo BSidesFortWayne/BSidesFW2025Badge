@@ -14,8 +14,9 @@ FULL_REDRAW_FB = 2
 PARTIAL_REDRAW_FB = 3
 
 class AnalogClock(BaseApp):
+    name = "Analog Clock"
     def __init__(self, controller):
-        super().__init__(controller, "Analog Clock")
+        super().__init__(controller)
         self.controller = controller
         self.display1 = self.controller.bsp.displays.display1
 

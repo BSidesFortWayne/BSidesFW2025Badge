@@ -1,6 +1,6 @@
 # type: ignore
-# import ure as re
-import re
+import ure as re
+# import re
 
 """
 Exceptions

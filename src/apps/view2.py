@@ -1,6 +1,7 @@
 import apps.app
 
 class App(apps.app.BaseApp):
+    name = "Green View"
     def __init__(self, views):
         self.view = 2
         self.views = views

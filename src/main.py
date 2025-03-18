@@ -31,7 +31,9 @@ async def main():
     total_counts = 0
     while True:
         x = time.ticks_ms()
-        controller.current_view.update()
+        current_view = controller.current_view
+        if current_view:
+            current_view.update()
         await asyncio.sleep(0.05)
         d = time.ticks_diff(time.ticks_ms(), x)
         total_times += d

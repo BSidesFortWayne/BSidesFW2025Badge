@@ -1,98 +1,12 @@
 import json
-import os
 import random
 
-import apps
+from app_directory import AppDirectory, AppMetadata
 import apps.app
 from bsp import BSP
 from hardware_rev import HardwareRev
 
-
-class AppMetadata:
-    def __init__(
-            self, 
-            friendly_name: str, 
-            module_name: str,
-            icon_file: str | bytes | None = None,
-            constructor: type[apps.app.BaseApp] | None = None,
-    ):
-        self.friendly_name = friendly_name
-        self.module_name = module_name
-        self.constructor = constructor
-        self.icon_file = icon_file
-    
-    def __str__(self):
-        return self.friendly_name
-
-class AppDirectory(list):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        self.ignore_app_files = [
-            '__init__.py',
-            'app.py'
-        ]
-
-        try:
-            with open('config/app_directory_cache.json') as f:
-                app_data_cache = json.load(f)
-                for app_data in app_data_cache['apps']:
-                    self.append(AppMetadata(**app_data))
-        except Exception:
-            print("No app cache found")
-
-
-        app_files = os.listdir('apps')
-        for app_file in app_files:
-            # If this already exists in our app directory, we don't
-            # need to create it here. It can update its cache when it
-            # runs
-            if app_file in self:
-                continue
-            
-            if app_file in self.ignore_app_files:
-                continue
-
-            if not app_file.endswith('.py'):
-                continue
-
-            module_name = app_file[:-3]
-            self.append(AppMetadata(module_name, module_name, None))
-    
-    
-    def save_app_directory_cache(self):
-        with open('config/app_directory_cache.json', 'w') as f:
-            apps = [{
-                'friendly_name': app.friendly_name,
-                'module_name': app.module_name,
-                'icon_file': app.icon_file,
-            } for app in self]
-            json.dump({
-                'apps': apps
-            }, f)
-
-    def get_app_by_name(self, name: str):
-        for app in self:
-            if app.module_name == name or app.friendly_name == name:
-                return app
-        
-        return None
-
-    def __contains__(self, item: str | AppMetadata):
-        if isinstance(item, str):
-            for app in self:
-                if app.module_name == item or app.friendly_name == item:
-                    return True
-                
-        return False
-
-        
-
 class Controller(object):
-    current_view: apps.app.BaseApp
-    apps: list[AppMetadata]
-    app_names: list[str]
-
     # This is a singleton pattern which gives us a single instance of the 
     # controller object. This is useful for global state 
     def __new__(cls):
@@ -109,6 +23,7 @@ class Controller(object):
         print("Callback handlers")
 
         self.app_directory = AppDirectory()
+        self.current_view: apps.app.BaseApp | None = None
 
         try:
             name_file = open('name.json')
@@ -140,7 +55,7 @@ class Controller(object):
         self.bsp.buttons.button_pressed_callbacks.append(self.button_press)
         self.bsp.buttons.button_released_callbacks.append(self.button_release)
 
-        self.switch_app("view0")
+        self.switch_app("Badge")
 
 
     # TODO temporary shadow property for backwards compatibility
@@ -166,7 +81,8 @@ class Controller(object):
         self.bsp.leds.turn_off_led(button)
 
     def update(self):
-        self.current_view.update()
+        if self.current_view:
+            self.current_view.update()
 
     def random_app(self):
         app = random.choice(self.app_directory)

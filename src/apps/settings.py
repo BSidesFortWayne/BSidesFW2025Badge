@@ -8,8 +8,9 @@ from lib.uQR import QRCode
 
 
 class App(BaseApp):
+    name = "QR Code"
     def __init__(self, controller):
-        super().__init__(controller, "Settings")
+        super().__init__(controller)
         self.display1 = self.controller.bsp.displays.display1
 
         self.bg_color = gc9a01.WHITE

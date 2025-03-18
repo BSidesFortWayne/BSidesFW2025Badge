@@ -2,7 +2,7 @@ import apps.app
 
 class App(apps.app.BaseApp):
     def __init__(self, controller):
-        super().__init__(controller, "View 4")
+        super().__init__(controller)
         self.view = 4
         self.views = controller
         self.views.displays.display1.fill(self.views.displays.gc9a01.WHITE)
