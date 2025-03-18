@@ -8,9 +8,9 @@ class App(BaseApp):
     Displays name on both screens.
     The buttons go to the other 4 views.
     """
-
+    name = "Badge"
     def __init__(self, controller):
-        super().__init__(controller, "Badge")
+        super().__init__(controller)
         self.view = 0
         if not self.controller.name:
             self.controller.displays.display_center_write(

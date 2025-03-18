@@ -23,8 +23,9 @@ class View(BaseApp):
     SW4 - Drop
     """
 
+    name = "Tetris"
     def __init__(self, controller):
-        super().__init__(controller, "Tetris")
+        super().__init__(controller)
         self.controller.neopixel.fill((0, 0, 0))
         self.controller.neopixel.write()
         self.controller.displays.display1.fill(self.controller.displays.gc9a01.BLACK)
