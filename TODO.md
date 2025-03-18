@@ -1,85 +1,83 @@
-- Design artifacts
-    - [ ] User flows
-	- [ ] Initial programming flowchart
-	- [ ] Software startup routines
-- Software
-	- [ ] App Directory
-		- [ ] Clean+ up app directory 
-	- [ ] UI
-		- [ ] Make loading/pop up screen design for any views to use
-		- [ ] Normalize rendering around async?
-			- [ ] Have options for popups, confirmation dialogs, multi choice selections, etc
-			- [ ] "Modal" contexts
+# To Do List
 
+- Design artifacts
+  - [ ] User flows
+  - [ ] Initial programming flowchart
+  - [ ] Software startup routines
+- Software
+  - [ ] App Directory
+    - [ ] Clean+ up app directory
+  - [ ] UI
+    - [ ] Make loading/pop up screen design for any views to use
+    - [ ] Normalize rendering around async?
+      - [ ] Have options for popups, confirmation dialogs, multi choice selections, etc
+      - [ ] "Modal" contexts
     - [ ] Network
-		- [ ] Add option to connect to local network
-		- [ ] Add option to set up in station mode and display QR code 
-		- [ ] Make simple HTTP server construct (for a module to listen for a specific URL/port?)
+      - [ ] Add option to connect to local network
+      - [ ] Add option to set up in station mode and display QR code
+      - [ ] Make simple HTTP server construct (for a module to listen for a specific URL/port?)
 - Hardware improvements
-	- [x] Add button listeners for press, release, and click
-	- [x] Add high level config for hardware version (no point to waste v1 hardware, and then we can share code more easily)
-	- [x] Implement IO expander support in `buttons` module (not sure if it needs to just be polled or if we want to make it interrupt driven...)
-	- [x] Implement standalone `led` module and add some convenience function
-	- [x] Battery meter hardware support?
-		- [ ] Battery monitor screen/utility
-	- [x] Add accelerometer hardware module 
-	- [ ] System monitor utility (RAM, storage, etc)
-	- [x] Add speaker module
-		- [ ] MIDI transforms?
-	- [ ] Better display functions
-	- [ ] Frame buffer based driver module
-	- [ ] LED bug
-	- [ ] Test Suite
-		- [ ] Speaker driver test (async background?)
-	- [ ] MicroPython RTC support?
-	- [ ] Low power mode for all day badge usage
+  - [x] Add button listeners for press, release, and click
+  - [x] Add high level config for hardware version (no point to waste v1 hardware, and then we can share code more easily)
+  - [x] Implement IO expander support in `buttons` module (not sure if it needs to just be polled or if we want to make it interrupt driven...)
+  - [x] Implement standalone `led` module and add some convenience function
+  - [x] Battery meter hardware support?
+    - [ ] Battery monitor screen/utility
+  - [x] Add accelerometer hardware module 
+  - [ ] System monitor utility (RAM, storage, etc)
+  - [x] Add speaker module
+    - [ ] MIDI transforms?
+  - [ ] Better display functions
+  - [ ] Frame buffer based driver module
+  - [ ] LED bug
+  - [ ] Test Suite
+    - [ ] Speaker driver test (async background?)
+  - [ ] MicroPython RTC support?
+  - [ ] Low power mode for all day badge usage
 - Refactors
-	- [x] Make a base `hardware` class that gets called back regularly on the main thread for polling reasons
-	- [x] Redesign base `view` concept into `apps` and make `views` class into `controller` for better variable naming/lack of confusion
-	- [x] Migrate some hardware setup to `boot.py` for better REPL usage (Dependent on v1/v2 hardware switching)
-	- [x] Figure out how to add stubs for better type hint support (I added more `#type: ignore` where appropriate to get better static checking help in VSCode)
+  - [x] Make a base `hardware` class that gets called back regularly on the main thread for polling reasons
+  - [x] Redesign base `view` concept into `apps` and make `views` class into `controller` for better variable naming/lack of confusion
+  - [x] Migrate some hardware setup to `boot.py` for better REPL usage (Dependent on v1/v2 hardware switching)
+  - [x] Figure out how to add stubs for better type hint support (I added more `#type: ignore` where appropriate to get better static checking help in VSCode)
 - Display
-	- [x] QR code generator/displayer
-		- [x] https://github.com/JASchilz/uQR
-	- [ ] Better abstraction functions/color functions
-	- [ ] Make frame buffer based display class for driver abstraction
-	- [ ] Dissolve/transitions between images?
-		- [ ] General animation function between frame buffers
-	- [ ] Ingest / transform image from user?
-		- [ ] Zoom/rotate (for final image tweaks?)
-		- [ ] Part of badge config
+  - [x] QR code generator/displayer
+    - [x] [https://github.com/JASchilz/uQR](https://github.com/JASchilz/uQR)
+  - [ ] Better abstraction functions/color functions
+  - [ ] Make frame buffer based display class for driver abstraction
+  - [ ] Dissolve/transitions between images?
+    - [ ] General animation function between frame buffers
+  - [ ] Ingest / transform image from user?
+    - [ ] Zoom/rotate (for final image tweaks?)
+    - [ ] Part of badge config
 - Performance
-	- [ ] Investigate increasing performance in underlying gc9a01 driver in base image/coming up with custom BSides base image
-	- [ ] Initial programming could then happen via image load + config file
+  - [ ] Investigate increasing performance in underlying gc9a01 driver in base image/coming up with custom BSides base image
+  - [ ] Initial programming could then happen via image load + config file
 - Bluetooth
-	- Detect BLE beacons?
-		- CTF/special prize?
+  - Detect BLE beacons?
+    - CTF/special prize?
 - User configurability
-	- Add default `config` options object that can be serialized by app name and then edited via web GUI 
-	- Add base functionality to `App` base class which handles serialization/deserialization 
-	- Stored in `config/{module_name}/{app_name}/config.json`
+  - Add default `config` options object that can be serialized by app name and then edited via web GUI 
+  - Add base functionality to `App` base class which handles serialization/deserialization 
+  - Stored in `config/{module_name}/{app_name}/config.json`
 - App Ideas
-    - [ ] Badge Modes
-		- [ ] Large First + Last Name
-		- [ ] Images on both screen
-		- [ ] QR mode for contact info
-		- [ ] 
-	- [ ] 
-	- [ ] Clock
-		- [ ] Analog Clock
-		- [ ] Digital Clock
-		- [ ] Clock Learning program for kids?
-	- [ ] Etch a Sketch
-	- [ ] 2048 (hard to implement?...)
-	- [ ] Surface level based on x/y position
-	- [ ] Reaction timer game
-		- [ ] Multi-player network reaction game
-	- [ ] On board image manipulation
-		- [ ] Rotate
-		- [ ] Zoom
-		- [ ] Skew?
-	- [ ] Image Slideshow
-		- [ ] Scroll through selected images
-	- [ ] Vendor sign off app
-	    - [ ] Crypto key
-		- [ ] 
+  - [ ] Badge Modes
+    - [ ] Large First + Last Name
+    - [ ] Images on both screen
+    - [ ] QR mode for contact info
+  - [ ] Clock
+    - [ ] Analog Clock
+    - [ ] Digital Clock
+    - [ ] Clock Learning program for kids?
+  - [ ] Etch a Sketch
+  - [ ] 2048 (hard to implement?...)
+  - [ ] Surface level based on x/y position
+  - [ ] Reaction timer game
+    - [ ] Multi-player network reaction game
+  - [ ] On board image manipulation
+    - [ ] Rotate
+    - [ ] Zoom
+    - [ ] Skew?
+  - [ ] Image Slideshow
+    - [ ] Scroll through selected images
+  - [ ] Vendor sign off app
+    - [ ] Crypto key
