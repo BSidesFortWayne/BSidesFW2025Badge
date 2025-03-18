@@ -1,0 +1,20 @@
+{
+    "modules": [
+     {
+       "filename": "app.py",
+       "checksum": "1234567890abcdef",
+       "apps": [
+         {
+           "friendly_name": "App",
+           "module_name": "app",
+           "icon_file": "icon.png"
+         },
+        {
+        "friendly_name": "App2",
+        "module_name": "app2",
+        "icon_file": "icon2.png"
+        }
+       ]
+     }
+    ]
+  }

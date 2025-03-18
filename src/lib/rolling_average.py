@@ -1,12 +1,19 @@
 class RollingAverage:
-    def __init__(self, window_size):
+    def __init__(self, window_size = 100):
         self.window_size = window_size
-        self.data = []
-        self.total = 0
+        self.data: list[float] = []
+        self.count: int = 0
 
-    def add(self, value):
+    def add(self, value: float | int):
         self.data.append(value)
-        self.total += value
 
         if len(self.data) > self.window_size:
-            self.total -= self.data.pop(0)
+            # TODO make this more effcient index based logic instead of doing pop(...)
+            self.data.pop(0)
+        else:
+            self.count += 1
+    
+    def average(self) -> float:
+        if len(self.data) == 0:
+            return 0
+        return sum(self.data) / len(self.data)

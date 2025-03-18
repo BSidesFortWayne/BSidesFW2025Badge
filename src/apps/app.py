@@ -1,9 +1,9 @@
 class BaseApp:
-    def __init__(self, controller, name: str = "", version="0.0.1"):
+    name = "(No Name)"
+    version = "0.0.1"
+    def __init__(self, controller):
         super().__init__()
         self.controller = controller
-        self.name = name if name else "Da App"
-        self.version = version
         print(f"BaseApp {self.name} {self.version}")
 
     def update(self):

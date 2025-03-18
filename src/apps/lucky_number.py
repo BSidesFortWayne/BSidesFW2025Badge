@@ -2,8 +2,9 @@ from apps.app import BaseApp
 import random
 
 class App(BaseApp):
+    name = "Lucky Number"
     def __init__(self, controller):
-        super().__init__(controller, "Lucky Number")
+        super().__init__(controller)
 
         # This button callback will be automatically unregistered once this object is cleaned up/not in view
         # self.register_button_pressed(self.button_press)

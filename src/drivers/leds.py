@@ -28,10 +28,10 @@ class LEDs:
         LEDpin = Pin(26)
 
         # Maximum brightness constant (0 to 1)
-        self.max_brightness = 0.4
+        self.max_brightness = 1.0
 
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS)
+        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=1)
 
     def set_led_color(self, led_index, color):
         """Turn on the LED at the given index with the specified color."""
@@ -51,7 +51,6 @@ class LEDs:
     def turn_off_led(self, led_index):
         """Turn off the LED at the given index."""
         self.set_led_color(led_index, (0, 0, 0))
-
 
     def color_bounce(self, color, wait):
         """Move up and down the LED strip with the specified color

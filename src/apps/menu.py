@@ -2,8 +2,9 @@ from apps.app import BaseApp
 import gc9a01 
 
 class Menu(BaseApp):
+    name = "Menu"
     def __init__(self, controller):
-        super().__init__(controller, "Main Menu")
+        super().__init__(controller)
         
         self.title_display = self.controller.bsp.displays.display1
         self.app_selection = self.controller.bsp.displays.display2
