@@ -8,11 +8,10 @@
 - App minimum requirements are very light
 - Base App class will provide
   - Automatic app registration (thanks to app directory)
-  - Automatic serialization/deserialization of configs 
+  - Automatic serialization/deserialization of configs
     - Not required to use, but helps group configs for UI and web based config edits
     - (Not Done) Support for displaying in apps menu with custom icons and names
-    - (Not Done) Abstracted registraiton functions for button handling and other hardware based callbacks that can be 
-    automatically de-registered as well
+    - (Not Done) Abstracted registraiton functions for button handling and other hardware based callbacks that can be     automatically de-registered as well
 
 ## Button Constructs
 

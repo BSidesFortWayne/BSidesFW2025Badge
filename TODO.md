@@ -23,7 +23,7 @@
   - [x] Implement standalone `led` module and add some convenience function
   - [x] Battery meter hardware support?
     - [ ] Battery monitor screen/utility
-  - [x] Add accelerometer hardware module 
+  - [x] Add accelerometer hardware module
   - [ ] System monitor utility (RAM, storage, etc)
   - [x] Add speaker module
     - [ ] MIDI transforms?
@@ -56,8 +56,8 @@
   - Detect BLE beacons?
     - CTF/special prize?
 - User configurability
-  - Add default `config` options object that can be serialized by app name and then edited via web GUI 
-  - Add base functionality to `App` base class which handles serialization/deserialization 
+  - Add default `config` options object that can be serialized by app name and then edited via web GUI
+  - Add base functionality to `App` base class which handles serialization/deserialization
   - Stored in `config/{module_name}/{app_name}/config.json`
 - App Ideas
   - [ ] Badge Modes
