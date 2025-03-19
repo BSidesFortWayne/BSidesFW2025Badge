@@ -52,15 +52,44 @@ class LEDs:
         """Turn off the LED at the given index."""
         self.set_led_color(led_index, (0, 0, 0))
 
-    def color_bounce(self, color, wait):
+    IN = 1
+    OUT = -1
+    FADE_DELAY_MS = 1
+    def fade_led(self, led_index, color, in_or_out=1):
+        """Fade in the LED at the given index with the specified color."""
+        for i in range(0, 256):
+            if in_or_out == self.IN:
+                self.set_led_color(led_index, scale_color(color, i / 255))
+            else:
+                self.set_led_color(led_index, scale_color(color, 1 - i / 255))
+            time.sleep_ms(self.FADE_DELAY_MS)
+
+
+    def cross_fade(self, led1, led2, color1, color2):
+        """Cross fade between two LEDs with the specified colors."""
+        for i in range(0, 256):
+            self.set_led_color(led1, scale_color(color1, 1 - i / 255))
+            self.set_led_color(led2, scale_color(color2, i / 255))
+            time.sleep_ms(self.FADE_DELAY_MS)
+
+
+    def color_bounce(self, color, wait, fade=True):
         """Move up and down the LED strip with the specified color
         "Bounce" at the ends of the strip."""
         direction = FORWARD
         index = 0
         while True:
-            self.set_led_color(index, color)
-            time.sleep_ms(wait)
-            self.set_led_color(index, (0, 0, 0))
+            if fade:
+                if index == 0 or index == NUM_LEDS - 1:
+                    self.fade_led(index, color, self.IN)
+                else:
+                    self.cross_fade(index - direction, index, color, color)
+            else:
+                self.set_led_color(index, color)
+                time.sleep_ms(wait)
+                self.set_led_color(index, (0, 0, 0))
+                
+
             index += direction
             if index == NUM_LEDS:
                 direction = BACKWARD

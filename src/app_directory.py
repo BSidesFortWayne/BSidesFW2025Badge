@@ -104,7 +104,7 @@ class AppDirectory:
 
         try:
             # TODO refactor this to another method
-            with open(cache_location) as f:
+            with open(self.cache_location) as f:
                 cache = json.load(f)
                 for filename, module_data in cache["modules"].items():
                     module = ModuleMetadata(

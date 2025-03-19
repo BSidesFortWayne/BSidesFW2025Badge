@@ -68,7 +68,7 @@ def smooth_interpolate_color(color1: int, color2: int, fraction: float):
 print(x, y, width, height, padding, display_center_x, display_center_y, fbuf_width, fbuf_height)
 fade_square = 0
 start_fade_ticks = time.ticks_ms()
-fade_duration = 1000
+fade_duration = 10000
 square_colors = [
     gc9a01.RED,
     gc9a01.GREEN,
