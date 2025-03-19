@@ -2,9 +2,10 @@
 
 BSides Fort Wayne Badge Programming
 
-# Development: Getting Started
+## Development: Getting Started
 
 ### Tools
+
 The python packages in this repository are managed by `uv`. The repository structure is as follows
 
 - `.venv`: This folder will be installed when you set up the python virtual environment with uv
@@ -14,9 +15,9 @@ The python packages in this repository are managed by `uv`. The repository struc
 - `STLs`: Screen bezels, supports, and PCB STLs
 - `typings`: Custom typings for the VSCode Python Language Server in order to get better typehints and support for the micropython code
 
-
 ### Setup
-Install `uv` (https://docs.astral.sh/uv/getting-started/installation/) based on your OS of choice. If on Windows, you may have a better development experience in `WSL` if you can provide access to the ESP32 chip to the WSL instance (https://learn.microsoft.com/en-us/windows/wsl/connect-usb). However, `uv` and `mpremote` both work on Windows so you can also develop natively
+
+Install `uv` ([getting started](https://docs.astral.sh/uv/getting-started/installation/)) based on your OS of choice. If on Windows, you may have a better development experience in `WSL` if you can provide access to the ESP32 chip to the WSL instance ([Connect USB devices](https://learn.microsoft.com/en-us/windows/wsl/connect-usb)). However, `uv` and `mpremote` both work on Windows so you can also develop natively
 
 ### Using `mpremote` for on board development
 
@@ -32,7 +33,7 @@ to get the virtual environment set up. Once you plug in and turn on your dev boa
 sudo chmod a+x /dev/ttyUSB0
 ```
 
-At this point, you will need to flash our base image, which is here: https://github.com/russhughes/gc9a01_mpy/raw/refs/heads/main/firmware/ESP32_GENERIC/firmware_SPIRAM_8MiB.bin
+At this point, you will need to flash our base image, which is here: [firmware_SPIRAM_8MiB.bin](https://github.com/russhughes/gc9a01_mpy/raw/refs/heads/main/firmware/ESP32_GENERIC/firmware_SPIRAM_8MiB.bin)
 
 You can erase the flash and then flash the board with the above image with the following commands
 
@@ -57,7 +58,8 @@ Or deploy the source to the board directly
 uv run mpremote cp -r src/* :
 ```
 
-Here are some other useful patterns with `mpremote` 
+Here are some other useful patterns with `mpremote`
+
 ```shell
 # when developing and iterating quickly, we can use this to deploy the file you are working on and then running `main` from local
 # in one command
@@ -70,21 +72,20 @@ uv run mpremote cp -r src/apps/analog_clock.py + run main.py
 
 TODO: Add details
 
-# Technical Specifications V2
+## Technical Specifications V2
 
 This section describes the technical specifications of the board to aid in development.
 
-## Schematic Overview
+### Schematic Overview
 
 Within the [schematics/BSides Badge V2 Schematic.pdf](https://github.com/commputethis/BSidesFW2025Badge/blob/68bb887bfc6d0544537c8bf179ed645db8c0f13b/schematics/BSides%20Badge%20V2%20Schematic.pdf) you will find the electrical schematic of the device including the part numbers and connections between components identified as net labels. Each section of the schematic will be described below and applicable datasheets will be linked.
 
 ### ESP32-WROVER-E-N8R8
 
-This section contains the ESP32-WROVER-E-N8R8 itself, the decoupling capacitors, the pullup resistors required for operation of the I2C Bus, and the net labels associated with the GPIO pins of the ESP32. 
-The ESP32-WROVER-E-N8R8 has a 240Mhz Dual Core processor with 8Mb of Flash and 8Mb of RAM available on the SPI bus.
+This section contains the ESP32-WROVER-E-N8R8 itself, the decoupling capacitors, the pullup resistors required for operation of the I2C Bus, and the net labels associated with the GPIO pins of the ESP32. The ESP32-WROVER-E-N8R8 has a 240Mhz Dual Core processor with 8Mb of Flash and 8Mb of RAM available on the SPI bus.
 
 Datasheets:
-https://www.espressif.com.cn/sites/default/files/documentation/esp32-wrover-e_esp32-wrover-ie_datasheet_en.pdf
+[ESP32 Wrover E/IE](https://www.espressif.com.cn/sites/default/files/documentation/esp32-wrover-e_esp32-wrover-ie_datasheet_en.pdf)
 
 ### USB-Serial
 
@@ -100,7 +101,7 @@ This section contains the 7 RGB LEDs that are connected to IO26. Nothing much mo
 
 Note: The 5V switching power supply is present on the V2 schematic, but has been disabled. The red jumper on H3 is providing 3.3V to the 5V bus. There is no need to enable the 5v power supply, stuff just works.
 
-https://www.lcsc.com/product-detail/RGB-LEDs-Built-in-IC_Worldsemi-WS2812B-B-T_C2761795.html
+[Worldsemi WS2812B-B/T](https://www.lcsc.com/product-detail/RGB-LEDs-Built-in-IC_Worldsemi-WS2812B-B-T_C2761795.html)
 
 ### RTS/DTR Circuit
 
@@ -130,9 +131,7 @@ Connected to the EN pin of the ESP32. Pressing this will reset the device.
 
 This section contains the accelerometer (LIS3DHTR) and the associated connections. The datasheet is linked for reference, and that reference will probably be needed. The I2C data lines are connected to IO22 (SCL) and IO21 (SDA) on the ESP32, and the accelerometer can be accessed at I2C address 0x18. IO34 is also dedicated to a programmable interrupt pin on the accelerometer for possible use. An example of this device would be for power saving. If no motion is detected for an interval, the device could be put into a reduced power state and then later woken up using the interrupt pin. Of course, there are plenty of other fun things that can be accomplished using the three-axis output of the accelerometer. The unused interrupts and ADC inputs are wired to the expansion headers for future use.
 
-Datasheet:
-
-https://www.st.com/resource/en/datasheet/lis3dh.pdf
+Datasheet: [LIS3DH](https://www.st.com/resource/en/datasheet/lis3dh.pdf)
 
 ### Battery Monitor
 
@@ -148,7 +147,7 @@ This is a basic single cell lithium battery charger circuit. It will charge at u
 
 ### Boost Buck 3V3
 
-This is the primary switching power converter and takes its input from the VCC network (Post power switch, battery protection, and fuse) and converts that into a stable 3.3V for the board Components. This power module (TPS63060DSCR) is a boost buck module and can accept input voltages in a wide range to deliver a consistent 3.3V output. This module is running anytime the power switch is in the on position and a battery is connected. 
+This is the primary switching power converter and takes its input from the VCC network (Post power switch, battery protection, and fuse) and converts that into a stable 3.3V for the board Components. This power module (TPS63060DSCR) is a boost buck module and can accept input voltages in a wide range to deliver a consistent 3.3V output. This module is running anytime the power switch is in the on position and a battery is connected.
 
 Note: This device is not designed to operate without a battery. The battery provides voltage stability that the boost buck converter requires for reliable operation. Operating the device from USB power with no battery is not recommended and will result in undesirable power fluctuations.
 
@@ -192,7 +191,7 @@ CS2 > IO13
 
 Yes... V2 has audio! There is a "speaker" (really a variable frequency buzzer) You can send tones by adjusting the PWM frequency and vary the volume by adjusting the PWM duty cycle. This is connected to IO15 of the ESP32. Datasheet below:
 
-https://www.lcsc.com/product-detail/Buzzers_HYDZ-HYG-7525A-5027_C18623827.html
+[HYDZ HYG-7525A-5027](https://www.lcsc.com/product-detail/Buzzers_HYDZ-HYG-7525A-5027_C18623827.html)
 
 ### Expansion Headers
 
@@ -202,46 +201,44 @@ V2 contains two expansion headers. In V3 these will not be populated with header
 
 This is a PCA9535 IO expander at address 0x20 on the I2C bus IO22 (SCL) and IO21 (SDA). The PCA9535 provides an additional 16 GPIO lines via the I2C bus and in this application is used to read the status of buttons. For details about the buttons refer to the Boot/Function Buttons section. The unused IO lines are wired to the expansion headers for future use.
 
+### GPIO Pin Assignments
 
-## GPIO Pin Assignments
+IO0    Boot/Button 1 (Strapping)
 
-IO0    		Boot/Button 1 (Strapping)
+IO2    (Strapping) Not Connected
 
-IO2    		(Strapping) Not Connected
+IO4    (Strapping) Not Connected
 
-IO4    		(Strapping) Not Connected
+IO5    (Strapping) Not Connected
 
-IO5    		(Strapping) Not Connected
+IO12   (Strapping) Not Connected
 
-IO12   		(Strapping) Not Connected
+IO13   CS2
 
-IO13   		CS2 
+IO14   RST1
 
-IO14   		RST1
+IO15   (Strapping) Speaker
 
-IO15   		(Strapping) Speaker
+IO18   CLK
 
-IO18   		CLK
+IO19   DC1
 
-IO19   		DC1
+IO21   I2C SDA
 
-IO21   		I2C SDA
+IO22   I2C SCL
 
-IO22   		I2C SCL
+IO23   MOSI
 
-IO23   		MOSI
+IO25   DC2
 
-IO25   		DC2
+IO26   WS2812B
 
-IO26   		WS2812B
+IO27   RST2
 
-IO27   		RST2
+IO32   DISP_EN
 
-IO32   		DISP_EN
+IO33   CS1
 
-IO33   		CS1 
+IO34   Accelerometer Interrupt
 
-IO34   		Accelerometer Interrupt
-
-IO35   		Not Connected
-
+IO35   Not Connected

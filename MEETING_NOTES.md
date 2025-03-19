@@ -3,6 +3,7 @@
 ## 2025-03-17
 
 Agenda:
+
 - Review deployment options
   - Luke: pymakr?
   - Will centralize around mpremote
@@ -20,6 +21,5 @@ Agenda:
 - CTF
   - File on the board that tells the commands?
 - Dynamic app loading review
-    - App Directory Class
+- App Directory Class
 - `TODO` list review
-- 
