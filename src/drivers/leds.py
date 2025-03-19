@@ -28,7 +28,7 @@ class LEDs:
         LEDpin = Pin(26)
 
         # Maximum brightness constant (0 to 1)
-        self.max_brightness = 0.4
+        self.max_brightness = 0.1
 
         # SVH 2025-03-19 on V2 versions of the board, the LEDs have a very strange
         # timing bug that is causing LED artifacts. This is a workaround for that
@@ -52,10 +52,11 @@ class LEDs:
         # The V3 board may have the same issue, but the trace distances are being adjusted
         # for the VX board that will hopefully resolve the issue, and the timings could be 
         # set back to the default.
-        custom_timings = (400, 1500, 1500, 450)
+        DEFAULT_TIMINGS = (400, 850, 800, 450)
+        CUSTOM_TIMINGS = (400, 1500, 1500, 450)
         
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=custom_timings)
+        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=CUSTOM_TIMINGS)
 
     def set_led_color(self, led_index, color):
         """Turn on the LED at the given index with the specified color."""
@@ -97,19 +98,28 @@ class LEDs:
             time.sleep_ms(self.FADE_DELAY_MS)
 
 
-    def color_bounce(self, color, wait, fade=True):
-        """Move up and down the LED strip with the specified color
-        "Bounce" at the ends of the strip."""
+    def color_bounce(self, start_color, wait, fade=True, color_alternate=False):
+        """Move up and down the LED strip with the specified color "Bounce" at 
+        the ends of the strip. This is really more of a test routine but it 
+        certianly could be used as an effect, or could at least be a selectable 
+        fun routine in a list of routines
+
+        Args:
+            start_color (tuple): The color to use for the LEDs.
+            wait (int): The delay in milliseconds between each LED.
+            fade (bool): Whether to fade the LEDs in and out.
+            color_alternate (bool): Whether to alternate the color levels on bouncing
+        """
         direction = FORWARD
         index = 0
         while True:
             if fade:
                 if index == 0 or index == NUM_LEDS - 1:
-                    self.fade_led(index, color, self.IN)
+                    self.fade_led(index, start_color, self.IN)
                 else:
-                    self.cross_fade(index - direction, index, color, color)
+                    self.cross_fade(index - direction, index, start_color, start_color)
             else:
-                self.set_led_color(index, color)
+                self.set_led_color(index, start_color)
                 time.sleep_ms(wait)
                 self.set_led_color(index, (0, 0, 0))
                 
@@ -122,8 +132,9 @@ class LEDs:
                 direction = FORWARD
                 index = 1
                 # swap all color levels
-                save_color = color
-                color = (save_color[1], save_color[2], save_color[0])
+                if color_alternate:
+                    save_color = start_color
+                    start_color = (save_color[1], save_color[2], save_color[0])
 
     def rainbow_test_single_led(self, led_index, wait):
         """Perform the rainbow test on a specific LED."""
