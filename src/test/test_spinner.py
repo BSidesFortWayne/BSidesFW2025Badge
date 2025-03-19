@@ -11,10 +11,10 @@ c.bsp.displays.display1.fill(0x000000)
 frame_count = 0
 last_frame_count = 0
 
-square_side = 70
+square_side = 50
 width = square_side
 height = square_side
-padding = 10
+padding = 20
 display_center_x = c.bsp.displays.display1.width() // 2
 display_center_y = c.bsp.displays.display1.height() // 2
 x = display_center_x - (width + padding // 2)
@@ -50,20 +50,38 @@ time_start = time.ticks_ms()
 c.bsp.displays.display1.fill(gc9a01.BLACK)
 
 # Take two 565 colors and interpolate
-def smooth_interpolate_color(color1: int, color2: int, fraction: float):
-    r1 = (color1 & 0xF800) >> 8
-    g1 = (color1 & 0x07E0) >> 3
-    b1 = (color1 & 0x001F) << 3
+def smooth_interpolate_color(color1: int, color2: int, step: int):
+# void rgb(int rgbA, int rgbB) {
+#     int ra = (rgbA&0xf800)>>11;
+#     int ga = (rgbA&0x7e0)>>5;
+#     int ba = rgbA&0x1f;
+#     int rb = (rgbB&0xf800)>>11;
+#     int gb = (rgbB&0x7e0)>>5;
+#     int bb = rgbB&0x1f;
 
-    r2 = (color2 & 0xF800) >> 8
-    g2 = (color2 & 0x07E0) >> 3
-    b2 = (color2 & 0x001F) << 3
+#     for (int i=0; i<16; i++) {
+#         int r = (ra*(15-i) + rb*i + 7)/15; // + 7 is there to apply rounding
+#         int g = (ga*(15-i) + gb*i + 7)/15;
+#         int b = (ba*(15-i) + bb*i + 7)/15;
 
-    r = int(r1 + fraction * (r2 - r1))
-    g = int(g1 + fraction * (g2 - g1))
-    b = int(b1 + fraction * (b2 - b1))
+#         int result = r<<11|g<<5|b;
 
-    return (r << 8) | (g << 3) | (b >> 3)
+#         printf("%04x\n", result);
+#     }
+# }
+    ra = (color1 & 0xF800) >> 11
+    ga = (color1 & 0x07E0) >> 5
+    ba = color1 & 0x001F
+
+    rb = (color2 & 0xF800) >> 11
+    gb = (color2 & 0x07E0) >> 5
+    bb = color2 & 0x001F
+
+    r = (ra * (255 - step) + rb * step + 7) // 255
+    g = (ga * (255 - step) + gb * step + 7) // 255
+    b = (ba * (255 - step) + bb * step + 7) // 255
+
+    return (r << 11) | (g << 5) | b
 
 print(x, y, width, height, padding, display_center_x, display_center_y, fbuf_width, fbuf_height)
 fade_square = 0
@@ -99,7 +117,7 @@ while True:
 
         start_color = square_colors[fade_square]
     else:
-        square_colors[fade_square] = smooth_interpolate_color(start_color, square_colors[(fade_square + 1) % 4], percent_fade)
+        square_colors[fade_square] = smooth_interpolate_color(start_color, square_colors[(fade_square + 1) % 4], int(percent_fade * 255))
 
     draw_rect(
         0, 
