@@ -27,7 +27,7 @@ class NeoPixel:
           may also supply a timing tuple as accepted by `machine.bitstream()`.
     """
 
-    def __init__(self, pin, n, *, bpp=3, timing=1) -> None: ...
+    def __init__(self, pin, n, *, bpp=3, timing: int | tuple = 1) -> None: ...
     def fill(self, pixel) -> None:
         """
         Sets the value of all pixels to the specified *pixel* value (i.e. an

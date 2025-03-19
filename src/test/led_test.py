@@ -5,4 +5,4 @@ index = 0
 direction = 1
 color = (0, 0xFF, 0)
 
-leds.color_bounce(color, 500)
+leds.color_bounce(color, 250)

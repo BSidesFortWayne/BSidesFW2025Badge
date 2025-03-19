@@ -11,18 +11,18 @@ c.bsp.displays.display1.fill(0x000000)
 frame_count = 0
 last_frame_count = 0
 
-square_side = 60
+square_side = 70
 width = square_side
 height = square_side
 padding = 10
 display_center_x = c.bsp.displays.display1.width() // 2
 display_center_y = c.bsp.displays.display1.height() // 2
-x = display_center_x - (width + padding)
-y = display_center_y - (height + padding)
+x = display_center_x - (width + padding // 2)
+y = display_center_y - (height + padding // 2)
 
 fbuf_width = 2*width + padding
 fbuf_height = 2*height + padding
-mem_buf = bytearray(fbuf_width * fbuf_height * 3)
+mem_buf = bytearray(fbuf_width * fbuf_height * 2)
 
 fbuf = framebuf.FrameBuffer(
     mem_buf, 

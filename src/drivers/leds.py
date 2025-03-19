@@ -28,10 +28,10 @@ class LEDs:
         LEDpin = Pin(26)
 
         # Maximum brightness constant (0 to 1)
-        self.max_brightness = 1.0
+        self.max_brightness = 0.4
 
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=1)
+        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=(400, 1000, 800, 450))
 
     def set_led_color(self, led_index, color):
         """Turn on the LED at the given index with the specified color."""
@@ -68,6 +68,9 @@ class LEDs:
             elif index == -1:
                 direction = FORWARD
                 index = 1
+                # swap all color levels
+                save_color = color
+                color = (save_color[1], save_color[2], save_color[0])
 
     def rainbow_test_single_led(self, led_index, wait):
         """Perform the rainbow test on a specific LED."""
