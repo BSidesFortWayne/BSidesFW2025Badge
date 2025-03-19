@@ -7,4 +7,5 @@ color = (0, 0xFF, 0)
 
 # leds.color_bounce(color, 250)
 while True:
-    leds.rainbow_test_all_leds(2)
+    leds.rainbow_test_all_leds(1)
+

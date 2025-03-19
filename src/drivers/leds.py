@@ -30,8 +30,32 @@ class LEDs:
         # Maximum brightness constant (0 to 1)
         self.max_brightness = 0.4
 
+        # SVH 2025-03-19 on V2 versions of the board, the LEDs have a very strange
+        # timing bug that is causing LED artifacts. This is a workaround for that
+        # bug. The timing values that MicroPython says are its defaults for 800 kHz
+        # are (400, 850, 800, 450) for (T0H, T0L, T1H, T1L). 
+        # 
+        # 0 timing
+        #   ┌───────┐        
+        # <─| T0H   |    T0L
+        #   |       └─────────────┘ 
+        # 
+        # 1 timing   
+        #   ┌────────────┐        |
+        # <─|   T1H      |   T1L  |
+        #   |            └────────┘s
+        # 
+        # By changing the timings from the default to (400, 1500, 1500, 450) we are 
+        # increasing the data significant time of the 0 bit and the 1 bit which makes it
+        # more obvious/definitive to the LED what is a 0 and what is a 1.
+        # 
+        # The V3 board may have the same issue, but the trace distances are being adjusted
+        # for the VX board that will hopefully resolve the issue, and the timings could be 
+        # set back to the default.
+        custom_timings = (400, 1500, 1500, 450)
+        
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=(400, 1500, 1500, 450))
+        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=custom_timings)
 
     def set_led_color(self, led_index, color):
         """Turn on the LED at the given index with the specified color."""
