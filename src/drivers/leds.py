@@ -31,7 +31,7 @@ class LEDs:
         self.max_brightness = 0.4
 
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=(400, 1000, 800, 450))
+        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=(400, 1500, 1500, 450))
 
     def set_led_color(self, led_index, color):
         """Turn on the LED at the given index with the specified color."""
