@@ -54,6 +54,7 @@ class Controller(object):
         print("Register buttons")
         self.bsp.buttons.button_pressed_callbacks.append(self.button_press)
         self.bsp.buttons.button_released_callbacks.append(self.button_release)
+        self.bsp.buttons.button_long_press_callbacks.append(self.button_long_press)
 
         self.switch_app("Badge")
 
@@ -67,14 +68,13 @@ class Controller(object):
     def neopixel(self):
         return self.bsp.leds.leds
     
+    def button_long_press(self, button: int):
+        if button == 1:
+            self.switch_app("Menu")
+
+
     def button_press(self, button: int):
         print(f"Button Press {button}")
-        if button == 0:
-            self.switch_app("settings")
-        if button == 1:
-            self.switch_app("voltage_meter")
-        if button == 2:
-            self.switch_app("analog_clock")
 
     def button_release(self, button: int):
         print(f"Button Relased {button}")

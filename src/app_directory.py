@@ -48,7 +48,7 @@ class AppMetadata:
                 
 
     def __str__(self):
-        return self.friendly_name
+        return self.friendly_name if self.friendly_name else self.class_name
 
     def __repr__(self):
         return f'<AppMetadata {self.friendly_name} from {self.module_name}>'
@@ -104,7 +104,7 @@ class AppDirectory:
 
         try:
             # TODO refactor this to another method
-            with open(cache_location) as f:
+            with open(self.cache_location) as f:
                 cache = json.load(f)
                 for filename, module_data in cache["modules"].items():
                     module = ModuleMetadata(

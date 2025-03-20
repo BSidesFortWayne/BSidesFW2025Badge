@@ -1,6 +1,7 @@
 from machine import Pin, SPI
 import gc9a01 
 import vga1_bold_16x32
+import machine
 
 SCK = 18
 MOSI = 23
@@ -22,7 +23,9 @@ reset = Pin(RST1, Pin.OUT)
 cs=Pin(CS1, Pin.OUT)
 dc=Pin(DC1, Pin.OUT)
 
-spi = SPI(1, baudrate=60_000_000, sck=Pin(SCK), mosi=Pin(MOSI))
+spi_freq = machine.freq() // 2
+print(f"SPI Frequency: {spi_freq}")
+spi = SPI(1, baudrate=machine.freq() // 2, sck=Pin(SCK), mosi=Pin(MOSI))
 
 display1 = gc9a01.GC9A01(spi, 240, 240, reset=Pin(RST1, Pin.OUT), cs=Pin(CS1, Pin.OUT), dc=Pin(DC1, Pin.OUT), rotation=3, options=0, buffer_size=0)
 display2 = gc9a01.GC9A01(spi, 240, 240, reset=Pin(RST2, Pin.OUT), cs=Pin(CS2, Pin.OUT), dc=Pin(DC2, Pin.OUT), rotation=3, options=0, buffer_size=0)

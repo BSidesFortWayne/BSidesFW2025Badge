@@ -3,6 +3,9 @@ leds = LEDs()
 led_count = len(leds.leds)
 index = 0
 direction = 1
-color = (0, 0xFF, 0)
+color = (0xFF, 0, 0)
 
-leds.color_bounce(color, 500)
+leds.color_bounce(color, 100, fade=False)
+# while True:
+#     leds.rainbow_test_all_leds(1)
+

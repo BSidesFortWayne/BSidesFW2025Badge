@@ -11,18 +11,18 @@ c.bsp.displays.display1.fill(0x000000)
 frame_count = 0
 last_frame_count = 0
 
-square_side = 60
+square_side = 50
 width = square_side
 height = square_side
-padding = 10
+padding = 20
 display_center_x = c.bsp.displays.display1.width() // 2
 display_center_y = c.bsp.displays.display1.height() // 2
-x = display_center_x - (width + padding)
-y = display_center_y - (height + padding)
+x = display_center_x - (width + padding // 2)
+y = display_center_y - (height + padding // 2)
 
 fbuf_width = 2*width + padding
 fbuf_height = 2*height + padding
-mem_buf = bytearray(fbuf_width * fbuf_height * 3)
+mem_buf = bytearray(fbuf_width * fbuf_height * 2)
 
 fbuf = framebuf.FrameBuffer(
     mem_buf, 
@@ -30,6 +30,39 @@ fbuf = framebuf.FrameBuffer(
     fbuf_height,
     framebuf.RGB565
 )
+
+def fade_color_to_black(color565: int, step: int):
+    r = (color565 & 0xF800) >> 11
+    g = (color565 & 0x07E0) >> 5
+    b = color565 & 0x001F
+
+    r = r * step // 255
+    g = g * step // 255
+    b = b * step // 255
+
+    return (r << 11) | (g << 5) | b
+
+def fade_color_to_white(color565: int, step: int):
+    r = (color565 & 0xF800) >> 11
+    g = (color565 & 0x07E0) >> 5
+    b = color565 & 0x001F
+
+    r = r + (255 - r) * step // 255
+    g = g + (255 - g) * step // 255
+    b = b + (255 - b) * step // 255
+
+    return (r << 11) | (g << 5) | b
+
+def fade_black_to_color(color565: int, step: int):
+    r = (color565 & 0xF800) >> 11
+    g = (color565 & 0x07E0) >> 5
+    b = color565 & 0x001F
+
+    r = r + (0 - r) * step // 255
+    g = g + (0 - g) * step // 255
+    b = b + (0 - b) * step // 255
+
+    return (r << 11) | (g << 5) | b
 
 # Scale 565 color with percent
 def fade_color(percent: float, color: int):
@@ -50,25 +83,43 @@ time_start = time.ticks_ms()
 c.bsp.displays.display1.fill(gc9a01.BLACK)
 
 # Take two 565 colors and interpolate
-def smooth_interpolate_color(color1: int, color2: int, fraction: float):
-    r1 = (color1 & 0xF800) >> 8
-    g1 = (color1 & 0x07E0) >> 3
-    b1 = (color1 & 0x001F) << 3
+def smooth_interpolate_color(color1: int, color2: int, step: int):
+# void rgb(int rgbA, int rgbB) {
+#     int ra = (rgbA&0xf800)>>11;
+#     int ga = (rgbA&0x7e0)>>5;
+#     int ba = rgbA&0x1f;
+#     int rb = (rgbB&0xf800)>>11;
+#     int gb = (rgbB&0x7e0)>>5;
+#     int bb = rgbB&0x1f;
 
-    r2 = (color2 & 0xF800) >> 8
-    g2 = (color2 & 0x07E0) >> 3
-    b2 = (color2 & 0x001F) << 3
+#     for (int i=0; i<16; i++) {
+#         int r = (ra*(15-i) + rb*i + 7)/15; // + 7 is there to apply rounding
+#         int g = (ga*(15-i) + gb*i + 7)/15;
+#         int b = (ba*(15-i) + bb*i + 7)/15;
 
-    r = int(r1 + fraction * (r2 - r1))
-    g = int(g1 + fraction * (g2 - g1))
-    b = int(b1 + fraction * (b2 - b1))
+#         int result = r<<11|g<<5|b;
 
-    return (r << 8) | (g << 3) | (b >> 3)
+#         printf("%04x\n", result);
+#     }
+# }
+    ra = (color1 & 0xF800) >> 11
+    ga = (color1 & 0x07E0) >> 5
+    ba = color1 & 0x001F
+
+    rb = (color2 & 0xF800) >> 11
+    gb = (color2 & 0x07E0) >> 5
+    bb = color2 & 0x001F
+
+    r = (ra * (255 - step) + rb * step + 7) // 255
+    g = (ga * (255 - step) + gb * step + 7) // 255
+    b = (ba * (255 - step) + bb * step + 7) // 255
+
+    return (r << 11) | (g << 5) | b
 
 print(x, y, width, height, padding, display_center_x, display_center_y, fbuf_width, fbuf_height)
 fade_square = 0
 start_fade_ticks = time.ticks_ms()
-fade_duration = 1000
+fade_duration = 10000
 square_colors = [
     gc9a01.RED,
     gc9a01.GREEN,
@@ -77,15 +128,14 @@ square_colors = [
 ]
 
 start_color = square_colors[fade_square]
+square_on = True
 while True:
     fbuf.fill(gc9a01.BLACK)
 
     # Draw the spinner, display 4 squares with 90 degree rotation
-    bit_frame_mask = 0b000011000
-    bit_value = frame_count & bit_frame_mask >> 3
-    fade_value = (frame_count & 0b00000111) / 0b1000
     
     percent_fade = (time.ticks_ms() - start_fade_ticks) / fade_duration
+    step = int(511 * percent_fade)
     # We've hit 100%, switch to the next color
     if (percent_fade > 1):
         # Reset timer
@@ -99,8 +149,8 @@ while True:
 
         start_color = square_colors[fade_square]
     else:
-        square_colors[fade_square] = smooth_interpolate_color(start_color, square_colors[(fade_square + 1) % 4], percent_fade)
-
+        square_colors[fade_square] = smooth_interpolate_color(start_color, square_colors[(fade_square + 1) % 4], step)
+    
     draw_rect(
         0, 
         0, 

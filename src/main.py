@@ -3,6 +3,7 @@ import gc
 
 from controller import Controller
 
+
 gc.enable()
 gc.collect()
 
