@@ -31,6 +31,39 @@ fbuf = framebuf.FrameBuffer(
     framebuf.RGB565
 )
 
+def fade_color_to_black(color565: int, step: int):
+    r = (color565 & 0xF800) >> 11
+    g = (color565 & 0x07E0) >> 5
+    b = color565 & 0x001F
+
+    r = r * step // 255
+    g = g * step // 255
+    b = b * step // 255
+
+    return (r << 11) | (g << 5) | b
+
+def fade_color_to_white(color565: int, step: int):
+    r = (color565 & 0xF800) >> 11
+    g = (color565 & 0x07E0) >> 5
+    b = color565 & 0x001F
+
+    r = r + (255 - r) * step // 255
+    g = g + (255 - g) * step // 255
+    b = b + (255 - b) * step // 255
+
+    return (r << 11) | (g << 5) | b
+
+def fade_black_to_color(color565: int, step: int):
+    r = (color565 & 0xF800) >> 11
+    g = (color565 & 0x07E0) >> 5
+    b = color565 & 0x001F
+
+    r = r + (0 - r) * step // 255
+    g = g + (0 - g) * step // 255
+    b = b + (0 - b) * step // 255
+
+    return (r << 11) | (g << 5) | b
+
 # Scale 565 color with percent
 def fade_color(percent: float, color: int):
     r = (color & 0xF800) >> 8
@@ -95,15 +128,14 @@ square_colors = [
 ]
 
 start_color = square_colors[fade_square]
+square_on = True
 while True:
     fbuf.fill(gc9a01.BLACK)
 
     # Draw the spinner, display 4 squares with 90 degree rotation
-    bit_frame_mask = 0b000011000
-    bit_value = frame_count & bit_frame_mask >> 3
-    fade_value = (frame_count & 0b00000111) / 0b1000
     
     percent_fade = (time.ticks_ms() - start_fade_ticks) / fade_duration
+    step = int(511 * percent_fade)
     # We've hit 100%, switch to the next color
     if (percent_fade > 1):
         # Reset timer
@@ -117,8 +149,8 @@ while True:
 
         start_color = square_colors[fade_square]
     else:
-        square_colors[fade_square] = smooth_interpolate_color(start_color, square_colors[(fade_square + 1) % 4], int(percent_fade * 255))
-
+        square_colors[fade_square] = smooth_interpolate_color(start_color, square_colors[(fade_square + 1) % 4], step)
+    
     draw_rect(
         0, 
         0, 

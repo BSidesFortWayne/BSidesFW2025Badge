@@ -48,7 +48,7 @@ class AppMetadata:
                 
 
     def __str__(self):
-        return self.friendly_name
+        return self.friendly_name if self.friendly_name else self.class_name
 
     def __repr__(self):
         return f'<AppMetadata {self.friendly_name} from {self.module_name}>'
