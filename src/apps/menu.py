@@ -1,6 +1,26 @@
 from apps.app import BaseApp
 import gc9a01 
 
+
+class IconMenu(BaseApp):
+    name = "Icon Menu"
+    version = "0.0.1"
+    def __init__(self, controller):
+        super().__init__(controller)
+        self.display1 = self.controller.bsp.displays.display1
+        self.display2 = self.controller.bsp.displays.display2
+
+        self.display1.fill(gc9a01.WHITE)
+        self.display2.fill(gc9a01.WHITE)
+
+        self.icon_size = 40
+        self.icon_spacing = 10
+        self.icons_per_row = 5
+        self.icon_rows = 3
+
+        self.icons = [app.icon for app in self.controller.app_directory]
+
+
 class Menu(BaseApp):
     name = "Menu"
     def __init__(self, controller):
@@ -57,5 +77,3 @@ class Menu(BaseApp):
                     display_index=2
                 )
 
-
-print("Menu loaded")

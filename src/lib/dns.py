@@ -14,6 +14,7 @@ class MicroDNSSrv :
     # ===( Speed Creation )=======================================================
     # ============================================================================
 
+    @staticmethod
     def Create(domainsList) :
         mds = MicroDNSSrv()
         if mds.SetDomainsList(domainsList) and mds.Start() :

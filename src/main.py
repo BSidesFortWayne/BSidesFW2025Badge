@@ -2,31 +2,16 @@ import time
 import gc
 
 from controller import Controller
-
+from lib.network import start_http_server
 
 gc.enable()
 gc.collect()
 
 
-def test_http_server():
-    import network
-
-    ap = network.WLAN(network.AP_IF)
-    ap.active(True)
-    ap.config(essid="test123", password="abcd1234")
-
-    while not ap.active():
-        pass
-
-    print('Connection successful')
-    print(ap.ifconfig())
-
-    from web.http_server import HTTPServer
-    server = HTTPServer()
-    server.start()
-
 async def main():
     controller = Controller()
+
+    asyncio.create_task(start_http_server(controller))
 
     total_times = 0
     total_counts = 0
@@ -34,8 +19,8 @@ async def main():
         x = time.ticks_ms()
         current_view = controller.current_view
         if current_view:
-            current_view.update()
-        await asyncio.sleep(0.05)
+            await current_view.update()
+        await asyncio.sleep(0.01)
         d = time.ticks_diff(time.ticks_ms(), x)
         total_times += d
         total_counts += 1

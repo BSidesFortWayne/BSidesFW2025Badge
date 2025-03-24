@@ -34,13 +34,13 @@ while True:
 
     gen_start = time.ticks_ms()
     fbuf.fill(0x0000)
-    font.write("Some text", fbuf, framebuf.RGB565, fbuf_width, fbuf_height, 60, 120, color, rot=angle, x_spacing=0, y_spacing=0)
+    font.write("Hi!", fbuf, framebuf.RGB565, fbuf_width, fbuf_height, 120, 120, color, rot=angle, x_spacing=0, y_spacing=0)
 
     gen_end = time.ticks_ms()
 
-    print(f'Gen time: {gen_end - gen_start} ms')
+    # print(f'Gen time: {gen_end - gen_start} ms')
 
-    angle += 3
+    angle += 9
     
     bsp.displays.display1.blit_buffer(
         mem_buf,

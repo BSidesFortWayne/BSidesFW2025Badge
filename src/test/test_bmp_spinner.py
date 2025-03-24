@@ -1,4 +1,3 @@
-import gc9a01
 from controller import Controller
 import framebuf
 import time

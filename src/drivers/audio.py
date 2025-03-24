@@ -1,6 +1,5 @@
+import asyncio
 import machine
-import time
-import _thread
 
 AUDIO_STOPPED = 0
 AUDIO_PLAYING = 1
@@ -27,12 +26,13 @@ class Speaker:
     def start_song(self, song):
         # TODO need to set the state to stopped and wait for the old thread to exit
         # before starting a new one... 
-        _thread.start_new_thread(self._play_song, (song,))
+        # _thread.start_new_thread(self._play_song, (song,))
+        asyncio.create_task(self._play_song(song))
 
     def pause_song(self):
         self.state = AUDIO_PAUSED
 
-    def _play_song(self, song, repeat=False):
+    async def _play_song(self, song, repeat=False):
         self.duration = self.get_song_duration(song)
         print(f"Song Duration Is: {self.duration}")
         self.state = AUDIO_PLAYING
@@ -44,12 +44,12 @@ class Speaker:
                 else:
                     self.pwm.duty(0)
 
-                time.sleep(duration / self.speed)
+                await asyncio.sleep(duration / self.speed)
                 self.pwm.duty(0)
-                time.sleep(0.01)
+                await asyncio.sleep(0.01)
                 if self.state == AUDIO_PAUSED:
                     while self.state == AUDIO_PAUSED:
-                        time.sleep(0.1)
+                        await asyncio.sleep(0.1)
             if not repeat:
                 break
         self.state = AUDIO_STOPPED

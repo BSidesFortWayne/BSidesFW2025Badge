@@ -5,8 +5,10 @@
   - [ ] Initial programming flowchart
   - [ ] Software startup routines
 - Software
-  - [ ] App Directory
-    - [ ] Clean+ up app directory
+  - [x] App Directory
+    - [x] Clean up app directory
+  - [ ] Controller
+    - [ ] Add error screen/error logging to app loading
   - [ ] UI
     - [ ] Make loading/pop up screen design for any views to use
     - [ ] Normalize rendering around async?

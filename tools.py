@@ -1,7 +1,28 @@
 from typer import Typer
 import os
+import time
 
 app = Typer()
+
+
+@app.command()
+def program_device(firmware: str = "firmware_SPIRAM_8MiB.bin", reinstall_base_image: bool = False):
+    # TODO I wonder if we can import esptool.py and mpremote directly as their python modules
+    # Pros: we would get autocomplete and intellisense for running those tools
+    # Cons: using the system command line calls is very straightforward and internal usage of those
+    # libraries could be more fragile
+    if reinstall_base_image:
+        # erase flash with esptool
+        os.system("esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash")
+
+        # flash firmware with esptool
+        os.system(f"esptool.py --chip esp32 --baud 460800 --port /dev/ttyUSB0 write_flash -z 0x1000 {firmware}")
+        
+        # Add 2 second delay for reset
+        time.sleep(2)
+
+    # Load python code with mpremote
+    os.system("mpremote cp -r src/* :")
 
 @app.command()
 def generate_app_cache(app_directory="src/apps"):

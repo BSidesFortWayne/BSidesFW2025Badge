@@ -46,7 +46,6 @@ class AppMetadata:
         
         return results
                 
-
     def __str__(self):
         return self.friendly_name if self.friendly_name else self.class_name
 
@@ -56,11 +55,11 @@ class AppMetadata:
 
 class ModuleMetadata:
     def __init__(self, filename: str, checksum: str):
-        if not filename.endswith(".py"):
+        if not filename.endswith(".py") and not filename.endswith(".pyc"):
             raise ValueError(f"File {filename} is not a python file")
         
         self.filename = filename
-        self.module_name = filename.replace(".py", "")
+        self.module_name = filename.replace(".py", "").replace(".pyc", "")
         self.checksum = checksum
         self.apps = []
 
@@ -74,13 +73,14 @@ class ModuleMetadata:
         #     raise FileNotFoundError(f"File {py_filepath} not found")
 
         filepath = f"{root}/{filename}"
-        if not filename.endswith(".py"):
+        if not filename.endswith(".py") and not filename.endswith(".pyc"):
             raise ValueError(f"File {filename} is not a python file")
 
         checksum = calculate_file_hash(filepath)
 
         module = ModuleMetadata(
-            filename=filename, checksum=checksum
+            filename=filename, 
+            checksum=checksum
         )
 
         return module
@@ -121,8 +121,9 @@ class AppDirectory:
                         for app_data in module_data["apps"]
                     ]
                     self.modules[module.module_name] = module
-
-        except Exception:
+        
+        except Exception as e:
+            print(e)
             print("No app cache found")
 
         app_files = os.listdir(root_app_directory)
@@ -131,7 +132,7 @@ class AppDirectory:
             if app_file in self.ignore_app_files:
                 continue
 
-            if not app_file.endswith(".py"):
+            if not app_file.endswith(".py") and not app_file.endswith(".pyc"):
                 continue
 
             # Create the new module metadata from the file itself
@@ -160,6 +161,7 @@ class AppDirectory:
         return app_dir
 
     def save_app_directory_cache(self):
+        print("Saving app directory cache")
         with open(self.cache_location, "w") as f:
             modules = {
                 # TODO refactor the app serialization to come from the AppMetadata class

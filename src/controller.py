@@ -56,7 +56,7 @@ class Controller(object):
         self.bsp.buttons.button_released_callbacks.append(self.button_release)
         self.bsp.buttons.button_long_press_callbacks.append(self.button_long_press)
 
-        self.switch_app("Badge")
+        self.switch_app("Analog Clock")
 
 
     # TODO temporary shadow property for backwards compatibility
@@ -72,7 +72,6 @@ class Controller(object):
         if button == 1:
             self.switch_app("Menu")
 
-
     def button_press(self, button: int):
         print(f"Button Press {button}")
 
@@ -80,9 +79,9 @@ class Controller(object):
         print(f"Button Relased {button}")
         self.bsp.leds.turn_off_led(button)
 
-    def update(self):
+    async def update(self):
         if self.current_view:
-            self.current_view.update()
+            await self.current_view.update()
 
     def random_app(self):
         app = random.choice(self.app_directory)
@@ -115,8 +114,7 @@ class Controller(object):
             print("No module found")
             return
 
-        print(dir(module))
-        print(module.__dict__.items())
+        # TODO normalize with code in module metadata?
         for _, obj in module.__dict__.items():
             if isinstance(obj, type) and issubclass(obj, apps.app.BaseApp) and obj != apps.app.BaseApp:
                 print(f"Found constructor, switched to {app_name} with {obj}")

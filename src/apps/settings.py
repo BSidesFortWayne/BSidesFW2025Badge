@@ -11,7 +11,7 @@ import asyncio
 
 
 class App(BaseApp):
-    name = "QR Code"
+    name = "Settings"
     def __init__(self, controller):
         super().__init__(controller)
         self.display1 = self.controller.bsp.displays.display1
@@ -26,6 +26,8 @@ class App(BaseApp):
 
         self.display1.fill(gc9a01.WHITE)
         self.display2.fill(gc9a01.WHITE)
+
+        self.config['test_config_var'] = 'test'
 
         self.draw_status()
 
@@ -63,23 +65,35 @@ class App(BaseApp):
     def start_wifi(self, essid, password):
         import network
 
-        ap = network.WLAN(network.AP_IF)
-        ap.active(True)
-        ap.config(essid=essid, authmode=network.AUTH_WPA_WPA2_PSK, password=password)
+        sta_if = network.WLAN(network.STA_IF)
+        sta_if.active(True)
+        sta_if.connect("ubnt-spy-24ghz", 'ubntnotforyouonlyforme')
 
-        while not ap.active():
+        while not sta_if.active():
             sleep_ms(10)
         
-        MicroDNSSrv.Create({ '*' : ap.ifconfig()[0] })
+        MicroDNSSrv.Create({ '*' : sta_if.ifconfig()[0] })
+
+        print(sta_if.ifconfig())
     
     async def start_website(self):
+        import json
         app = Microdot()
 
         Response.default_content_type = 'text/html'
 
-        @app.before_request
-        def home(request):
-            return '<h1>Hello, World!</h1>'
+        @app.route('/config')
+        async def index(request):
+            return json.dumps(self.controller.current_view.config)
+        
+        @app.route('/config/<key>')
+        async def get_key(request, key):
+            return self.controller.current_view.config[key]
+        
+        @app.route('/config/<key>', methods=['POST'])
+        async def set_key(request, key):
+            self.controller.current_view.config[key] = request.body
+            return json.dumps(self.controller.current_view.config)
         
         app.run(port=80)
 
