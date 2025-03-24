@@ -1,4 +1,4 @@
-from config.smart_config import Config, SmartConfig
+from lib.smart_config import Config, SmartConfig
 
 class BaseApp:
     name = "no_name"
