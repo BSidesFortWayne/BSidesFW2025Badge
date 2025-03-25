@@ -12,16 +12,18 @@ async def start_wifi(mode: str, ssid: str, password: str):
     if mode == "STA":
         sta_if = network.WLAN(network.STA_IF)
         sta_if.active(True)
+        print(f"Connecting to {ssid} with password {password}")
         sta_if.connect(ssid, password)
+        while not sta_if.isconnected():
+            await asyncio.sleep(0.01)
     elif mode == "AP":
         sta_if = network.WLAN(network.AP_IF)
         sta_if.active(True)
         sta_if.config(essid=ssid, password=password)
+        while not sta_if.active():
+            await asyncio.sleep(0.01)
 
-    while not sta_if.active():
-        await asyncio.sleep(0.01)
-    
-    MicroDNSSrv.Create({ '*' : sta_if.ifconfig()[0] })
+    MicroDNSSrv.Create({"*": sta_if.ifconfig()[0]})
 
     print(sta_if.ifconfig())
 
@@ -29,43 +31,41 @@ async def start_wifi(mode: str, ssid: str, password: str):
 async def start_http_server(controller: Controller):
     print("Starting HTTP Server")
     import json
+
     app = Microdot()
     app.debug = True
 
-    Response.default_content_type = 'text/html'
+    Response.default_content_type = "text/html"
 
-    @app.route('/_config', methods=['GET', 'POST'])
+    @app.route("/_config", methods=["GET", "POST"])
     async def config_json(request: Request):
         if not controller.current_view:
             Microdot.abort(404)
             # This doesn't actually return anything, we're just returning to make the linter happy
             return
-        
-        if request.method == 'POST':
+
+        config = controller.current_view.config
+        if request.method == "POST":
             # TODO validate the value
             try:
                 print(request.body)
-                # b'last_second=0&radius=110&minuts_hand_color=65535&bg_color=65535&seconds_hand_color=10100&hours_hand_color=1000&fg_color=0&minutes_hand_color=65535&minute_hand_color=65535&redraw_method=2&numbers_color=0'
-                print(request.form)
-                # {'last_second': ['0'], 'radius': ['110'], 'minuts_hand_color': ['65535'], 'numbers_color': ['0'], 'seconds_hand_color': ['10100'], 'hours_hand_color': ['1000'], 'fg_color': ['0'], 'minutes_hand_color': ['65535'], 'minute_hand_color': ['65535'], 'redraw_method': ['2'], 'bg_color': ['65535']}
                 print(request.json)
-                controller.current_view.config.update(json.loads(request.body))
+                config.update(request.json) # type: ignore
                 # redirect back to /config for web users
                 Response.redirect("/config")
             except Exception as ex:
                 print(ex)
                 Microdot.abort(500)
         return json.dumps(controller.current_view.config)
-    
 
-    @app.route('/_config/<key>', methods=['GET', 'POST'])
+    @app.route("/_config/<key>", methods=["GET", "POST"])
     async def get_key(request: Request, key):
         if not controller.current_view:
             Microdot.abort(404)
             # This doesn't actually return anything, we're just returning to make the linter happy
             return
-        
-        if request.method == 'POST':
+
+        if request.method == "POST":
             try:
                 print(request.body)
                 print(request.form)
@@ -75,36 +75,87 @@ async def start_http_server(controller: Controller):
                 print(ex)
                 Microdot.abort(500)
         return json.dumps(controller.current_view.config)
-    
+
+    def python_type_to_html_type(value_type):
+        if value_type is str:
+            return "text"
+        elif value_type is int:
+            return "number"
+        elif value_type is bool:
+            return "checkbox"
+        else:
+            return "text"
+
     def config_item_to_html(key, value):
+        value_type = python_type_to_html_type(type(value))
+
         return f"""
         <label for="{key}">{key}</label>
-        <input type="text" name="{key}" value="{value}">
+        <input type="{value_type}" name="{key}" value="{value}">
         """
-    
-    @app.route('/config')
+
+    @app.route("/config")
     async def config_web(request: Request):
         if not controller.current_view:
             Microdot.abort(404)
             # This doesn't actually return anything, we're just returning to make the linter happy
             return
-        
+
         config = controller.current_view.config
+        title = f"{controller.current_view.name} Config"
         # Return basic html
         return f"""
         <html>
             <head>
-                <title>Config</title>
+                <title>{title}</title>
+                <style>
+                    form label, form input {{
+                        display: block;
+                        margin-bottom: 10px;
+                    }}
+                </style>
+                <script>
+                    function myFunction(form) {{
+                        const formData = new FormData(form);
+                        console.log(formData);
+                        var object = {{}};
+                        formData.forEach((value, key) => object[key] = value);
+                        var json = JSON.stringify(object);
+                        
+                        // Send the JSON to the server
+                        fetch('/_config', {{
+                            method: 'POST',
+                            headers: {{
+                                'Content-Type': 'application/json'
+                            }},
+                            body: json
+                        }})
+                        .then(response => {{
+                            if (response.ok) {{
+                                // draw on an element with text that shows the update time
+                                var status = document.getElementById("status");
+                                status.innerText = "Config updated at " + new Date().toLocaleTimeString();
+                            }} else {{
+                                var status = document.getElementById("status");
+                                status.innerText = "Error updating config";
+                            }}
+                        }})
+                        .catch(error => {{
+                            console.error("Error submitting config:", error);
+                            alert("An error occurred.");
+                        }});
+                    }}
+                </script>
             </head>
             <body>
-                <h1>Config</h1>
-                <form action="/_config" method="POST">
+                <h1>{title}</h1>
+                <form onsubmit="event.preventDefault(); myFunction(this);">
                     {"".join([config_item_to_html(k, v) for k, v in config.items()])}
                     <input type="submit" value="Submit">
                 </form>
+                <div id="status"></div>
             </body>
         </html>
         """
-        
 
     app.run(port=80)

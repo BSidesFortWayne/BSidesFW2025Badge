@@ -1,10 +1,17 @@
 import json
 import os
 
-class SmartConfig(dict):
-    pass
+class SmartConfigValue(dict):
+    # abstract class
+    def to_html_input(self):
+        pass
 
-class EnumConfig(SmartConfig):
+    def parse_value(self, value):
+        pass
+
+
+
+class EnumConfig(SmartConfigValue):
     def __init__(self, name: str, options: list[str], default = None):
         super().__init__()
         self.name = name
@@ -18,9 +25,33 @@ class Config(dict):
         self.filename = filename
         self.load()
 
+    def update(self, data: dict):
+        updates = {}
+        for key, value in data.items():
+            if key not in self:
+                print(f"Warning: Key {key} not in config")
+                continue
+            # if the value is a dict... Check if it is a SmartConfigValue object
+            # Check the original value type and convert it if different
+            existing_value_type = type(self[key])
+            if isinstance(self[key], SmartConfigValue):
+                updates[key] = self[key].parse_value(value)
+            elif existing_value_type is type(value):
+                updates[key] = value
+            elif existing_value_type is int and type(value) is str:
+                updates[key] = int(value)
+            elif existing_value_type is bool and type(value) is str:
+                updates[key] = value.lower() == "true"
+            else:
+                raise ValueError(f"Type mismatch for {key}: {existing_value_type} != {type(value)}")
+        
+        # Only update the config at the end so if anything throws we don't accept the update
+        super().update(updates)
+
     def load(self):
         try:
             with open(self.filename, "r") as f:
+                # TODO custom transformer for smart config...
                 data = json.load(f)
                 self.update(data)
         except OSError:
