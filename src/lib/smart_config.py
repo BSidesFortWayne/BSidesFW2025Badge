@@ -28,6 +28,10 @@ class Config(dict):
     def update(self, data: dict):
         updates = {}
         for key, value in data.items():
+            if key not in self:
+                updates[key] = value
+                continue
+
             # if the value is a dict... Check if it is a SmartConfigValue object
             # Check the original value type and convert it if different
             existing_value_type = type(self[key])
