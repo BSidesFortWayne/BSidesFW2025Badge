@@ -53,9 +53,11 @@ class AppMetadata:
         return f'<AppMetadata {self.friendly_name} from {self.module_name}>'
 
 
+def is_python_file(filename: str) -> bool:
+    return filename.endswith(".py") or filename.endswith(".pyc")
 class ModuleMetadata:
     def __init__(self, filename: str, checksum: str):
-        if not filename.endswith(".py") and not filename.endswith(".pyc"):
+        if not is_python_file(filename):
             raise ValueError(f"File {filename} is not a python file")
         
         self.filename = filename
@@ -73,7 +75,7 @@ class ModuleMetadata:
         #     raise FileNotFoundError(f"File {py_filepath} not found")
 
         filepath = f"{root}/{filename}"
-        if not filename.endswith(".py") and not filename.endswith(".pyc"):
+        if not is_python_file(filename):
             raise ValueError(f"File {filename} is not a python file")
 
         checksum = calculate_file_hash(filepath)
@@ -132,7 +134,7 @@ class AppDirectory:
             if app_file in self.ignore_app_files:
                 continue
 
-            if not app_file.endswith(".py") and not app_file.endswith(".pyc"):
+            if not is_python_file(app_file):
                 continue
 
             # Create the new module metadata from the file itself
