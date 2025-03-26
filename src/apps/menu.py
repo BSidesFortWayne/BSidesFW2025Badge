@@ -1,6 +1,9 @@
+import asyncio
 from apps.app import BaseApp
 import gc9a01 
+import framebuf
 
+from lib.microfont import MicroFont
 
 class IconMenu(BaseApp):
     name = "Icon Menu"
@@ -18,7 +21,7 @@ class IconMenu(BaseApp):
         self.icons_per_row = 5
         self.icon_rows = 3
 
-        self.icons = [app.icon for app in self.controller.app_directory]
+        # self.icons = [app.icon for app in self.controller.app_directory]
 
 
 class Menu(BaseApp):
@@ -46,6 +49,22 @@ class Menu(BaseApp):
         #     )
         self.controller.bsp.buttons.button_pressed_callbacks.append(self.button_press)
 
+        self.fbuf_width = 200
+        self.fbuf_height = 200
+
+        self.fbuf_mem = bytearray(self.fbuf_width*self.fbuf_height*2)
+        self.fbuf = framebuf.FrameBuffer(
+            self.fbuf_mem, 
+            self.fbuf_width, 
+            self.fbuf_height, 
+            framebuf.RGB565
+        )
+        self.fbuf_mv = memoryview(self.fbuf_mem)
+        self.font = MicroFont("fonts/victor_R_24.mfnt", cache_index=True)
+
+        self.render_lock = asyncio.Lock()
+
+
     def __del__(self):
         self.controller.bsp.buttons.button_pressed_callbacks.remove(self.button_press)
     
@@ -54,26 +73,29 @@ class Menu(BaseApp):
             first = self.menu_items.pop(0)
             self.menu_items.append(first)
         elif button == 4:
-            last = self.menu_items.pop()
-            self.menu_items.insert(0, last)
+            self.controller.switch_app(self.menu_items[0])
+
+    async def update(self):
+        # self.title_display.fill(gc9a01.BLACK)
+        # self.app_selection.fill(gc9a01.BLACK)
+        self.fbuf.fill(gc9a01.BLACK)
+        for i, item in enumerate(self.menu_items[:5]):
+            self.font.write(
+                item, 
+                self.fbuf_mv, 
+                framebuf.RGB565, 
+                self.fbuf_width, 
+                self.fbuf_height, 
+                0,
+                i * 40,
+                gc9a01.RED if i == 0 else gc9a01.WHITE
+            )
 
 
-    def update(self):
-        for i, item in enumerate(self.menu_items):
-            if i == 0:
-                # Draw a red line below the first item
-                self.display_text(
-                    item,
-                    40,
-                    40 + (i * 40),
-                    display_index=2,
-                    fg=gc9a01.RED
-                )
-            else:
-                self.display_text(
-                    item,
-                    40,
-                    40 + (i * 40),
-                    display_index=2
-                )
-
+        self.controller.bsp.displays.display2.blit_buffer(
+            self.fbuf_mv,
+            40,
+            40,
+            self.fbuf_width,
+            self.fbuf_height
+        )

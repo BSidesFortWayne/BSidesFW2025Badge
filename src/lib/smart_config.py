@@ -23,9 +23,12 @@ class Config(dict):
     def __init__(self, filename: str):
         super().__init__()
         self.filename = filename
+        print(f"Loading smart config from {self.filename}")
         self.load()
+        print(f"Loaded smart config: {self}")
 
     def update(self, data: dict):
+        print(f"Updating config with {data}")
         updates = {}
         for key, value in data.items():
             if key not in self:
@@ -48,6 +51,8 @@ class Config(dict):
         
         # Only update the config at the end so if anything throws we don't accept the update
         super().update(updates)
+
+        self.save()
 
     def load(self):
         try:
@@ -76,6 +81,7 @@ class Config(dict):
 
 
     def __setitem__(self, key, value):
+        print(f"Setting {key} to {value} (file: {self.filename})")
         super().__setitem__(key, value)
         self.save()
 

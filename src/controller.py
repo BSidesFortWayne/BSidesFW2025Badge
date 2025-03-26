@@ -56,7 +56,7 @@ class Controller(object):
         self.bsp.buttons.button_released_callbacks.append(self.button_release)
         self.bsp.buttons.button_long_press_callbacks.append(self.button_long_press)
 
-        self.switch_app("Analog Clock")
+        self.switch_app("Menu")
 
 
     # TODO temporary shadow property for backwards compatibility

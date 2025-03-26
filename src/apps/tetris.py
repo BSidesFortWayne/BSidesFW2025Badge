@@ -1,3 +1,4 @@
+import asyncio
 from apps.app import BaseApp
 import random
 import time
@@ -341,9 +342,9 @@ class View(BaseApp):
                         pixel_y = y_offset + (ghost_y + row_i) * self.block_size
                         disp.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, 0x7800)
 
-    def update(self):
+    async def update(self):
         if self.is_game_over:
-            self.game_over()
+            await self.game_over()
             return
         y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
         x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
@@ -351,9 +352,9 @@ class View(BaseApp):
         self.controller.displays.display1.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, self.controller.displays.gc9a01.BLACK)
         self.draw_scene()
         self.move_block_down()
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
 
-    def game_over(self):
+    async def game_over(self):
         self.controller.neopixel.fill((40, 0, 0))
         self.controller.neopixel.write()
         self.controller.displays.display1.fill(self.controller.displays.gc9a01.BLACK)
@@ -373,4 +374,4 @@ class View(BaseApp):
         )
         self.update_stats()
         while self.is_game_over:
-            time.sleep(0.05)
+            await asyncio.sleep(0.05)

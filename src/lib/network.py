@@ -58,8 +58,9 @@ async def start_http_server(controller: Controller):
                 Microdot.abort(500)
         return json.dumps(controller.current_view.config)
 
+    # TODO do we need this endpoint? Maybe not?
     @app.route("/_config/<key>", methods=["GET", "POST"])
-    async def get_key(request: Request, key):
+    async def get_key(request: Request, key: str):
         if not controller.current_view:
             Microdot.abort(404)
             # This doesn't actually return anything, we're just returning to make the linter happy
@@ -67,10 +68,8 @@ async def start_http_server(controller: Controller):
 
         if request.method == "POST":
             try:
-                print(request.body)
-                print(request.form)
-                print(request.json)
-                controller.current_view.config[key] = request.json
+                config = controller.current_view.config
+                config.update({key: request.json}) 
             except Exception as ex:
                 print(ex)
                 Microdot.abort(500)
@@ -103,6 +102,7 @@ async def start_http_server(controller: Controller):
 
         config = controller.current_view.config
         title = f"{controller.current_view.name} Config"
+        sorted_config_items = sorted(config.items(), key=lambda x: x[0])
         # Return basic html
         return f"""
         <html>
@@ -115,6 +115,7 @@ async def start_http_server(controller: Controller):
                     }}
                 </style>
                 <script>
+                    // an alternative to this would be the parse the form data on the microcontroller instead
                     function myFunction(form) {{
                         const formData = new FormData(form);
                         console.log(formData);
@@ -150,7 +151,7 @@ async def start_http_server(controller: Controller):
             <body>
                 <h1>{title}</h1>
                 <form onsubmit="event.preventDefault(); myFunction(this);">
-                    {"".join([config_item_to_html(k, v) for k, v in config.items()])}
+                    {"".join([config_item_to_html(k, v) for k, v in sorted_config_items])}
                     <input type="submit" value="Submit">
                 </form>
                 <div id="status"></div>

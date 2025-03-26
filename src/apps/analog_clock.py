@@ -20,6 +20,8 @@ class AnalogClock(BaseApp):
         self.controller = controller
         self.display1 = self.controller.bsp.displays.display1
 
+        print("Pre-config Analog Clock")
+
         self.config.setdefault('bg_color', gc9a01.WHITE)
         self.config.setdefault('fg_color', gc9a01.BLACK)
         self.config.setdefault('hours_hand_color', gc9a01.BLACK)
@@ -27,6 +29,8 @@ class AnalogClock(BaseApp):
         self.config.setdefault('seconds_hand_color', gc9a01.RED)
         self.config.setdefault('radius', 110)
         self.config.setdefault('redraw_method', FULL_REDRAW_FB)
+
+        print("Post-config Analog Clock")
 
         radius = self.config['radius']
 

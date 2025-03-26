@@ -79,6 +79,8 @@
     - [ ] Rotate
     - [ ] Zoom
     - [ ] Skew?
+    - [ ] Grayscale/B&W
+    - [ ] Color invert
   - [ ] Image Slideshow
     - [ ] Scroll through selected images
   - [ ] Vendor sign off app

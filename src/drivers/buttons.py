@@ -9,20 +9,12 @@ def no_callback(button: int):
     print(f'Button {button} pressed')
 
 class Buttons():
-    gpio_button_pins: list[int]
-    gpio_buttons: list[Pin]
-    last_press_times: list[int]
-    last_release_times: list[int]
-    last_long_press_time: list[int]
-    button_state: int
-    debounce_time: int
-
     def __init__(self, hardware_rev, iox: PCA9535):
         if hardware_rev == HardwareRev.V1:
-            self.gpio_button_pins = [0, 33, 35, 34]
+            self.gpio_button_pins: list[int] = [0, 33, 35, 34]
         else:
-            self.gpio_button_pins = [0]
-        self.gpio_buttons = []
+            self.gpio_button_pins: list[int] = [0]
+        self.gpio_buttons: list[Pin] = []
         self.debounce_time = 50
         self.button_pressed_callbacks = []
 
@@ -60,13 +52,19 @@ class Buttons():
             
         
         total_buttons = len(self.gpio_buttons) + len(self.iox_button_map)
-        self.last_press_times = [0 for _ in range(total_buttons)]
-        self.last_release_times = [0 for _ in range(total_buttons)]
-        self.last_long_press_time = [0 for _ in range(total_buttons)]
+        self.last_press_times: list[int] = [0 for _ in range(total_buttons)]
+        self.last_release_times: list[int] = [0 for _ in range(total_buttons)]
+        self.last_long_press_time: list[int] = [0 for _ in range(total_buttons)]
 
 
     def reset_button_long_press(self, button: int):
-        print(f"Resetting long press for button {button}")
+        long_pressed = bool(self.last_long_press_time[button])
+        if long_pressed:
+            print(f"Button {button} was long pressed, resetting")
+            self.last_long_press_time[button] = 0
+        else:
+            # TODO If this button wasn't long pressed, send a "clicked" event?
+            pass
         self.last_press_times[button] = 0
         self.last_long_press_time[button] = 0
 
@@ -128,13 +126,11 @@ class Buttons():
 
 
     def irq_rising(self, pin):
-        print(f"Button released {pin}")
         button_index = self.gpio_buttons.index(pin)
         self.button_debounce_processor(button_index, self.last_release_times, self.button_released_callbacks)
 
 
     def irq_falling(self, pin):
-        print(f"Button pressed {pin}")
         button_index = self.gpio_buttons.index(pin)
         self.button_debounce_processor(button_index, self.last_press_times, self.button_pressed_callbacks)
 
