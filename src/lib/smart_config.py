@@ -27,6 +27,22 @@ class Config(dict):
         self.load()
         print(f"Loaded smart config: {self}")
 
+    def add(self, key: str, value, force: bool = False):
+        """
+        Add a key to the config. If the key already exists, it will not be added
+        unless force is set to True.
+        :param key: The key to add
+        :param value: The value to add
+        :param force: If True, the key will be added even if it already exists
+        :return: None
+        """
+        print(f"Adding {key} to config")
+        if force:
+            self[key] = value
+            return value
+        else:
+            return self.setdefault(key, value)
+
     def update(self, data: dict):
         print(f"Updating config with {data}")
         updates = {}
@@ -44,8 +60,8 @@ class Config(dict):
                 updates[key] = value
             elif existing_value_type is int and type(value) is str:
                 updates[key] = int(value)
-            elif existing_value_type is bool and type(value) is str:
-                updates[key] = value.lower() == "true"
+            elif existing_value_type is bool:
+                updates[key] = value.lower() == "on"
             else:
                 raise ValueError(f"Type mismatch for {key}: {existing_value_type} != {type(value)}")
         

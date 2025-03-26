@@ -85,12 +85,23 @@ async def start_http_server(controller: Controller):
         else:
             return "text"
 
+    def python_type_to_value(value):
+        if isinstance(value, bool):
+            return "checked" if value else ""
+        elif isinstance(value, str):
+            return f'value={value}'
+        # elif isinstance(value, int):
+        #     return f'value={str(value)}'
+        else:
+            return f'value={str(value)}'
+
     def config_item_to_html(key, value):
         value_type = python_type_to_html_type(type(value))
+        value = python_type_to_value(value)
 
         return f"""
-        <label for="{key}">{key}</label>
-        <input type="{value_type}" name="{key}" value="{value}">
+            <label for="{key}">{key}</label>
+            <input type="{value_type}" name="{key}" {value}>
         """
 
     @app.route("/config")

@@ -22,20 +22,18 @@ class AnalogClock(BaseApp):
 
         print("Pre-config Analog Clock")
 
-        self.config.setdefault('bg_color', gc9a01.WHITE)
-        self.config.setdefault('fg_color', gc9a01.BLACK)
-        self.config.setdefault('hours_hand_color', gc9a01.BLACK)
-        self.config.setdefault('minutes_hand_color', gc9a01.BLACK)
-        self.config.setdefault('seconds_hand_color', gc9a01.RED)
-        self.config.setdefault('radius', 110)
-        self.config.setdefault('redraw_method', FULL_REDRAW_FB)
+        self.config.add('bg_color', gc9a01.WHITE)
+        self.config.add('fg_color', gc9a01.BLACK)
+        self.config.add('hours_hand_color', gc9a01.BLACK)
+        self.config.add('minutes_hand_color', gc9a01.BLACK)
+        self.config.add('seconds_hand_color', gc9a01.RED)
+        self.config.add('use partial redraw', False)
+        radius = self.config.add('radius', 110)
+        use_frame_buffer = self.config.add('use frame buffer', True)
 
         print("Post-config Analog Clock")
 
-        radius = self.config['radius']
-
         self.last_second = 0
-        self.redraw_method = FULL_REDRAW_FB
 
         self.font = arial16px
 
@@ -53,10 +51,11 @@ class AnalogClock(BaseApp):
             framebuf.RGB565
         )
 
-        if self.redraw_method == FULL_REDRAW or self.redraw_method == PARTIAL_REDRAW:
-            self.draw_clock_face(self.config['bg_color'], self.config['fg_color'], radius)
-        elif self.redraw_method == FULL_REDRAW_FB or self.redraw_method == PARTIAL_REDRAW_FB:
+        if use_frame_buffer:
             self.draw_clock_face_fb(self.config['bg_color'], self.config['fg_color'], radius)
+        else:
+            self.draw_clock_face(self.config['bg_color'], self.config['fg_color'], radius)
+            
 
 
     def draw_clock_face_fb(self, bg_color: int, fg_color: int, radius: int):
@@ -171,17 +170,20 @@ class AnalogClock(BaseApp):
         bg_color = self.config['bg_color']
         fg_color = self.config['fg_color']
         radius = self.config['radius']
+        use_frame_buffer = self.config['use frame buffer']
+        use_partial_redraw = self.config['use partial redraw']
         
         # Get hours, minutes, and seconds from ms timestamp. Don't use datetime
         # because it's not accurate enough.
         year, month, day, weekday, hour, minute, second, ms = datetime
 
-        if self.redraw_method == FULL_REDRAW:
-            self.draw_clock_face(bg_color, fg_color, radius)
-        elif self.redraw_method == FULL_REDRAW_FB:
+        if use_frame_buffer:
             self.draw_clock_face_fb(bg_color, fg_color, radius)
+        elif not use_partial_redraw:
+            # Draw the whole face if not using the partial method
+            self.draw_clock_face(bg_color, fg_color, radius)
         else:
-            # erase previous hands, this could be better logic
+            # erase previous hands in the 'partial' implementation
             if second != self.last_second:
                 self.draw_hour_hand(hour, bg_color, radius)
                 self.draw_hour_hand(hour-1, bg_color, radius)
@@ -192,7 +194,7 @@ class AnalogClock(BaseApp):
         # it would be neat to make the hours angle fractional based on the minutes
         # but this would need to update the previous hand delete logic
         # TODO add partial FB redraw logic for faster drawing
-        if self.redraw_method == FULL_REDRAW_FB or self.redraw_method == PARTIAL_REDRAW_FB:
+        if use_frame_buffer:
             self.draw_hour_hand_fb(hour + (minute / 60), self.config['hours_hand_color'], radius)
             self.draw_minute_hand_fb(minute + (second / 60), self.config['minutes_hand_color'], radius)
 

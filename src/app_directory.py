@@ -63,7 +63,7 @@ class ModuleMetadata:
         self.filename = filename
         self.module_name = filename.replace(".py", "").replace(".pyc", "")
         self.checksum = checksum
-        self.apps = []
+        self.apps: list[AppMetadata] = []
 
     def __str__(self):
         return self.filename
@@ -211,6 +211,7 @@ class AppDirectory:
         return sum([len(module.apps) for module in self.modules.values()])
     
 
+    # Even though we will allow users to get the apps by name
     def __getitem__(self, key):
         for module in self.modules.values():
             for app in module.apps:
@@ -221,6 +222,8 @@ class AppDirectory:
 
 
     def __iter__(self):
+        # For consumers of the app directory, they don't care that we key
+        # based on the module, they just care to get the app names
         for module in self.modules.values():
             for app in module.apps:
                 yield app
