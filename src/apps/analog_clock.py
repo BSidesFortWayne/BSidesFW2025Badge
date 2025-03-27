@@ -6,6 +6,7 @@ from machine import RTC
 import framebuf
 
 import fonts.arial16px as arial16px
+from lib.smart_config import BoolDropdownConfig, EnumConfig, RangeConfig
 
 
 FULL_REDRAW = 0
@@ -22,14 +23,30 @@ class AnalogClock(BaseApp):
 
         print("Pre-config Analog Clock")
 
-        self.config.add('bg_color', gc9a01.WHITE)
-        self.config.add('fg_color', gc9a01.BLACK)
+        bg_range = self.config.add(
+            'bg_color', 
+            RangeConfig('BG Color', 0, 0xFFFF, gc9a01.WHITE),
+            force=True
+        )
+        fg_range = self.config.add(
+            'fg_color', 
+            RangeConfig('FG Color', 0, 0xFFFF, gc9a01.BLACK),
+            force=True
+        )
         self.config.add('hours_hand_color', gc9a01.BLACK)
         self.config.add('minutes_hand_color', gc9a01.BLACK)
         self.config.add('seconds_hand_color', gc9a01.RED)
-        self.config.add('use partial redraw', False)
+        self.config.add(
+            'draw method', 
+            EnumConfig('draw method', ['full redraw', 'partial redraw'], 'full redraw'),
+            force=True
+        )
         radius = self.config.add('radius', 110)
-        use_frame_buffer = self.config.add('use frame buffer', True)
+        use_frame_buffer = self.config.add(
+            'use frame buffer',
+            BoolDropdownConfig('use frame buffer', True),
+            force=True
+        ).value()
 
         print("Post-config Analog Clock")
 
@@ -52,9 +69,9 @@ class AnalogClock(BaseApp):
         )
 
         if use_frame_buffer:
-            self.draw_clock_face_fb(self.config['bg_color'], self.config['fg_color'], radius)
+            self.draw_clock_face_fb(bg_range.value(), fg_range.value(), radius)
         else:
-            self.draw_clock_face(self.config['bg_color'], self.config['fg_color'], radius)
+            self.draw_clock_face(bg_range.value(), fg_range.value(), radius)
             
 
 
@@ -167,11 +184,11 @@ class AnalogClock(BaseApp):
 
     async def update(self):
         datetime = self.rtc.datetime()
-        bg_color = self.config['bg_color']
-        fg_color = self.config['fg_color']
+        bg_color = self.config['bg_color'].value()
+        fg_color = self.config['fg_color'].value()
         radius = self.config['radius']
-        use_frame_buffer = self.config['use frame buffer']
-        use_partial_redraw = self.config['use partial redraw']
+        use_frame_buffer = self.config['use frame buffer'].value()
+        use_partial_redraw = self.config['draw method'].value() != 'full redraw'
         
         # Get hours, minutes, and seconds from ms timestamp. Don't use datetime
         # because it's not accurate enough.

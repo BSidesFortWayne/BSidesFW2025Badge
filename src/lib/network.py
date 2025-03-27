@@ -75,35 +75,6 @@ async def start_http_server(controller: Controller):
                 Microdot.abort(500)
         return json.dumps(controller.current_view.config)
 
-    def python_type_to_html_type(value_type):
-        if value_type is str:
-            return "text"
-        elif value_type is int:
-            return "number"
-        elif value_type is bool:
-            return "checkbox"
-        else:
-            return "text"
-
-    def python_type_to_value(value):
-        if isinstance(value, bool):
-            return "checked" if value else ""
-        elif isinstance(value, str):
-            return f'value={value}'
-        # elif isinstance(value, int):
-        #     return f'value={str(value)}'
-        else:
-            return f'value={str(value)}'
-
-    def config_item_to_html(key, value):
-        value_type = python_type_to_html_type(type(value))
-        value = python_type_to_value(value)
-
-        return f"""
-            <label for="{key}">{key}</label>
-            <input type="{value_type}" name="{key}" {value}>
-        """
-
     @app.route("/config")
     async def config_web(request: Request):
         if not controller.current_view:
@@ -113,7 +84,6 @@ async def start_http_server(controller: Controller):
 
         config = controller.current_view.config
         title = f"{controller.current_view.name} Config"
-        sorted_config_items = sorted(config.items(), key=lambda x: x[0])
         # Return basic html
         return f"""
         <html>
@@ -126,6 +96,10 @@ async def start_http_server(controller: Controller):
                     }}
                 </style>
                 <script>
+                    function updateCheckboxValue(checkbox) {{
+                        // Update the value attribute based on the checked state
+                        checkbox.value = checkbox.checked ? "true" : "false";
+                    }}
                     // an alternative to this would be the parse the form data on the microcontroller instead
                     function myFunction(form) {{
                         const formData = new FormData(form);
@@ -162,7 +136,7 @@ async def start_http_server(controller: Controller):
             <body>
                 <h1>{title}</h1>
                 <form onsubmit="event.preventDefault(); myFunction(this);">
-                    {"".join([config_item_to_html(k, v) for k, v in sorted_config_items])}
+                    {config.as_html()}
                     <input type="submit" value="Submit">
                 </form>
                 <div id="status"></div>

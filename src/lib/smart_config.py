@@ -1,22 +1,150 @@
 import json
 import os
 
+
+def python_type_to_html_type(value_type):
+    if value_type is str:
+        return "text"
+    elif value_type is int:
+        return "number"
+    elif value_type is bool:
+        return "checkbox"
+    else:
+        return "text"
+
+def config_item_to_html(key, value):
+    print(value, type(value))
+    if issubclass(type(value), SmartConfigValue):
+        # if the value is a SmartConfigValue object, call its to_html_input method
+        return value.to_html_input(key)
+    
+    value_type = python_type_to_html_type(type(value))
+
+    # if bool
+    if isinstance(value, bool):
+        return f"""
+            <label for="{key}">{key}</label>
+            <input type="{value_type}" name="{key}" {"checked" if value else ""} value={str(value).lower()} onchange="updateCheckboxValue(this)">
+        """
+
+    return f"""
+        <label for="{key}">{key}</label>
+        <input type="{value_type}" name="{key}" value={value}>
+    """
+
+
+
 class SmartConfigValue(dict):
     # abstract class
-    def to_html_input(self):
-        pass
-
+    def to_html_input(self, key: str) -> str:
+        return ""
+    
     def parse_value(self, value):
         pass
 
+
+    # TODO develop base "renderable" component for on screen editing of config values
+
+#     def to_json(self):
+#         return json.dumps(self)
+
+
+# class SmartConfigEncoder(json.JSONEncoder):
+#     def default(self, obj):
+#         """called by json.dumps to translate an object obj to
+#         a json serialisable data"""
+#         if isinstance(obj, SmartConfigValue):
+#             return obj.to_json()
+#         return json.JSONEncoder.default(self, obj)
+
+
+class RangeConfig(SmartConfigValue):
+    module_name = "RangeConfig"
+    def __init__(self, name: str, min: int, max: int, default = None):
+        super().__init__()
+        self['name'] = name
+        self['min'] = min
+        self['max'] = max
+        self['current'] = default if default and min <= default <= max else min
+        self['step'] = 1
+
+    def to_html_input(self, key) -> str:
+        return f"""
+            <label for="{self['name']}">{self['name']}</label>
+            <input type="range" name="{key}" min="{self['min']}" max="{self['max']}" step="{self['step']}" value="{self['current']}">
+        """
+
+    def value(self):
+        return self['current']
+    
+    def parse_value(self, value):
+        print("RangeConfig parse_value", value)
+        # Check if the value is a string and convert it to an int
+        if isinstance(value, str):
+            try:
+                value = int(value)
+            except ValueError:
+                raise ValueError(f"Invalid value for {self['name']}: {value}")
+
+        # Check if the value is within the range
+        if not (self['min'] <= value <= self['max']):
+            raise ValueError(f"Value {value} out of range for {self['name']}: {self['min']} - {self['max']}")
+
+        # Set the current value
+        self['current'] = value
+        return value
+    
+    def __str__(self):
+        return f"{self['name']}: {self['current']} ({self['min']}-{self['max']})"
+    
+    def __repr__(self):
+        return f"<RangeConfig {self['name']} ({self['min']}-{self['max']})>"
 
 
 class EnumConfig(SmartConfigValue):
     def __init__(self, name: str, options: list[str], default = None):
         super().__init__()
-        self.name = name
-        self.options = options
-        self.current = default if default and default in options else options[0]
+        self['name'] = name
+        self['options'] = options
+        self['current'] = default if default and default in options else options[0]
+    
+    def to_html_input(self, key) -> str:
+        options_html = "".join([f'<option value="{option}" {"selected" if option == self['current'] else ""}>{option}</option>' for option in self['options']])
+        return f"""
+            <label for="{self['name']}">{self['name']}</label>
+            <select name="{key}">
+                {options_html}
+            </select>
+        """
+    
+    def parse_value(self, value):
+        print("EnumConfig parse_value", value)
+        # Check if the value is a string and convert it to an int
+        if isinstance(value, str):
+            if value not in self['options']:
+                raise ValueError(f"Invalid value for {self['name']}: {value}")
+
+        # Set the current value
+        self['current'] = value
+        return value
+    
+    def value(self):
+        return self['current']
+    
+    def __str__(self):
+        return f"{self['name']}: {self['current']} ({', '.join(self['options'])})"
+    
+    def __repr__(self):
+        return f"<EnumConfig {self['name']} ({', '.join(self['options'])})>"
+
+
+class BoolDropdownConfig(EnumConfig):
+    def __init__(self, name: str, default = None):
+        super().__init__(name, ['True', 'False'], default)
+        self['current'] = 'True' if default else 'False'
+    
+    def value(self):
+        return self['current'] == 'True'
 
 
 class Config(dict):
@@ -55,13 +183,15 @@ class Config(dict):
             # Check the original value type and convert it if different
             existing_value_type = type(self[key])
             if isinstance(self[key], SmartConfigValue):
-                updates[key] = self[key].parse_value(value)
+                # TODO we might need to make a copy of this object to not update state until validated...
+                self[key].parse_value(value)
+                updates[key] = self[key]
             elif existing_value_type is type(value):
                 updates[key] = value
             elif existing_value_type is int and type(value) is str:
                 updates[key] = int(value)
             elif existing_value_type is bool:
-                updates[key] = value.lower() == "on"
+                updates[key] = value.lower() == "true"
             else:
                 raise ValueError(f"Type mismatch for {key}: {existing_value_type} != {type(value)}")
         
@@ -69,6 +199,10 @@ class Config(dict):
         super().update(updates)
 
         self.save()
+
+    def as_html(self):
+        sorted_config_items = sorted(self.items(), key=lambda x: x[0])
+        return "".join([config_item_to_html(k, v) for k, v in sorted_config_items])
 
     def load(self):
         try:
@@ -101,8 +235,3 @@ class Config(dict):
         super().__setitem__(key, value)
         self.save()
 
-
-if __name__ == "__main__":
-    config = EnumConfig("test", ["a", "b", "c"], "d")
-    print(config.name)
-    print(config.current)

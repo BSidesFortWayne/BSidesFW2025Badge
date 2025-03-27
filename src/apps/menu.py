@@ -34,7 +34,7 @@ class Menu(BaseApp):
         self.display_center_text = self.controller.bsp.displays.display_center_text
         self.display_text = self.controller.bsp.displays.display_text
 
-        self.menu_items = [str(app) for app in self.controller.app_directory]
+        self.menu_items = sorted([str(app) for app in self.controller.app_directory])
 
         self.title_display.fill(gc9a01.BLACK)
         self.app_selection.fill(gc9a01.BLACK)
