@@ -6,7 +6,7 @@ from machine import RTC
 import framebuf
 
 import fonts.arial16px as arial16px
-from lib.smart_config import BoolDropdownConfig, EnumConfig, RangeConfig
+from lib.smart_config import BoolDropdownConfig, ColorConfig, EnumConfig, RangeConfig
 
 
 FULL_REDRAW = 0
@@ -23,22 +23,21 @@ class AnalogClock(BaseApp):
 
         print("Pre-config Analog Clock")
 
-        bg_range = self.config.add(
-            'bg_color', 
-            RangeConfig('BG Color', 0, 0xFFFF, gc9a01.WHITE),
-            force=True
-        )
-        fg_range = self.config.add(
-            'fg_color', 
-            RangeConfig('FG Color', 0, 0xFFFF, gc9a01.BLACK),
-            force=True
-        )
-        self.config.add('hours_hand_color', gc9a01.BLACK)
-        self.config.add('minutes_hand_color', gc9a01.BLACK)
-        self.config.add('seconds_hand_color', gc9a01.RED)
+        bg_range = self.config.add('bg_color', ColorConfig('BG Color', gc9a01.WHITE), force=True)
+        fg_range = self.config.add('fg_color', ColorConfig('FG Color', gc9a01.BLACK), force=True)
+        self.config.add('hours_hand_color', ColorConfig('Hours Hand Color', gc9a01.BLACK), force=True)
+        self.config.add('minutes_hand_color', ColorConfig('Minutes Hand Color', gc9a01.BLACK), force=True)
+        self.config.add('seconds_hand_color', ColorConfig('Seconds Hand Color', gc9a01.RED), force=True)
         self.config.add(
             'draw method', 
-            EnumConfig('draw method', ['full redraw', 'partial redraw'], 'full redraw'),
+            EnumConfig(
+                'draw method', 
+                [
+                    'full redraw', 
+                    'partial redraw'
+                ],
+                'full redraw'
+            ),
             force=True
         )
         radius = self.config.add('radius', 110)
@@ -212,13 +211,13 @@ class AnalogClock(BaseApp):
         # but this would need to update the previous hand delete logic
         # TODO add partial FB redraw logic for faster drawing
         if use_frame_buffer:
-            self.draw_hour_hand_fb(hour + (minute / 60), self.config['hours_hand_color'], radius)
-            self.draw_minute_hand_fb(minute + (second / 60), self.config['minutes_hand_color'], radius)
+            self.draw_hour_hand_fb(hour + (minute / 60), self.config['hours_hand_color'].value(), radius)
+            self.draw_minute_hand_fb(minute + (second / 60), self.config['minutes_hand_color'].value(), radius)
 
             # draw seconds hand with fractional milliseconds
             # milliseconds vlaue can be 1-6 digits so that needds
             # to be accounte for as well
-            self.draw_second_hand_fb(second + (ms / 1_000_000), self.config['seconds_hand_color'], radius)
+            self.draw_second_hand_fb(second + (ms / 1_000_000), self.config['seconds_hand_color'].value(), radius)
             
             self.display1.blit_buffer(
                 self.mem_buf,
@@ -228,9 +227,9 @@ class AnalogClock(BaseApp):
                 240
             )
         else:
-            self.draw_hour_hand(hour, self.config['hours_hand_color'], radius)
-            self.draw_minute_hand(minute, self.config['minutes_hand_color'], radius)
-            self.draw_second_hand(second, self.config['seconds_hand_color'], radius)
+            self.draw_hour_hand(hour, self.config['hours_hand_color'].value(), radius)
+            self.draw_minute_hand(minute, self.config['minutes_hand_color'].value(), radius)
+            self.draw_second_hand(second, self.config['seconds_hand_color'].value(), radius)
 
         self.last_second = second
         

@@ -65,7 +65,7 @@ class RangeConfig(SmartConfigValue):
         self['name'] = name
         self['min'] = min
         self['max'] = max
-        self['current'] = default if default and min <= default <= max else min
+        self['current'] = default if default is not None and min <= default <= max else min
         self['step'] = 1
 
     def to_html_input(self, key) -> str:
@@ -99,6 +99,11 @@ class RangeConfig(SmartConfigValue):
     
     def __repr__(self):
         return f"<RangeConfig {self['name']} ({self['min']}-{self['max']})>"
+
+
+class ColorConfig(RangeConfig):
+    def __init__(self, name: str, default = None):
+        super().__init__(name, 0, 0xFFFF, default)
 
 
 class EnumConfig(SmartConfigValue):
