@@ -60,3 +60,6 @@ itself a dictionary for easy serialization and deserialization to a JSON config 
   normal ways in HTML forms so to avoid a larger payload to patch that behavior, we just use this instead for bools
   - `RangeConfig`: Allows you to specify a number value with a range that is then rendered as an HTML slider
   - `ColorConfig`: Inherits from `RangeConfig` and specifics the normal 565 color limits for the gc9a01 display
+
+- (Not Done) The Smart Config class will also be renderable as UI elements on the screens themeselves. The inputs
+should generally match what is available on the HTML config page (sliders, dropdowns, numeric entries, etc)

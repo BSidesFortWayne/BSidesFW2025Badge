@@ -45,6 +45,8 @@ class SmartConfigValue(dict):
 
     # TODO develop base "renderable" component for on screen editing of config values
 
+
+    # TODO deal with serializaton and deserialziation of smart config values...
 #     def to_json(self):
 #         return json.dumps(self)
 
