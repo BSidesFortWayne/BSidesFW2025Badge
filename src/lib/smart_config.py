@@ -60,13 +60,13 @@ class SmartConfigValue(dict):
 
 class RangeConfig(SmartConfigValue):
     module_name = "RangeConfig"
-    def __init__(self, name: str, min: int, max: int, default = None):
+    def __init__(self, name: str, min: int, max: int, default = None, step: int = 1):
         super().__init__()
         self['name'] = name
         self['min'] = min
         self['max'] = max
         self['current'] = default if default is not None and min <= default <= max else min
-        self['step'] = 1
+        self['step'] = step
 
     def to_html_input(self, key) -> str:
         return f"""
