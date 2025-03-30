@@ -6,7 +6,7 @@ import math
 from bsp import BSP
 from hardware_rev import HardwareRev
 
-bsp = BSP(hardware_version=HardwareRev.V2)
+bsp = BSP(hardware_version=HardwareRev.V3)
 
 fbuf_width = 240
 fbuf_height = 240
@@ -21,6 +21,8 @@ fbuf = framebuf.FrameBuffer(
     fbuf_height,
     framebuf.RGB565
 )
+
+mv = memoryview(mem_buf)
 
 
 frame_count = 0
@@ -44,9 +46,20 @@ start_time = 0
 
 leds = bsp.leds
 
-def rgb(r, g, b):
+def rgb(color: tuple):
+    r,g,b = color
     return (r & 0xF8) | ((g & 0xE0) >> 5) | ((g & 0x1C) << 11) | ((b & 0xF8) << 5)
 
+
+released_color = (255, 0, 0)
+pressed_color = (0, 255, 0)
+long_pressed_color = (0, 0, 255)
+
+state_to_color = {
+    "Released": released_color,
+    "Pressed": pressed_color,
+    "Long Pressed": long_pressed_color,
+}
 
 while True:
 
@@ -73,12 +86,7 @@ while True:
         # Draw button number as column header
         fbuf.text(str(i), x + 5, y, 0xFFFF)
 
-        if state == "Pressed":
-            leds.set_led_color(i, (0, 255, 0))
-        elif state == "Long Pressed":
-            leds.set_led_color(i, (255, 0, 0))
-        else:
-            leds.set_led_color(i, (0, 0, 255))
+        leds.set_led_color(i, state_to_color[state])
         
         # Draw first row as a circle and fill if "Long Pressed"\
         method = fbuf.fill_rect if state == "Long Pressed" else fbuf.rect
@@ -87,7 +95,7 @@ while True:
             y+y_increment, 
             indicator_width, 
             indicator_height, 
-            rgb(0, 255, 0)
+            rgb(long_pressed_color)
         )
 
         # Draw second row as a circle and fill if "Pressed" or "Long Pressed"
@@ -97,7 +105,7 @@ while True:
             y+y_increment*2, 
             indicator_width, 
             indicator_height, 
-            rgb(0, 0, 255)
+            rgb(pressed_color)
         )
 
         # Draw third row as a circle and fill if "Released"
@@ -107,7 +115,7 @@ while True:
             y+y_increment*3, 
             indicator_width, 
             indicator_height, 
-            rgb(255, 0, 0)
+            rgb(released_color)
         )
     
     if any_pressed:
@@ -126,7 +134,7 @@ while True:
     gen_end = time.ticks_ms()
     
     bsp.displays.display1.blit_buffer(
-        mem_buf,
+        mv,
         x,
         y,
         fbuf_width,

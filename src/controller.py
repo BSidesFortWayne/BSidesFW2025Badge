@@ -18,7 +18,7 @@ class Controller(object):
 
     def __init__(self):
         # some things that the views will need
-        self.bsp = BSP(HardwareRev.V2)
+        self.bsp = BSP(HardwareRev.V3)
 
         print("Callback handlers")
 

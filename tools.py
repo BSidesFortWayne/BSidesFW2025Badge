@@ -38,7 +38,7 @@ def program_device(
     firmware: str = "firmware_SPIRAM_8MiB.bin", 
     reinstall_base_image: bool = False,
     device: str = "/dev/ttyUSB0",
-    verbose: bool = False,
+    verbose: bool = True,
 ):
     # TODO I wonder if we can import esptool.py and mpremote directly as their python modules
     # Pros: we would get autocomplete and intellisense for running those tools
@@ -62,6 +62,22 @@ def program_device(
     time.sleep(2)
 
     os.system('mpremote reset')
+
+
+@app.command()
+def auto_programmer():
+    """
+    Automatically program the device with the latest firmware and code.
+
+    Look for new devices to be plugged in. Ideally if running on Linux should
+    already have permissions set for all reasonable devices. Should spin off 
+    programming scripts as separate asynchronous tasks that can be started and 
+    stopped, and cancelled if hanging.
+    - Master thread - cancels a task if hasn't responded soon enough. Also
+      responsible for drawing CLI that shows device connections and progress
+    - Device identifier thread
+
+    """
 
 @app.command()
 def generate_app_cache(app_directory="src/apps"):

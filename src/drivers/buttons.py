@@ -32,20 +32,19 @@ class Buttons():
             # https://www.reddit.com/r/esp32/comments/ia9bsa/esp32_micropython_pin_interrupts_for_both_rising/
             # self.gpio_buttons[index].irq(handler=self.button_released_handler, trigger=Pin.IRQ_RISING)
 
-        print(f"Registered {len(self.gpio_buttons)} buttons")
 
-        self.iox_button_map = [
-            1 << 10, # 0000 0100 0000 0000
-            1 << 9,  # 0000 0010 0000 0000
-            1 << 8,  # 0000 0001 0000 0000
-            1 << 1,  # 0000 0000 0000 0010
-            1 << 2,  # 0000 0000 0000 0100
-        ]
-        
+        if hardware_rev == HardwareRev.V3:
+            self.v3_init()
+        elif hardware_rev == HardwareRev.V2:
+            self.v2_init()
+
         total_buttons = len(self.gpio_buttons) + len(self.iox_button_map)
         self.last_press_times: list[int] = [0 for _ in range(total_buttons)]
         self.last_release_times: list[int] = [0 for _ in range(total_buttons)]
         self.last_long_press_time: list[int] = [0 for _ in range(total_buttons)]
+
+
+        print(f"Registered {len(self.gpio_buttons)} buttons")
 
         # V1 hardware uses all GPIO buttons
         if hardware_rev == HardwareRev.V2:
@@ -53,9 +52,28 @@ class Buttons():
             timer.init(mode=Timer.PERIODIC, period=50, callback=self.poll_buttons)
 
         elif hardware_rev == HardwareRev.V3:
-            # TODO add interrupt handler for pca9535
-            pass
+            # TODO add interrupt handler for pca9535 for v3
+            timer = Timer(3)
+            timer.init(mode=Timer.PERIODIC, period=50, callback=self.poll_buttons)
 
+    def v2_init(self):
+        self.iox_button_map = [
+            1 << 10, # 0000 0100 0000 0000
+            1 << 9,  # 0000 0010 0000 0000
+            1 << 8,  # 0000 0001 0000 0000
+            1 << 1,  # 0000 0000 0000 0010
+            1 << 2,  # 0000 0000 0000 0100
+        ]
+
+    def v3_init(self):
+        self.iox_button_map = [
+            1 << 10, # 0000 0100 0000 0000
+            1 << 9,  # 0000 0010 0000 0000
+            1 << 8,  # 0000 0001 0000 0000
+            1 << 0,  # 0000 0000 0000 0001 // V3 only
+            1 << 1,  # 0000 0000 0000 0010
+            1 << 2,  # 0000 0000 0000 0100
+        ]
 
     def reset_button_long_press(self, button: int):
         long_pressed = bool(self.last_long_press_time[button])

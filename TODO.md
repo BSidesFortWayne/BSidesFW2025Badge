@@ -22,7 +22,6 @@
   - [x] App Directory
     - [x] Clean up app directory
   - [ ] Base App
-    - [ ] 
   - [ ] Controller
     - [ ] Add error screen/error logging to app loading
   - [ ] UI

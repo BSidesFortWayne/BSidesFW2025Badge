@@ -40,7 +40,9 @@ class AnalogClock(BaseApp):
             ),
             force=True
         )
+        
         radius = self.config.add('radius', 110)
+
         use_frame_buffer = self.config.add(
             'use frame buffer',
             BoolDropdownConfig('use frame buffer', True),
@@ -183,9 +185,9 @@ class AnalogClock(BaseApp):
 
     async def update(self):
         datetime = self.rtc.datetime()
+        radius = self.config['radius']
         bg_color = self.config['bg_color'].value()
         fg_color = self.config['fg_color'].value()
-        radius = self.config['radius']
         use_frame_buffer = self.config['use frame buffer'].value()
         use_partial_redraw = self.config['draw method'].value() != 'full redraw'
         
