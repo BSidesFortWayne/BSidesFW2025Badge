@@ -35,7 +35,7 @@ TODO add steps
 
 - Start up badge
 - Put into AP mode
-- Open page to add app /add_app.html
+- Open page to add app /apps
   - Text editor to paste code
   - Download examples
 

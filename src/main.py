@@ -2,7 +2,7 @@ import time
 import gc
 
 from controller import Controller
-from lib.network import start_http_server
+from lib.http_server import start_http_server
 
 gc.enable()
 gc.collect()
@@ -11,6 +11,9 @@ gc.collect()
 async def main():
     controller = Controller()
 
+    # TODO conditionally start based on 
+    # - Network is started
+    # - User has setup configuration to auto-run HTTP server
     asyncio.create_task(start_http_server(controller))
 
     total_times = 0
