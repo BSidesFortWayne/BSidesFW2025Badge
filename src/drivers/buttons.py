@@ -3,26 +3,18 @@ from machine import Pin, Timer
 import time 
 from drivers.pca9535 import PCA9535
 
-
 LONG_CLICK_DURATION_MS = 1000
 def no_callback(button: int):
     print(f'Button {button} pressed')
 
-class Buttons():
-    gpio_button_pins: list[int]
-    gpio_buttons: list[Pin]
-    last_press_times: list[int]
-    last_release_times: list[int]
-    last_long_press_time: list[int]
-    button_state: int
-    debounce_time: int
 
+class Buttons():
     def __init__(self, hardware_rev, iox: PCA9535):
         if hardware_rev == HardwareRev.V1:
-            self.gpio_button_pins = [0, 33, 35, 34]
+            self.gpio_button_pins: list[int] = [0, 33, 35, 34]
         else:
-            self.gpio_button_pins = [0]
-        self.gpio_buttons = []
+            self.gpio_button_pins: list[int] = [0]
+        self.gpio_buttons: list[Pin] = []
         self.debounce_time = 50
         self.button_pressed_callbacks = []
 
@@ -40,33 +32,57 @@ class Buttons():
             # https://www.reddit.com/r/esp32/comments/ia9bsa/esp32_micropython_pin_interrupts_for_both_rising/
             # self.gpio_buttons[index].irq(handler=self.button_released_handler, trigger=Pin.IRQ_RISING)
 
+
+        if hardware_rev == HardwareRev.V3:
+            self.v3_init()
+        elif hardware_rev == HardwareRev.V2:
+            self.v2_init()
+
+        total_buttons = len(self.gpio_buttons) + len(self.iox_button_map)
+        self.last_press_times: list[int] = [0 for _ in range(total_buttons)]
+        self.last_release_times: list[int] = [0 for _ in range(total_buttons)]
+        self.last_long_press_time: list[int] = [0 for _ in range(total_buttons)]
+
+
         print(f"Registered {len(self.gpio_buttons)} buttons")
 
         # V1 hardware uses all GPIO buttons
         if hardware_rev == HardwareRev.V2:
             timer = Timer(3)
             timer.init(mode=Timer.PERIODIC, period=50, callback=self.poll_buttons)
-            self.iox_button_map = [
-                1 << 10, # 0000 0100 0000 0000
-                1 << 9,  # 0000 0010 0000 0000
-                1 << 8,  # 0000 0001 0000 0000
-                1 << 1,  # 0000 0000 0000 0010
-                1 << 2,  # 0000 0000 0000 0100
-            ]
 
         elif hardware_rev == HardwareRev.V3:
-            # TODO add interrupt handler for pca9535
-            pass
-            
-        
-        total_buttons = len(self.gpio_buttons) + len(self.iox_button_map)
-        self.last_press_times = [0 for _ in range(total_buttons)]
-        self.last_release_times = [0 for _ in range(total_buttons)]
-        self.last_long_press_time = [0 for _ in range(total_buttons)]
+            # TODO add interrupt handler for pca9535 for v3
+            timer = Timer(3)
+            timer.init(mode=Timer.PERIODIC, period=50, callback=self.poll_buttons)
 
+    def v2_init(self):
+        self.iox_button_map = [
+            1 << 10, # 0000 0100 0000 0000
+            1 << 9,  # 0000 0010 0000 0000
+            1 << 8,  # 0000 0001 0000 0000
+            1 << 1,  # 0000 0000 0000 0010
+            1 << 2,  # 0000 0000 0000 0100
+        ]
+
+    def v3_init(self):
+        self.iox_button_map = [
+            1 << 10, # 0000 0100 0000 0000
+            1 << 9,  # 0000 0010 0000 0000
+            1 << 8,  # 0000 0001 0000 0000
+            1 << 0,  # 0000 0000 0000 0001 // V3 only
+            1 << 1,  # 0000 0000 0000 0010
+            1 << 2,  # 0000 0000 0000 0100
+        ]
 
     def reset_button_long_press(self, button: int):
-        print(f"Resetting long press for button {button}")
+        long_pressed = bool(self.last_long_press_time[button])
+        if long_pressed:
+            print(f"Button {button} was long pressed, resetting")
+            self.last_long_press_time[button] = 0
+        else:
+            # TODO If this button wasn't long pressed, send a "clicked" event?
+            pass
         self.last_press_times[button] = 0
         self.last_long_press_time[button] = 0
 
@@ -76,12 +92,8 @@ class Buttons():
         inputs = self.iox.read_all_pca9535_inputs()
         self.iox_button_handler(inputs)
 
-        now = time.ticks_ms() 
+        now = time.ticks_ms()
         for button_index,button_pressed in enumerate(self.last_press_times):
-            # We don't support long press for the GPIO buttons
-            if button_index == 0:
-                continue
-
             # if the button doesn't have a last_press_time, then it isn't pressed
             # and we won't worry about this
             if not button_pressed:
@@ -104,7 +116,7 @@ class Buttons():
     def iox_button_handler(self, inputs):
         pins_changed = inputs ^ self.last_iox_state
         if pins_changed:
-            # TODO probably not super performance using the keys() method...
+            # TODO probably not super performant using the keys() method...
             for button_index,button_mask in enumerate(self.iox_button_map):
                 button_index += len(self.gpio_buttons)
                 if not pins_changed & button_mask:
@@ -125,16 +137,21 @@ class Buttons():
                     # print(f"You held the button down for {press_duration} ms")
                     self.button_debounce_processor(button_index, self.last_release_times, self.button_released_callbacks)
             self.last_iox_state = inputs
+    
+        # Check if the GPIO button went high
+        for button_index, button in enumerate(self.gpio_buttons):
+            button_state = button.value()
+            if self.last_press_times[button_index] and button_state:
+                # Button is pressed
+                self.button_debounce_processor(button_index, self.last_release_times, self.button_released_callbacks)
 
 
     def irq_rising(self, pin):
-        print(f"Button released {pin}")
         button_index = self.gpio_buttons.index(pin)
         self.button_debounce_processor(button_index, self.last_release_times, self.button_released_callbacks)
 
 
     def irq_falling(self, pin):
-        print(f"Button pressed {pin}")
         button_index = self.gpio_buttons.index(pin)
         self.button_debounce_processor(button_index, self.last_press_times, self.button_pressed_callbacks)
 
@@ -148,3 +165,21 @@ class Buttons():
         [callback(button) for callback in callbacks]
         times[button_index] = time_now
 
+    def __len__(self):
+        return len(self.gpio_buttons) + len(self.iox_button_map)
+
+    def __getitem__(self, index):
+        # if button long pressed, return long pressed
+        if self.last_long_press_time[index]:
+            return "Long Pressed"
+        if self.last_press_times[index]:
+            return "Pressed"
+        
+        return "Released"
+    
+    def __iter__(self):
+        for index in range(len(self)):
+            yield self[index]
+
+    def __str__(self):
+        return f"Buttons: {self.gpio_buttons}, {self.iox_button_map}"

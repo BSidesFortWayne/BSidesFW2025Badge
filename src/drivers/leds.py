@@ -7,7 +7,9 @@ NUM_LEDS = 7
 FORWARD = 1
 BACKWARD = -1
 
-def scale_color(color, scale):
+LED_COLOR = tuple
+
+def scale_color(color: LED_COLOR, scale: float) -> LED_COLOR:
     """Scale the color values by the given scale factor."""
     return tuple(int(c * scale) for c in color)
 
@@ -53,34 +55,38 @@ class LEDs:
         # for the VX board that will hopefully resolve the issue, and the timings could be 
         # set back to the default.
         DEFAULT_TIMINGS = (400, 850, 800, 450)  # noqa: F841
-        CUSTOM_TIMINGS = (400, 1500, 1500, 450)
+        CUSTOM_TIMINGS = (400, 5000, 5000, 450)
         
         # Create a NeoPixel object
         self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=CUSTOM_TIMINGS)
 
-    def set_led_color(self, led_index, color):
+
+    def set_led_color(self, led_index: int, color: LED_COLOR):
         """Turn on the LED at the given index with the specified color."""
         self.leds[led_index] = scale_color(color, self.max_brightness)
         self.leds.write()
     
+
     def turn_off_all(self):
         for led_num in range(NUM_LEDS):
             self.leds[led_num] = (0, 0, 0)
         
         self.leds.write()
 
+
     def turn_on_led(self, led_index):
         self.leds[led_index] = (0xFF, 0xFF, 0xFF)
         self.leds.write()
 
-    def turn_off_led(self, led_index):
+
+    def turn_off_led(self, led_index: int):
         """Turn off the LED at the given index."""
         self.set_led_color(led_index, (0, 0, 0))
 
     IN = 1
     OUT = -1
     FADE_DELAY_MS = 1
-    def fade_led(self, led_index, color, in_or_out=1):
+    def fade_led(self, led_index, color: LED_COLOR, in_or_out=1):
         """Fade in the LED at the given index with the specified color."""
         for i in range(0, 256):
             if in_or_out == self.IN:
@@ -90,7 +96,7 @@ class LEDs:
             time.sleep_ms(self.FADE_DELAY_MS)
 
 
-    def cross_fade(self, led1, led2, color1, color2):
+    def cross_fade(self, led1, led2, color1: LED_COLOR, color2: LED_COLOR):
         """Cross fade between two LEDs with the specified colors."""
         for i in range(0, 256):
             self.set_led_color(led1, scale_color(color1, 1 - i / 255))

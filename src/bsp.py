@@ -11,6 +11,8 @@ class BSP:
     def __init__(self, hardware_version: str):
         print("Initializing BSP")
         print("I2C")
+        # Initialize I2C on an ESP32 
+
         self.i2c = I2C(1, scl=Pin(22), sda=Pin(21), freq=400_000)
         print("LEDs")
         self.leds = LEDs()

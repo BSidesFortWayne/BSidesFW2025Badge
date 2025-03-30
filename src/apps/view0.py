@@ -79,6 +79,3 @@ class App(BaseApp):
         # view_mapping = [1, 6, 5, 4]
         # if button in view_mapping:
         self.controller.switch_view(button)
-
-
-print("Badge loaded")

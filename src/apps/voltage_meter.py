@@ -60,5 +60,5 @@ class VoltageMeter(BaseApp):
             gc9a01.BLACK
         )
 
-    def update(self):
+    async def update(self):
         self.draw_voltage_meter()

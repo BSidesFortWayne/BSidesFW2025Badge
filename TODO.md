@@ -1,12 +1,29 @@
 # To Do List
 
+- Hardware
+  - Drivers
+    - [x] Audio
+    - [x] Buttons
+    - [x] Displays
+    - [x] LEDs
+    - [x] LIS3DH
+    - [x] PCA9535
+- UI
+  - [ ] Base display tools to abstract framebuf usage
+  - 
+- 
+
 - Design artifacts
-  - [ ] User flows
+  - [x] User flows/User types
   - [ ] Initial programming flowchart
   - [ ] Software startup routines
+  - [ ] Smart Config Architecture
 - Software
-  - [ ] App Directory
-    - [ ] Clean+ up app directory
+  - [x] App Directory
+    - [x] Clean up app directory
+  - [ ] Base App
+  - [ ] Controller
+    - [ ] Add error screen/error logging to app loading
   - [ ] UI
     - [ ] Make loading/pop up screen design for any views to use
     - [ ] Normalize rendering around async?
@@ -77,6 +94,8 @@
     - [ ] Rotate
     - [ ] Zoom
     - [ ] Skew?
+    - [ ] Grayscale/B&W
+    - [ ] Color invert
   - [ ] Image Slideshow
     - [ ] Scroll through selected images
   - [ ] Vendor sign off app
