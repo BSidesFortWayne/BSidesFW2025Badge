@@ -1,9 +1,25 @@
 # To Do List
 
+- Hardware
+  - BSP / Drivers
+    - [ ] 
+    - [ ] 
+    - [ ] 
+    - [ ] 
+    - [ ] 
+    - [ ] 
+    - [ ] 
+    - [ ] 
+    - [ ] 
+  - Hardware Middleware
+- UI
+- 
+
 - Design artifacts
   - [ ] User flows
   - [ ] Initial programming flowchart
   - [ ] Software startup routines
+  - [ ] Smart Config Architecture
 - Software
   - [x] App Directory
     - [x] Clean up app directory

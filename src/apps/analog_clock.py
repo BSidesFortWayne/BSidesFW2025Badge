@@ -6,7 +6,7 @@ from machine import RTC
 import framebuf
 
 import fonts.arial16px as arial16px
-from lib.smart_config import BoolDropdownConfig, ColorConfig, EnumConfig, RangeConfig
+from lib.smart_config import BoolDropdownConfig, ColorConfig, EnumConfig
 
 
 FULL_REDRAW = 0

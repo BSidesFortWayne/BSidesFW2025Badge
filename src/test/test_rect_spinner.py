@@ -79,47 +79,37 @@ def fade_color(percent: float, color: int):
 def draw_rect(x, y, color):
     fbuf.fill_rect(x, y, width, height, color)
 
-time_start = time.ticks_ms()
 c.bsp.displays.display1.fill(gc9a01.BLACK)
+
+def rgb_to_565(r, g, b):
+    return (r & 0xF8) | ((g & 0xE0) >> 5) | ((g & 0x1C) << 11) | ((b & 0xF8) << 5)
+
+def _565_to_rgb(color565):
+    r = (color565 & 0xF800) >> 11
+    g = (color565 & 0x07E0) >> 5
+    b = color565 & 0x001F
+
+    r = (r << 3) | (r >> 2)
+    g = (g << 2) | (g >> 4)
+    b = (b << 3) | (b >> 2)
+
+    return r, g, b
 
 # Take two 565 colors and interpolate
 def smooth_interpolate_color(color1: int, color2: int, step: int):
-# void rgb(int rgbA, int rgbB) {
-#     int ra = (rgbA&0xf800)>>11;
-#     int ga = (rgbA&0x7e0)>>5;
-#     int ba = rgbA&0x1f;
-#     int rb = (rgbB&0xf800)>>11;
-#     int gb = (rgbB&0x7e0)>>5;
-#     int bb = rgbB&0x1f;
+    r1, g1, b1 = _565_to_rgb(color1)
+    r2, g2, b2 = _565_to_rgb(color2)
 
-#     for (int i=0; i<16; i++) {
-#         int r = (ra*(15-i) + rb*i + 7)/15; // + 7 is there to apply rounding
-#         int g = (ga*(15-i) + gb*i + 7)/15;
-#         int b = (ba*(15-i) + bb*i + 7)/15;
+    r = int(r1 + (r2 - r1) * step / 511)
+    g = int(g1 + (g2 - g1) * step / 511)
+    b = int(b1 + (b2 - b1) * step / 511)
 
-#         int result = r<<11|g<<5|b;
-
-#         printf("%04x\n", result);
-#     }
-# }
-    ra = (color1 & 0xF800) >> 11
-    ga = (color1 & 0x07E0) >> 5
-    ba = color1 & 0x001F
-
-    rb = (color2 & 0xF800) >> 11
-    gb = (color2 & 0x07E0) >> 5
-    bb = color2 & 0x001F
-
-    r = (ra * (255 - step) + rb * step + 7) // 255
-    g = (ga * (255 - step) + gb * step + 7) // 255
-    b = (ba * (255 - step) + bb * step + 7) // 255
-
-    return (r << 11) | (g << 5) | b
+    return rgb_to_565(r, g, b)
 
 print(x, y, width, height, padding, display_center_x, display_center_y, fbuf_width, fbuf_height)
 fade_square = 0
 start_fade_ticks = time.ticks_ms()
-fade_duration = 10000
+fade_duration = 1000
 square_colors = [
     gc9a01.RED,
     gc9a01.GREEN,
@@ -129,6 +119,7 @@ square_colors = [
 
 start_color = square_colors[fade_square]
 square_on = True
+time_start = time.ticks_ms()
 while True:
     fbuf.fill(gc9a01.BLACK)
 
