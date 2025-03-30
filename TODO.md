@@ -1,18 +1,16 @@
 # To Do List
 
 - Hardware
-  - BSP / Drivers
-    - [ ] 
-    - [ ] 
-    - [ ] 
-    - [ ] 
-    - [ ] 
-    - [ ] 
-    - [ ] 
-    - [ ] 
-    - [ ] 
-  - Hardware Middleware
+  - Drivers
+    - [x] Audio
+    - [x] Buttons
+    - [x] Displays
+    - [x] LEDs
+    - [x] LIS3DH
+    - [x] PCA9535
 - UI
+  - [ ] Base display tools to abstract framebuf usage
+  - 
 - 
 
 - Design artifacts

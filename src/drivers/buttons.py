@@ -3,7 +3,7 @@ from machine import Pin, Timer
 import time 
 from drivers.pca9535 import PCA9535
 
-LONG_CLICK_DURATION_MS = 2000
+LONG_CLICK_DURATION_MS = 1000
 def no_callback(button: int):
     print(f'Button {button} pressed')
 
