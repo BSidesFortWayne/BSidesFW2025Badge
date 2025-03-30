@@ -14,7 +14,7 @@
 - 
 
 - Design artifacts
-  - [ ] User flows
+  - [x] User flows/User types
   - [ ] Initial programming flowchart
   - [ ] Software startup routines
   - [ ] Smart Config Architecture

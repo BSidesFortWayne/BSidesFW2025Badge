@@ -73,7 +73,7 @@ def generate_app_cache(app_directory="src/apps"):
 
     
 @app.command()
-def deploy_all_to_device(files: list[str] = []):
+def deploy_app_to_device(files: list[str] = []):
     # Use mpremote to sync src/ folder to the device root
     # Execute this shell command
     # mpremote cp src/* :
@@ -81,7 +81,7 @@ def deploy_all_to_device(files: list[str] = []):
     print("Syncing files to device")
     print(files)
 
-    os.system("mpremote cp src/* :")
+    os.system("mpremote cp -r src/* :")
 
 
 def program_name(
