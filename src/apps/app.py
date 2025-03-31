@@ -1,10 +1,11 @@
+from bsp import BSPHolder
 from lib.smart_config import Config
 
 class BaseApp:
     name = "no_name"
     version = "0.0.1"
     module = "no_module"
-    def __init__(self, controller):
+    def __init__(self, controller: BSPHolder):
         super().__init__()
         print(self.name)
         self.controller = controller

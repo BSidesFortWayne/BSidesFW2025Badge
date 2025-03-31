@@ -3,22 +3,26 @@ import random
 
 from app_directory import AppDirectory, AppMetadata
 import apps.app
-from bsp import BSP
+from bsp import BSP, BSPHolder
 from hardware_rev import HardwareRev
 
-class Controller(object):
+class Controller(BSPHolder):
     # This is a singleton pattern which gives us a single instance of the 
     # controller object. This is useful for global state 
     def __new__(cls):
         """ creates a singleton object, if it is not created, 
         or else returns the previous singleton object"""
+
+        print("New")
+        
         if not hasattr(cls, 'instance'):
             cls.instance = super(Controller, cls).__new__(cls)
         return cls.instance
 
     def __init__(self):
+        print("Controller init")
         # some things that the views will need
-        self.bsp = BSP(HardwareRev.V3)
+        self._bsp = BSP(HardwareRev.V3)
 
         print("Callback handlers")
 
