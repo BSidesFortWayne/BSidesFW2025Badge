@@ -2,7 +2,7 @@ import time
 import gc
 
 from controller import Controller
-from lib.http_server import start_http_server
+from web.http_server import start_http_server
 
 gc.enable()
 gc.collect()

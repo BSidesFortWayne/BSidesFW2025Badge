@@ -14,3 +14,8 @@ dependencies = [
     "rshell>=0.0.36",
     "typer>=0.15.2",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
