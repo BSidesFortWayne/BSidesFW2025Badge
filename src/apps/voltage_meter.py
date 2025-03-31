@@ -44,7 +44,7 @@ class VoltageMeter(BaseApp):
         
         self.display1.write(
             self.font,
-            f'{self.raw_average.average()}mv',
+            f'{self.raw_average.average()} counts',
             10,
             100,
             gc9a01.WHITE,
@@ -53,7 +53,7 @@ class VoltageMeter(BaseApp):
 
         self.display1.write(
             self.font,
-            f'{self.mv_average.average()}mv',
+            f'{self.mv_average.average()} mv',
             10,
             140,
             gc9a01.WHITE,

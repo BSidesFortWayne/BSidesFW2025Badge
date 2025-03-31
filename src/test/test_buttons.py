@@ -1,7 +1,5 @@
 import framebuf
-import gc9a01
 import time
-import math
 
 from bsp import BSP
 from hardware_rev import HardwareRev
@@ -23,7 +21,6 @@ fbuf = framebuf.FrameBuffer(
 )
 
 mv = memoryview(mem_buf)
-
 
 frame_count = 0
 time_start = time.ticks_ms()
