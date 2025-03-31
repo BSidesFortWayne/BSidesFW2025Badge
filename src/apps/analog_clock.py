@@ -59,8 +59,6 @@ class AnalogClock(BaseApp):
 
         self.rtc = RTC()
 
-        self.rtc.datetime((2025, 3, 8, 6, 9, 18, 50, 0))
-
         self.mem_buf = bytearray(240*240*3)
         self.fbuf = framebuf.FrameBuffer(
             self.mem_buf, 

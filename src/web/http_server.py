@@ -1,52 +1,121 @@
-import socket
-import asyncio
+from controller import Controller
+from lib.microdot.microdot import Microdot, Request, Response
 
-html = """<!DOCTYPE html>
-<html>
-    <head>
-        <title>Hello World Title</title>
-    </head>
-    <body>
-        <h1>Hello World H1</h1>
-    </body>
-</html>
-"""
 
-class HTTPServer:
-    port: int
-    addr: str
-    running: bool
-    s: socket.socket
+async def start_http_server(controller: Controller):
+    print("Starting HTTP Server")
+    import json
 
-    def __init__(self, addr='0.0.0.0', port=80):
-        self.addr = addr
-        self.port = port
-        self.s = socket.socket()
-        self.running = False
+    app = Microdot()
+    app.debug = True
 
-    def start(self):
-        self.running = True
-        asyncio.create_task(self.run())
+    Response.default_content_type = "text/html"
 
-    def stop(self):
-        self.running = False
+    @app.route("/_config", methods=["GET", "POST"])
+    async def config_json(request: Request):
+        if not controller.current_view:
+            Microdot.abort(404)
+            # This doesn't actually return anything, we're just returning to make the linter happy
+            return
 
-    async def run(self):
-        self.s.bind(socket.getaddrinfo(self.addr, self.port)[0][-1])
-        self.s.listen(1)
-        print('listening on', self.addr)
-        while self.running:
-            cl, addr = self.s.accept()
-            print('client connected from', addr)
-            cl_file = cl.makefile('rwb', 0)
-            while True:
-                line = cl_file.readline()
-                if not line or line == b'\r\n':
-                    break
-            cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n') # type: ignore TODO why doesn't this type work?
-            cl.send(html) # type: ignore TODO why doesn't this type work?
-            cl.close()
-        
-        self.s.close()
+        config = controller.current_view.config
+        if request.method == "POST":
+            # TODO validate the value
+            try:
+                print(request.body)
+                print(request.json)
+                config.update(request.json) # type: ignore
+                # redirect back to /config for web users
+                Response.redirect("/config")
+            except Exception as ex:
+                print(ex)
+                Microdot.abort(500)
+        return json.dumps(controller.current_view.config)
 
-    
+    # TODO do we need this endpoint? Maybe not?
+    @app.route("/_config/<key>", methods=["GET", "POST"])
+    async def get_key(request: Request, key: str):
+        if not controller.current_view:
+            Microdot.abort(404)
+            # This doesn't actually return anything, we're just returning to make the linter happy
+            return
+
+        if request.method == "POST":
+            try:
+                config = controller.current_view.config
+                config.update({key: request.json}) 
+            except Exception as ex:
+                print(ex)
+                Microdot.abort(500)
+        return json.dumps(controller.current_view.config)
+
+    @app.route("/config")
+    async def config_web(request: Request):
+        if not controller.current_view:
+            Microdot.abort(404)
+            # This doesn't actually return anything, we're just returning to make the linter happy
+            return
+
+        config = controller.current_view.config
+        title = f"{controller.current_view.name} Config"
+        # Return basic html
+        return f"""
+        <html>
+            <head>
+                <title>{title}</title>
+                <style>
+                    form label, form input {{
+                        display: block;
+                        margin-bottom: 10px;
+                    }}
+                </style>
+                <script>
+                    function updateCheckboxValue(checkbox) {{
+                        // Update the value attribute based on the checked state
+                        checkbox.value = checkbox.checked ? "true" : "false";
+                    }}
+                    // an alternative to this would be the parse the form data on the microcontroller instead
+                    function myFunction(form) {{
+                        const formData = new FormData(form);
+                        console.log(formData);
+                        var object = {{}};
+                        formData.forEach((value, key) => object[key] = value);
+                        var json = JSON.stringify(object);
+                        
+                        // Send the JSON to the server
+                        fetch('/_config', {{
+                            method: 'POST',
+                            headers: {{
+                                'Content-Type': 'application/json'
+                            }},
+                            body: json
+                        }})
+                        .then(response => {{
+                            if (response.ok) {{
+                                // draw on an element with text that shows the update time
+                                var status = document.getElementById("status");
+                                status.innerText = "Config updated at " + new Date().toLocaleTimeString();
+                            }} else {{
+                                var status = document.getElementById("status");
+                                status.innerText = "Error updating config";
+                            }}
+                        }})
+                        .catch(error => {{
+                            console.error("Error submitting config:", error);
+                            alert("An error occurred.");
+                        }});
+                    }}
+                </script>
+            </head>
+            <body>
+                <h1>{title}</h1>
+                <form onsubmit="event.preventDefault(); myFunction(this);">
+                    {config.as_html()}
+                    <input type="submit" value="Submit">
+                </form>
+                <div id="status"></div>
+            </body>
+        </html>
+        """
+
+    app.run(port=80)

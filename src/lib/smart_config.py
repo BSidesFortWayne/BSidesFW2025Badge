@@ -35,12 +35,23 @@ def config_item_to_html(key, value):
 
 
 class SmartConfigValue(dict):
+    def __init__(self):
+        super().__init__()
+        self['type'] = self.__class__.__name__
+
     # abstract class
     def to_html_input(self, key: str) -> str:
         return ""
     
     def parse_value(self, value):
         pass
+    
+    def to_dict(self):
+        """
+        Convert the object to a dictionary representation.
+        This is used for serialization.
+        """
+        return {key: value for key, value in self.items() if not key.startswith('_')}
 
 
     # TODO develop base "renderable" component for on screen editing of config values
@@ -61,13 +72,19 @@ class SmartConfigValue(dict):
 
 
 class RangeConfig(SmartConfigValue):
-    module_name = "RangeConfig"
-    def __init__(self, name: str, min: int, max: int, default = None, step: int = 1):
+    def __init__(
+            self, 
+            name: str, 
+            min: int, 
+            max: int, 
+            current = None, 
+            step: int = 1
+    ):
         super().__init__()
         self['name'] = name
         self['min'] = min
         self['max'] = max
-        self['current'] = default if default is not None and min <= default <= max else min
+        self['current'] = current if current is not None and min <= current <= max else min
         self['step'] = step
 
     def to_html_input(self, key) -> str:
@@ -104,16 +121,16 @@ class RangeConfig(SmartConfigValue):
 
 
 class ColorConfig(RangeConfig):
-    def __init__(self, name: str, default = None):
-        super().__init__(name, 0, 0xFFFF, default)
+    def __init__(self, name: str, current = None):
+        super().__init__(name, 0, 0xFFFF, current)
 
 
 class EnumConfig(SmartConfigValue):
-    def __init__(self, name: str, options: list[str], default = None):
+    def __init__(self, name: str, options: list[str], current = None):
         super().__init__()
         self['name'] = name
         self['options'] = options
-        self['current'] = default if default and default in options else options[0]
+        self['current'] = current if current and current in options else options[0]
     
     def to_html_input(self, key) -> str:
         options_html = "".join([f'<option value="{option}" {"selected" if option == self['current'] else ""}>{option}</option>' for option in self['options']])
@@ -140,15 +157,12 @@ class EnumConfig(SmartConfigValue):
     
     def __str__(self):
         return f"{self['name']}: {self['current']} ({', '.join(self['options'])})"
-    
-    def __repr__(self):
-        return f"<EnumConfig {self['name']} ({', '.join(self['options'])})>"
 
 
 class BoolDropdownConfig(EnumConfig):
-    def __init__(self, name: str, default = None):
-        super().__init__(name, ['True', 'False'], default)
-        self['current'] = 'True' if default else 'False'
+    def __init__(self, name: str, current = None, **kwargs):
+        super().__init__(name, ['True', 'False'], current)
+        self['current'] = 'True' if str(current).lower() == 'true' else 'False'
     
     def value(self):
         return self['current'] == 'True'
@@ -172,6 +186,7 @@ class Config(dict):
         :return: None
         """
         print(f"Adding {key} to config")
+        
         if force:
             self[key] = value
             return value
@@ -216,7 +231,26 @@ class Config(dict):
             with open(self.filename, "r") as f:
                 # TODO custom transformer for smart config...
                 data = json.load(f)
-                self.update(data)
+                for key,value in data.items():
+                    # Check if the value is a dict and if it is a SmartConfigValue object
+                    if isinstance(value, dict) and 'type' in value:
+                        # Create an instance of the SmartConfigValue subclass
+                        class_name = value.pop('type')
+                        # Check if the class exists in the current module
+                        if class_name in globals():
+                            # Create an instance of the class
+                            config_value_class = globals()[class_name]
+                            config_value = config_value_class(**value)
+                            self[key] = config_value
+                        else:
+                            print(f"Class {class_name} not found")
+                    else:
+                        # Just set the value
+                        self[key] = value
+                
+                # self.update(data)
+
+                print(f"Loaded config: {data}")
         except OSError:
             print("No file found?")
         except Exception as e:

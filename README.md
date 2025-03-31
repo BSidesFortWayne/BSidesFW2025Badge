@@ -68,9 +68,21 @@ uv run mpremote cp -r src/apps/analog_clock.py + run main.py
 
 ```
 
-### Using `micropico` for on board development
+### Off Board Unit Tests
 
-TODO: Add details
+`pytest` is used to run any hardware independent unit tests in the `tests/` folder with
+the following command
+
+```shell
+uv run pytest tests
+```
+
+This runs the pytest command out of the `tests` folder. 
+
+TODO: Perhaps we can reference the src/ folder so that we can move the files in `src/test` to
+`tests` to keep as functional tests? But they are different in that we will run the functional
+onboard tests with `mpremote run src/test/<test_file.py>`
+
 
 ## Technical Specifications V2
 
