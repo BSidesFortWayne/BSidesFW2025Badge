@@ -3,24 +3,22 @@ import random
 
 from app_directory import AppDirectory, AppMetadata
 import apps.app
-from bsp import BSP, BSPHolder
+from bsp import BSP
 from hardware_rev import HardwareRev
+from icontroller import IController
 
-class Controller(BSPHolder):
+class Controller(IController):
     # This is a singleton pattern which gives us a single instance of the 
     # controller object. This is useful for global state 
     def __new__(cls):
         """ creates a singleton object, if it is not created, 
         or else returns the previous singleton object"""
-
-        print("New")
         
         if not hasattr(cls, 'instance'):
             cls.instance = super(Controller, cls).__new__(cls)
         return cls.instance
 
     def __init__(self):
-        print("Controller init")
         # some things that the views will need
         self._bsp = BSP(HardwareRev.V3)
 
@@ -63,17 +61,8 @@ class Controller(BSPHolder):
         self.switch_app("Menu")
 
 
-    # TODO temporary shadow property for backwards compatibility
-    @property
-    def displays(self):
-        return self.bsp.displays
-
-    @property
-    def neopixel(self):
-        return self.bsp.leds.leds
-    
     def button_long_press(self, button: int):
-        if button == 1:
+        if button == 3:
             self.switch_app("Menu")
 
     def button_press(self, button: int):
@@ -120,10 +109,17 @@ class Controller(BSPHolder):
 
         # TODO normalize with code in module metadata?
         for _, obj in module.__dict__.items():
-            if isinstance(obj, type) and issubclass(obj, apps.app.BaseApp) and obj != apps.app.BaseApp:
+            # This check makes sure we don't just load the first "BaseApp" we find and instead
+            # load the correct app based on `name`
+            if isinstance(obj, type) \
+                    and issubclass(obj, apps.app.BaseApp) \
+                    and obj != apps.app.BaseApp \
+                    and obj.name == app.friendly_name: 
                 print(f"Found constructor, switched to {app_name} with {obj}")
                 app.constructor = obj
-                self.current_view = app.constructor(self)
+                self.current_view = None
+                new_view_instance = app.constructor(self)
+                self.current_view = new_view_instance
                 return
 
         print("No constructor found")

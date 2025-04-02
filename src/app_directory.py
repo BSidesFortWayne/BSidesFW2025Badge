@@ -190,6 +190,13 @@ class AppDirectory:
     def get_app_by_name(self, name: str):
         for module_name,module in self.modules.items():
 
+            # If this doesn't match the module name, check if it matches
+            # a friendly app name
+            for app in module.apps:
+                if app.friendly_name == name:
+                    print("Found app by friendly name")
+                    return app
+
             # If we're given a module name, we will just return the first app
             # in that module
             if module_name == name:
@@ -198,13 +205,8 @@ class AppDirectory:
                 elif len(module.apps) > 1:
                     print(f"Multiple apps found in module {module_name}")
                 
+                print("Found app by module name")
                 return module.apps[0]
-                
-            # If this doesn't match the module name, check if it matches
-            # a friendly app name
-            for app in module.apps:
-                if app.friendly_name == name:
-                    return app
 
     def __len__(self):
         # Return the total number of module keyed apps

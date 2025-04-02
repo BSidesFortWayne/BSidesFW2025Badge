@@ -1,7 +1,9 @@
 # Home
 
+import gc9a01
 from apps.app import BaseApp
 import fonts.arial32px as arial32px
+from lib.smart_config import ColorConfig
 
 class App(BaseApp):
     """
@@ -12,70 +14,81 @@ class App(BaseApp):
     def __init__(self, controller):
         super().__init__(controller)
         self.view = 0
-        if not self.controller.name:
-            self.controller.displays.display_center_write(
+        displays = self.controller.bsp.displays
+        first_name = self.config.add('first_name', 'WhatAbout')
+        last_name = self.config.add('last_name', 'Bob')
+        company = self.config.add('company', 'BSidesFW')
+        title = self.config.add('title', '2025')
+        image = self.config.add('background_image', "img/bsides_logo.jpg")
+        fg_color = self.config.add('fg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['white']))
+        bg_color = self.config.add('bg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['black']))
+        # if there is a space in the name, split it
+        white = displays.COLOR_LOOKUP['white']
+        black = displays.COLOR_LOOKUP['black']
+        if not first_name and not last_name:
+            displays.display_center_text(
                 'NO',
-                self.controller.displays.gc9a01.WHITE,
-                self.controller.displays.gc9a01.BLACK,
+                white,
+                black,
                 1,
                 arial32px
             )
-            self.controller.displays.display_center_write(
+            displays.display_center_text(
                 'NAME',
-                self.controller.displays.gc9a01.WHITE,
-                self.controller.displays.gc9a01.BLACK,
+                white,
+                black,
                 2,
                 arial32px
             )
         else:
             # Convert hex to RGB
-            display1_fg_color = tuple(int(self.controller.name['fg_color'][0].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
-            display2_fg_color = tuple(int(self.controller.name['fg_color'][1].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
-            display1_bg_color = tuple(int(self.controller.name['bg_color'][0].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
-            display2_bg_color = tuple(int(self.controller.name['bg_color'][1].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
+            display1_fg_color = self.config['fg_color'].value()
+            display2_fg_color = self.config['fg_color'].value()
+            display1_bg_color = self.config['bg_color'].value()
+            display2_bg_color = self.config['bg_color'].value()
+            # display1_fg_color = tuple(int(self.config['fg_color'][0].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
+            # display2_fg_color = tuple(int(self.config['fg_color'][1].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
+            # display1_bg_color = tuple(int(self.config['bg_color'][0].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
+            # display2_bg_color = tuple(int(self.config['bg_color'][1].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
 
-            if 'background_image' not in self.controller.name:
-                self.controller.displays.display1.fill(self.controller.displays.gc9a01.color565(display1_bg_color[0], display1_bg_color[1], display1_bg_color[2]))
-                self.controller.displays.display2.fill(self.controller.displays.gc9a01.color565(display2_bg_color[0], display2_bg_color[1], display2_bg_color[2]))
+            if 'background_image' not in self.config:
+                displays.display1.fill(display1_bg_color)
+                displays.display2.fill(display1_bg_color)
             else:
-                self.controller.displays.display1.jpg(self.controller.name['background_image'][0], 0, 0, self.controller.displays.gc9a01.FAST)
-                self.controller.displays.display2.jpg(self.controller.name['background_image'][1], 0, 0, self.controller.displays.gc9a01.FAST)
+                displays[0].jpg(image, 0, 0, gc9a01.FAST)
+                displays[1].jpg(image, 0, 0, gc9a01.FAST)
 
-            self.controller.displays.display1.write(
+            displays.display1.write(
                 arial32px,
-                self.controller.name['first'],
-                int((self.controller.displays.display1.width()/2) - ((self.controller.displays.display1.write_len(arial32px, self.controller.name['first'])/2))),
-                int((self.controller.displays.display1.height()/2) - arial32px.HEIGHT),
-                self.controller.displays.gc9a01.WHITE,
-                self.controller.displays.gc9a01.BLACK
+                first_name,
+                int((displays.display1.width()/2) - ((displays.display1.write_len(arial32px, first_name)/2))),
+                int((displays.display1.height()/2) - arial32px.HEIGHT),
+                white,
+                black
             )
-            self.controller.displays.display1.write(
+            displays.display1.write(
                 arial32px,
-                self.controller.name['last'],
-                int((self.controller.displays.display1.width()/2) - ((self.controller.displays.display1.write_len(arial32px, self.controller.name['last'])/2))),
-                int((self.controller.displays.display1.height()/2)),
-                self.controller.displays.gc9a01.WHITE,
-                self.controller.displays.gc9a01.BLACK
-            )
-
-            self.controller.displays.display2.write(
-                arial32px,
-                self.controller.name['company'],
-                int((self.controller.displays.display2.width()/2) - ((self.controller.displays.display2.write_len(arial32px, self.controller.name['company'])/2))),
-                int((self.controller.displays.display2.height()/2) - arial32px.HEIGHT),
-                self.controller.displays.gc9a01.WHITE,
-                self.controller.displays.gc9a01.BLACK
-            )
-            self.controller.displays.display2.write(
-                arial32px,
-                self.controller.name['title'],
-                int((self.controller.displays.display2.width()/2) - ((self.controller.displays.display2.write_len(arial32px, self.controller.name['title'])/2))),
-                int((self.controller.displays.display2.height()/2)),
-                self.controller.displays.gc9a01.WHITE,
-                self.controller.displays.gc9a01.BLACK
+                last_name,
+                int((displays.display1.width()/2) - ((displays.display1.write_len(arial32px, last_name)/2))),
+                int((displays.display1.height()/2)),
+                white,
+                black,
             )
 
-    def button_press(self, button):
-        # view_mapping = [1, 6, 5, 4]
-        # if button in view_mapping:
-        self.controller.switch_view(button)
+            displays.display2.write(
+                arial32px,
+                company,
+                int((displays.display2.width()/2) - ((displays.display2.write_len(arial32px, company)/2))),
+                int((displays.display2.height()/2) - arial32px.HEIGHT),
+                white,
+                black
+            )
+            displays.display2.write(
+                arial32px,
+                title,
+                int((displays.display2.width()/2) - ((displays.display2.write_len(arial32px, title)/2))),
+                int((displays.display2.height()/2)),
+                white,
+                black
+            )
+

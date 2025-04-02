@@ -4,7 +4,6 @@ import vga1_bold_16x32
 import machine
 
 
-
 class Displays:    
     SCK = 18
     MOSI = 23
@@ -18,6 +17,16 @@ class Displays:
     CS2 = 13
 
     DISP_EN = 32
+    COLOR_LOOKUP = {
+        "black": gc9a01.BLACK,
+        "blue": gc9a01.BLUE,
+        "red": gc9a01.RED,
+        "green": gc9a01.GREEN,
+        "cyan": gc9a01.CYAN,
+        "magenta": gc9a01.MAGENTA,
+        "yellow": gc9a01.YELLOW,
+        "white": gc9a01.WHITE,
+    }
 
     def __init__(self):
         disp_en = Pin(self.DISP_EN, Pin.OUT)
@@ -56,9 +65,13 @@ class Displays:
         self.display1.fill(gc9a01.BLACK)
         self.display2.fill(gc9a01.BLUE)
 
+    @staticmethod
+    def rgb_to_565(r: int, g: int, b: int):
+        return (r & 0xF8) | ((g & 0xE0) >> 5) | ((g & 0x1C) << 11) | ((b & 0xF8) << 5)
+
     def display_center_text(
         self, 
-        text, 
+        text: str, 
         fg = gc9a01.WHITE, 
         bg = gc9a01.BLACK, 
         display_index: int = 1, 

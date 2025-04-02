@@ -1,13 +1,12 @@
-from bsp import BSPHolder
+from icontroller import IController
 from lib.smart_config import Config
 
 class BaseApp:
-    name = "no_name"
+    name = ""
     version = "0.0.1"
     module = "no_module"
-    def __init__(self, controller: BSPHolder):
+    def __init__(self, controller: IController):
         super().__init__()
-        print(self.name)
         self.controller = controller
         self.config = Config(f"config/apps/{self.name}.json")
         print(f"BaseApp {self.name} {self.version}")

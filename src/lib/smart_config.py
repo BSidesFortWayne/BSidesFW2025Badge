@@ -93,6 +93,10 @@ class RangeConfig(SmartConfigValue):
             <input type="range" name="{key}" min="{self['min']}" max="{self['max']}" step="{self['step']}" value="{self['current']}">
         """
 
+    def __int__(self):
+        print("RangeConfig __int__")
+        return int(self['current'])
+    
     def value(self):
         return self['current']
     
@@ -155,6 +159,9 @@ class EnumConfig(SmartConfigValue):
     def value(self):
         return self['current']
     
+    def __int__(self):
+        return int(self['current'])
+
     def __str__(self):
         return f"{self['name']}: {self['current']} ({', '.join(self['options'])})"
 
@@ -231,30 +238,31 @@ class Config(dict):
             with open(self.filename, "r") as f:
                 # TODO custom transformer for smart config...
                 data = json.load(f)
+                print(f'Raw data: {data}')
                 for key,value in data.items():
                     # Check if the value is a dict and if it is a SmartConfigValue object
                     if isinstance(value, dict) and 'type' in value:
                         # Create an instance of the SmartConfigValue subclass
                         class_name = value.pop('type')
                         # Check if the class exists in the current module
+                        # look up class name in the this module
                         if class_name in globals():
                             # Create an instance of the class
+                            print(f"Dynamically creating class {class_name} with {value}")
                             config_value_class = globals()[class_name]
                             config_value = config_value_class(**value)
+                            print(f"Created {config_value} and storing at {key}")
                             self[key] = config_value
                         else:
                             print(f"Class {class_name} not found")
                     else:
                         # Just set the value
                         self[key] = value
-                
-                # self.update(data)
-
-                print(f"Loaded config: {data}")
         except OSError:
             print("No file found?")
         except Exception as e:
             print(e)
+            print(str(e))
             print("Error loading config file")
 
     def save(self):
@@ -262,6 +270,8 @@ class Config(dict):
         # Make sure the file exists
         try:
             with open(self.filename, "w") as f:
+                data = json.dumps(self)
+                print("Data to save:", data)
                 json.dump(self, f)
         except OSError:
             print("No file found?")

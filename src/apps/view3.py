@@ -4,10 +4,8 @@ class App(apps.app.BaseApp):
     name = "Blue View"
     def __init__(self, controller):
         super().__init__(controller)
-        self.controller.displays.display1.fill(self.controller.displays.gc9a01.BLUE)
-        self.controller.displays.display2.fill(self.controller.displays.gc9a01.BLUE)
+        displays = self.controller.bsp.displays
+        blue = displays.COLOR_LOOKUP['blue']
+        displays.display1.fill(blue)
+        displays.display2.fill(blue)
 
-    def button_press(self, button):
-        if button == 1:
-            # Back to home
-            self.controller.switch_view(0)

@@ -197,3 +197,5 @@ class MicroFont:
             ch = self.get_ch(c)
             self.draw_ch(ch,fb,fb_fmt,fb_width,fb_height,x,y,color,off_x,off_y,rot)
             off_x += x_spacing + ch[2]
+    
+        return off_x, off_y or self.height

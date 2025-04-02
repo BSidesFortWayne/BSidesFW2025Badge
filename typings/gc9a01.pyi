@@ -7,6 +7,8 @@
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
 
+__name__ = "gc9a01"
+
 BLACK = 0x0000
 BLUE = 0x001F
 RED = 0xF800
@@ -15,6 +17,17 @@ CYAN = 0x07FF
 MAGENTA = 0xF81F
 YELLOW = 0xFFE0
 WHITE = 0xFFFF
+
+FAST = 0
+SLOW = 1
+
+WRAP = 3
+WRAP_H = 2
+WRAP_V = 1
+
+def map_bitarray_to_rgb565(bitarray, width, height): ...
+
+def color565(r, g, b): ...
 
 class GC9A01:
     def __init__(self, spi, width, height, reset, cs, dc, rotation, options, buffer_size) -> None: ...
