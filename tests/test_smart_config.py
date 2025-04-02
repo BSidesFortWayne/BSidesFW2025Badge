@@ -59,11 +59,14 @@ class TestSmartConfig(unittest.TestCase):
     def test_bool_dropdown_config(self):
         """Test the BoolDropdownConfig class."""
         bool_config = BoolDropdownConfig("Test Bool", current=True)
+        self.config.add("Test Bool", bool_config)
         self.assertTrue(bool_config.value())
+        print(self.config.items())
 
         # Test updating the value
         bool_config.parse_value("False")
         self.assertFalse(bool_config.value())
+
 
     def test_as_html(self):
         """Test the as_html method."""
@@ -81,6 +84,7 @@ class TestSmartConfig(unittest.TestCase):
         self.assertEqual(self.config["test_key"], "new_value")
         self.assertEqual(self.config["new_key"], "another_value")
 
+
     def test_load_and_save(self):
         """Test loading and saving the config."""
         self.config.add("test_key", "test_value")
@@ -93,20 +97,38 @@ class TestSmartConfig(unittest.TestCase):
         self.assertEqual(self.config["test_range"]["current"], 75)
         self.assertEqual(self.config["test_enum"]["current"], "Option2")
         self.assertFalse(self.config["test_bool"].value())
+        print(type(self.config["test_bool"]))
+        print(self.config["test_bool"])
+        import json
+        print(json.dumps(self.config))
+        print(json.dumps(self.config["test_bool"]))
         self.config.save()
 
-        print(type(self.config['test_range']))
+        with open(self.test_config_file, "r") as f:
+            data = f.read()
+            print(data)
 
         # Create a new Config object and load the saved data
         new_config = Config(self.test_config_file)
-        import json
-        print(type(new_config['test_range']))
         self.assertEqual(new_config["test_key"], "test_value")
         self.assertEqual(new_config["test_range"]["current"], 75)
         self.assertEqual(new_config["test_enum"]["current"], "Option2")
-        print(new_config)
         self.assertFalse(new_config["test_bool"].value())
 
+    def test_coercion(self):
+        """Test coercion of values."""
+        self.config.add("test_key", 123)
+        self.config.add("test_range", RangeConfig("test_range", 0, 100, current=50))
+        self.config.add("bool_dropdown", BoolDropdownConfig("bool_dropdown", current=True))
+        self.config["test_range"].parse_value(75)
+        self.assertEqual(self.config["test_key"], 123)
+        self.assertEqual(self.config["test_range"]["current"], 75)
+        self.assertEqual(self.config["test_range"], 75)
+        self.assertTrue(self.config["bool_dropdown"].value())
+        self.assertEqual(self.config["bool_dropdown"], True)
+        self.config["bool_dropdown"].parse_value("False")
+        self.assertFalse(self.config["bool_dropdown"].value())
+        self.assertEqual(self.config["bool_dropdown"], False)
 
 if __name__ == "__main__":
     unittest.main()

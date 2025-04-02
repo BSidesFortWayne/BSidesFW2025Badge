@@ -21,11 +21,3 @@ class BSP:
         self.speaker = Speaker()
         self.hardware_version = hardware_version
         print("BSP initialized")
-
-class BSPHolder:
-    def __init__(self, hardware_version: str):
-        self._bsp = BSP(hardware_version)
-
-    @property
-    def bsp(self):
-        return self._bsp

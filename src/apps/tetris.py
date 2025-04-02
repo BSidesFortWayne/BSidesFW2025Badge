@@ -1,7 +1,8 @@
 import asyncio
+
+import gc9a01
 from apps.app import BaseApp
 import random
-import time
 import vga2_bold_16x32 as font 
 import vga2_8x16 as font_small 
 
@@ -29,8 +30,10 @@ class View(BaseApp):
         super().__init__(controller)
         self.controller.neopixel.fill((0, 0, 0))
         self.controller.neopixel.write()
-        self.controller.displays.display1.fill(self.controller.displays.gc9a01.BLACK)
-        self.controller.displays.display2.fill(self.controller.displays.gc9a01.BLACK)
+        displays = self.controller.displays
+        black = displays.COLOR_LOOKUP['black']
+        displays.display1.fill(black)
+        displays.display2.fill(black)
         self.rows = 20
         self.columns = 10
         self.block_size = 10
@@ -75,7 +78,13 @@ class View(BaseApp):
         x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
         y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)
 
-        self.controller.displays.display1.fill_rect(x_offset-5, y_offset-5, (self.columns * self.block_size)+10, (self.rows * self.block_size)+10, self.controller.displays.gc9a01.color565(20, 20, 20))
+        self.controller.displays.display1.fill_rect(
+            x_offset-5, 
+            y_offset-5, 
+            (self.columns * self.block_size)+10, 
+            (self.rows * self.block_size)+10, 
+            gc9a01.color565(20, 20, 20)
+        )
         self.next_block = random.choice(self.blocks)
 
         self.add_block()
@@ -121,17 +130,27 @@ class View(BaseApp):
                 self.draw_scene()
 
     def update_stats(self):
-        self.controller.displays.display2.fill(self.controller.displays.gc9a01.BLACK)
+        displays = self.controller.displays
+        black = displays.COLOR_LOOKUP['black']
+        white = displays.COLOR_LOOKUP['white']
+        red = displays.COLOR_LOOKUP['red']
+        self.controller.displays.display2.fill(black)
         if not self.is_game_over:
             x = round(self.controller.displays.display2.width()/4)
             y = 60
-            self.controller.displays.display2.fill_rect(x-5, y-5, (len(self.next_block[0]) * self.next_block_size)+10, (len(self.next_block) * self.next_block_size)+10, self.controller.displays.gc9a01.color565(20, 20, 20))
+            self.controller.displays.display2.fill_rect(
+                x-5, 
+                y-5, 
+                (len(self.next_block[0]) * self.next_block_size)+10, 
+                (len(self.next_block) * self.next_block_size)+10, 
+                gc9a01.color565(20, 20, 20)
+            )
             for row_number, row in enumerate(self.next_block):
                 for column_number, cell in enumerate(row):
                     if cell:
-                        self.controller.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, self.controller.displays.gc9a01.RED)
+                        self.controller.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, red)
                     else:
-                        self.controller.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, self.controller.displays.gc9a01.BLACK)
+                        self.controller.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, black)
                     x += self.next_block_size
                 x = round(self.controller.displays.display2.width()/4)
                 y += self.next_block_size
@@ -140,24 +159,24 @@ class View(BaseApp):
                 "Next",
                 round(self.controller.displays.display2.width()/4),
                 60 - font_small.HEIGHT,
-                self.controller.displays.gc9a01.WHITE,
-                self.controller.displays.gc9a01.BLACK
+                white,
+                black
             )
         self.controller.displays.display2.text(
             font_small,
             f"Score: {self.score}",
             round(self.controller.displays.display2.width()/4),
             120,
-            self.controller.displays.gc9a01.WHITE,
-            self.controller.displays.gc9a01.BLACK
+            white,
+            black
         )
         self.controller.displays.display2.text(
             font_small,
             f"Lines: {self.lines}",
             round(self.controller.displays.display2.width()/4),
             120 + font_small.HEIGHT,
-            self.controller.displays.gc9a01.WHITE,
-            self.controller.displays.gc9a01.BLACK
+            white,
+            black
         )
 
     def add_block(self):
@@ -314,8 +333,11 @@ class View(BaseApp):
         else:
             ghost_y = 0
 
-        disp = self.controller.displays.display1
-        gc9a01 = self.controller.displays.gc9a01
+        displays = self.controller.displays
+        disp = displays.display1
+        red = displays.COLOR_LOOKUP['red']
+        black = displays.COLOR_LOOKUP['black']
+        
 
         x_offset = round((disp.width() - (self.columns * self.block_size)) / 2)
         y_offset = round((disp.height() - (self.rows * self.block_size)) / 2)
@@ -325,9 +347,9 @@ class View(BaseApp):
             x_pix = x_offset
             for cell in row:
                 if cell:
-                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, gc9a01.RED)
+                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, red)
                 else:
-                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, gc9a01.BLACK)
+                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, black)
                 x_pix += self.block_size
             y_pix += self.block_size
 
@@ -348,20 +370,22 @@ class View(BaseApp):
             return
         y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
         x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
-        self.controller.displays.display1.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, self.controller.displays.gc9a01.color565(20, 20, 20))
-        self.controller.displays.display1.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, self.controller.displays.gc9a01.BLACK)
+        self.controller.displays.display1.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, gc9a01.color565(20, 20, 20))
+        self.controller.displays.display1.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, gc9a01.BLACK)
         self.draw_scene()
         self.move_block_down()
         await asyncio.sleep(0.5)
 
     async def game_over(self):
+        black = self.controller.displays.COLOR_LOOKUP['black']
+        red = self.controller.displays.COLOR_LOOKUP['red']
         self.controller.neopixel.fill((40, 0, 0))
         self.controller.neopixel.write()
-        self.controller.displays.display1.fill(self.controller.displays.gc9a01.BLACK)
+        self.controller.displays.display1.fill(black)
         self.controller.displays.display_center_text(
             "Game Over", 
-            self.controller.displays.gc9a01.RED, 
-            self.controller.displays.gc9a01.BLACK, 
+            red, 
+            black, 
             1, 
             font)
         self.controller.displays.display1.text(
@@ -369,8 +393,8 @@ class View(BaseApp):
             "SW2 to retry",
             int((self.controller.displays.display1.width()/2) - ((font_small.WIDTH*len("SW2 to retry")/2))),
             int((self.controller.displays.display1.height()/2) - (font_small.HEIGHT/2)) + font_small.HEIGHT*2,
-            self.controller.displays.gc9a01.RED,
-            self.controller.displays.gc9a01.BLACK
+            red,
+            black
         )
         self.update_stats()
         while self.is_game_over:

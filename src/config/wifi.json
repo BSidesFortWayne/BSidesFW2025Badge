@@ -1,5 +1,5 @@
 {
-    "mode": "STA",
+    "mode": "AP",
     "ssid": "ubnt-spy-24ghz",
     "password": "ubntnotforyouonlyforme"
 }

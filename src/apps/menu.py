@@ -3,6 +3,7 @@ from apps.app import BaseApp
 import gc9a01 
 import framebuf
 
+from hardware_rev import HardwareRev
 from lib.microfont import MicroFont
 
 class IconMenu(BaseApp):
@@ -68,19 +69,36 @@ class Menu(BaseApp):
     def __del__(self):
         self.controller.bsp.buttons.button_pressed_callbacks.remove(self.button_press)
     
+    def menu_move_down(self):
+        first = self.menu_items.pop(0)
+        self.menu_items.append(first)
+        
+    def menu_move_up(self):
+        last = self.menu_items.pop(-1)
+        self.menu_items.insert(0, last)
+    
     def button_press(self, button: int):
-        if button == 5:
-            first = self.menu_items.pop(0)
-            self.menu_items.append(first)
-        elif button == 4:
-            self.controller.switch_app(self.menu_items[0])
+        if self.controller.bsp.hardware_version == HardwareRev.V3:
+            if button == 4:
+                self.menu_move_down()
+            elif button == 5:
+                self.menu_move_up()
+            elif button == 6:
+                self.controller.switch_app(self.menu_items[0])
+        else:
+            if button == 5:
+                self.menu_move_down()
+            elif button == 4:
+                self.controller.switch_app(self.menu_items[0])
 
     async def update(self):
         # self.title_display.fill(gc9a01.BLACK)
         # self.app_selection.fill(gc9a01.BLACK)
+        debug_mode = self.config['debug'].value()
+
         self.fbuf.fill(gc9a01.BLACK)
         for i, item in enumerate(self.menu_items[:5]):
-            self.font.write(
+            off_x, off_y = self.font.write(
                 item, 
                 self.fbuf_mv, 
                 framebuf.RGB565, 
@@ -88,6 +106,22 @@ class Menu(BaseApp):
                 self.fbuf_height, 
                 0,
                 i * 40,
+                gc9a01.RED if i == 0 else gc9a01.WHITE
+            )
+
+            if debug_mode:
+                self.fbuf.text(
+                    f"{off_x}, {off_y}",
+                    0,
+                    i * 40,
+                    gc9a01.WHITE
+                )
+            # generate rectangle around first item
+            self.fbuf.rect(
+                0,
+                i * 40,
+                off_x,
+                off_y,
                 gc9a01.RED if i == 0 else gc9a01.WHITE
             )
 

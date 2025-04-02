@@ -11,6 +11,9 @@ async def start_http_server(controller: Controller):
 
     Response.default_content_type = "text/html"
 
+    # This is effective a JSON API for the config, so we'll "hide" it at _config
+    # This is used for the form served from /config to accept the update config/form 
+    # value
     @app.route("/_config", methods=["GET", "POST"])
     async def config_json(request: Request):
         if not controller.current_view:
@@ -22,10 +25,11 @@ async def start_http_server(controller: Controller):
         if request.method == "POST":
             # TODO validate the value
             try:
-                print(request.body)
-                print(request.json)
+                # TODO if we instead use `request.form` and then do the validation in code
+                # we could deliver a slightly smaller payload...
                 config.update(request.json) # type: ignore
-                # redirect back to /config for web users
+                # redirect back to /config for web users...
+                # Could also serve a simple config success page?
                 Response.redirect("/config")
             except Exception as ex:
                 print(ex)
@@ -48,6 +52,47 @@ async def start_http_server(controller: Controller):
                 print(ex)
                 Microdot.abort(500)
         return json.dumps(controller.current_view.config)
+
+
+    @app.route("/apps")
+    async def apps(request: Request):
+        if not controller.current_view:
+            Microdot.abort(404)
+            # This doesn't actually return anything, we're just returning to make the linter happy
+            return
+
+        apps = sorted(controller.app_directory, key=lambda app: app.friendly_name)
+        app_list_html = "".join(
+            f'<li><a href="/apps/switch/{app.friendly_name}">{app.friendly_name}</a></li>'
+            for app in apps
+        )
+
+        # Return basic html
+        return f"""
+        <html>
+            <head>
+                <title>Apps</title>
+            </head>
+            <body>
+                <h1>Apps</h1>
+                <ul>
+                    {app_list_html}
+                </ul>
+            </body>
+        </html>
+        """
+
+    @app.route("/apps/switch/<app_name>")
+    async def switch_app(request: Request, app_name: str):
+        if not controller.current_view:
+            Microdot.abort(404)
+            # This doesn't actually return anything, we're just returning to make the linter happy
+            return
+
+        # unescape the app name to get rid of HTML escape codes
+        app_name = app_name.replace("%20", " ")
+        controller.switch_app(app_name)
+        Response.redirect("/apps")
 
     @app.route("/config")
     async def config_web(request: Request):
