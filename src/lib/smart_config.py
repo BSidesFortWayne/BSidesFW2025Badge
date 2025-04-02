@@ -179,9 +179,7 @@ class Config(dict):
     def __init__(self, filename: str):
         super().__init__()
         self.filename = filename
-        print(f"Loading smart config from {self.filename}")
         self.load()
-        print(f"Loaded smart config: {self}")
 
     def add(self, key: str, value, force: bool = False):
         """
@@ -201,7 +199,6 @@ class Config(dict):
             return self.setdefault(key, value)
 
     def update(self, data: dict):
-        print(f"Updating config with {data}")
         updates = {}
         for key, value in data.items():
             if key not in self:
@@ -238,7 +235,6 @@ class Config(dict):
             with open(self.filename, "r") as f:
                 # TODO custom transformer for smart config...
                 data = json.load(f)
-                print(f'Raw data: {data}')
                 for key,value in data.items():
                     # Check if the value is a dict and if it is a SmartConfigValue object
                     if isinstance(value, dict) and 'type' in value:
@@ -248,10 +244,8 @@ class Config(dict):
                         # look up class name in the this module
                         if class_name in globals():
                             # Create an instance of the class
-                            print(f"Dynamically creating class {class_name} with {value}")
                             config_value_class = globals()[class_name]
                             config_value = config_value_class(**value)
-                            print(f"Created {config_value} and storing at {key}")
                             self[key] = config_value
                         else:
                             print(f"Class {class_name} not found")
@@ -262,7 +256,6 @@ class Config(dict):
             print("No file found?")
         except Exception as e:
             print(e)
-            print(str(e))
             print("Error loading config file")
 
     def save(self):
