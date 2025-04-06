@@ -1,0 +1,2 @@
+HEIGHT = 32
+WIDTH = 16
