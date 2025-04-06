@@ -1,5 +1,8 @@
+import asyncio
 import json
 import random
+
+import time
 
 from app_directory import AppDirectory, AppMetadata
 import apps.app
@@ -58,29 +61,48 @@ class Controller(IController):
         self.bsp.buttons.button_released_callbacks.append(self.button_release)
         self.bsp.buttons.button_long_press_callbacks.append(self.button_long_press)
 
-        self.switch_app("Menu")
+        self.current_app_lock = asyncio.Lock()
+
+        asyncio.run(self.switch_app("Menu"))
+
+
+    async def run(self):
+        total_times = 0
+        total_counts = 0
+        while True:
+            x = time.ticks_ms()
+            async with self.current_app_lock:
+                if self.current_view:
+                    await self.current_view.update()
+                await asyncio.sleep(0.01)
+            d = time.ticks_diff(time.ticks_ms(), x)
+            total_times += d
+            total_counts += 1
+            if total_counts % 100 == 0:
+                average = total_times/total_counts
+                print(f"Average: {average} ms")
+                print(f"Average Hz: {int(1000/average)} Hz")
 
 
     def button_long_press(self, button: int):
         if button == 3:
-            self.switch_app("Menu")
+            asyncio.create_task(self.switch_app("Menu"))
 
     def button_press(self, button: int):
         print(f"Button Press {button}")
 
     def button_release(self, button: int):
         print(f"Button Relased {button}")
-        self.bsp.leds.turn_off_led(button)
 
     async def update(self):
         if self.current_view:
             await self.current_view.update()
 
-    def random_app(self):
+    async def random_app(self):
         app = random.choice(self.app_directory)
-        self.switch_app(app.module_name)
+        await self.switch_app(app.module_name)
 
-    def switch_app(self, app_name: str):
+    async def switch_app(self, app_name: str):
         if not app_name:
             # TODO show a popup or just return?
             print("No view provided")
@@ -93,7 +115,9 @@ class Controller(IController):
 
         if app.constructor:
             print(f"Switched to {app_name} (already loaded)")
-            self.current_view = app.constructor(self)
+            async with self.current_app_lock:
+                self.current_view = app.constructor(self)
+                await asyncio.sleep(0.01)
             # start threading callback to save app directory cache
 
             return
@@ -116,10 +140,16 @@ class Controller(IController):
                     and obj != apps.app.BaseApp \
                     and obj.name == app.friendly_name: 
                 print(f"Found constructor, switched to {app_name} with {obj}")
-                app.constructor = obj
-                self.current_view = None
+                async with self.current_app_lock:
+                    # Save the constructor to the app metadata
+                    app.constructor = obj
+                    self.current_view = None
+                
+                # As long as we locked to set the current view to None, we can then proceed as normal
+                # And set the current_view object without a lock
                 new_view_instance = app.constructor(self)
                 self.current_view = new_view_instance
+                print(f"Switched to {app_name} with {obj}")
                 return
 
         print("No constructor found")
