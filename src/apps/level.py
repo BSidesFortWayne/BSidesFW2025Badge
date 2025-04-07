@@ -1,4 +1,3 @@
-import gc9a01
 from apps.app import BaseApp
 import framebuf
 
@@ -12,7 +11,7 @@ def get_formatted_acceleration(acceleration):
         acceleration += '           '
     return acceleration
 
-class App(BaseApp):
+class Level(BaseApp):
     name = "Level"
     def __init__(self, controller):
         super().__init__(controller)
@@ -68,4 +67,4 @@ class App(BaseApp):
 
         
 if __name__ == "__main__":
-    run_app(App)
+    run_app(Level)

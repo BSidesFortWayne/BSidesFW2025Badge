@@ -164,6 +164,13 @@ class AppDirectory:
 
     def save_app_directory_cache(self):
         print("Saving app directory cache")
+        try:
+            os.mkdir("/".join(self.cache_location.split("/")[:-1]))
+        except Exception as e:
+            print(e)
+            # Directory already exists?
+            pass
+
         with open(self.cache_location, "w") as f:
             modules = {
                 # TODO refactor the app serialization to come from the AppMetadata class

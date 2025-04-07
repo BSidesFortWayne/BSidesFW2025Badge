@@ -88,6 +88,8 @@
   - [ ] Etch a Sketch
   - [ ] 2048 (hard to implement?...)
   - [ ] Surface level based on x/y position
+  - [ ] Voltage Meter
+    - [ ] Battery level: Low/Medium/High
   - [ ] Reaction timer game
     - [ ] Multi-player network reaction game
   - [ ] On board image manipulation
