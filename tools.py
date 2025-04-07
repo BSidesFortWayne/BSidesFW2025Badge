@@ -6,12 +6,20 @@ app = Typer()
 
 
 @app.command()
+def erase_flash(device="/dev/ttyUSB0"):
+    """
+    Erase the flash memory of the ESP32 device using esptool.
+    """
+    os.system("esptool.py --chip esp32 erase_flash")
+
+@app.command()
 def write_flash(
     file: str, 
     offset: int = 0x1000, 
     device: str = "/dev/ttyUSB0", 
     erase: bool = True,
     verbose: bool = False,
+    baud_rate: int = 460800,
 ):
     """
     Write a file to the ESP32 device using mpremote.
@@ -21,10 +29,11 @@ def write_flash(
         # Erase the flash memory first
         # TODO if not verbose, suppress output or make silent?
         os.system(f"esptool.py --chip esp32 --port {device} erase_flash")
+        time.sleep(2)
 
     # Execute this shell command
     # TODO if not verbose, suppress output or make silent?
-    os.system(f"esptool.py --chip esp32 --baud 460800 --port {device} write_flash -z {hex(offset)} {file}")
+    os.system(f"esptool.py --chip esp32 --baud {baud_rate} --port {device} write_flash -z {hex(offset)} {file}")
     end_time = time.time()
     elapsed_time = end_time - start_time
     if verbose:
