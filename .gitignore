@@ -2,8 +2,8 @@ name.json
 node_modules
 .nuxt
 
-config/*.json
-config/**/*.json
+src/config/*.json
+src/config/**/*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
