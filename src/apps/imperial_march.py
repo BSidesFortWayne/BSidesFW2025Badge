@@ -1,135 +1,125 @@
 from machine import Pin, PWM
 from time import sleep_ms
+from apps.app import BaseApp
 
-# Buzzer setup
-buzzer_pin = 12
-buzzer = PWM(Pin(buzzer_pin))
+class Imperial_March(BaseApp):
+    name = "Imperial March"
+    def __init__(self, buzzer_pin=12, bpm=120):
+        self.bpm = bpm
+        self.Q = int(60000 / self.bpm)
+        self.H = 2 * self.Q
+        self.E = self.Q // 2
+        self.S = self.Q // 4
+        self.W = 4 * self.Q
 
-# Constants
-BPM = 120
-Q = int(60000 / BPM)  # quarter note duration in ms
-H = 2 * Q
-E = Q // 2
-S = Q // 4
-W = 4 * Q
+        self.buzzer = PWM(Pin(buzzer_pin))
+        self.buzzer.duty(0)
 
-# Define the notes (some examples)
-C4 = 261.63
-Db4 = 277.18
-D4 = 293.66
-Eb4 = 311.13
-E4 = 329.63
-F3 = 174.61
-F4 = 349.23
-Gb4 = 369.99
-G4 = 392.00
-Ab3 = 207.65
-Ab4 = 415.30
-LA3 = 220.00
-LA4 = 440.00
-Bb3 = 233.08
-Bb4 = 466.16
-B3 = 246.94
-C5 = 523.25
-Db4 = 277.18
-D4 = 293.66
-Eb4 = 311.13
-Db4 = 277.18
+        self.notes = {
+            'C4': 261.63, 'Db4': 277.18, 'D4': 293.66, 'Eb4': 311.13, 'E4': 329.63,
+            'F3': 174.61, 'F4': 349.23, 'Gb4': 369.99, 'G4': 392.00,
+            'Ab3': 207.65, 'Ab4': 415.30, 'LA3': 220.00, 'LA4': 440.00,
+            'Bb3': 233.08, 'Bb4': 466.16, 'B3': 246.94, 'C5': 523.25,
+            'Eb4': 311.13, 'D4': 293.66, 'Db4': 277.18, 'C4': 261.63
+        }
 
-def mytone(freq, duration):
-    if freq > 0:
-        buzzer.freq(int(freq))
-        buzzer.duty(512)  # duty cycle: 50%
-    else:
-        buzzer.duty(0)
-    sleep_ms(duration)
-    buzzer.duty(0)
+    def mytone(self, freq, duration):
+        if freq > 0:
+            self.buzzer.freq(int(freq))
+            self.buzzer.duty(512)
+        else:
+            self.buzzer.duty(0)
+        sleep_ms(duration)
+        self.buzzer.duty(0)
 
-# You can directly run this in a while True loop or as a test
-def play_melody():
-    mytone(LA3, Q) 
-    mytone(LA3, Q)
-    mytone(LA3, Q)
-    mytone(F3, E + S)
-    mytone(C4, S)
-    
-    mytone(LA3, Q)
-    mytone(F3, E + S)
-    mytone(C4, S)
-    mytone(LA3, H)
+    def play(self):
+        n = self.notes
+        Q, H, E, S = self.Q, self.H, self.E, self.S
 
-    mytone(E4, Q) 
-    mytone(E4, Q)
-    mytone(E4, Q)
-    mytone(F4, E + S)
-    mytone(C4, S)
-    
-    mytone(Ab3, Q)
-    mytone(F3, E + S)
-    mytone(C4, S)
-    mytone(LA3, H)
+        self.mytone(n['LA3'], Q)
+        self.mytone(n['LA3'], Q)
+        self.mytone(n['LA3'], Q)
+        self.mytone(n['F3'], E + S)
+        self.mytone(n['C4'], S)
 
-    mytone(LA4, Q)
-    mytone(LA3, E + S)
-    mytone(LA3, S)
-    mytone(LA4, Q)
-    mytone(Ab4, E + S)
-    mytone(G4, S)
-    
-    mytone(Gb4, S)
-    mytone(E4, S)
-    mytone(F4, E)
-    sleep_ms(E)
-    mytone(Bb3, E)
-    mytone(Eb4, Q)
-    mytone(D4, E + S)
-    mytone(Db4, S)
+        self.mytone(n['LA3'], Q)
+        self.mytone(n['F3'], E + S)
+        self.mytone(n['C4'], S)
+        self.mytone(n['LA3'], H)
 
-    mytone(C4, S)
-    mytone(B3, S)
-    mytone(C4, E)
-    sleep_ms(E)
-    mytone(F3, E)
-    mytone(Ab3, Q)
-    mytone(F3, E + S)
-    mytone(LA3, S)
+        self.mytone(n['E4'], Q)
+        self.mytone(n['E4'], Q)
+        self.mytone(n['E4'], Q)
+        self.mytone(n['F4'], E + S)
+        self.mytone(n['C4'], S)
 
-    mytone(C4, Q)
-    mytone(LA3, E + S)
-    mytone(C4, S)
-    mytone(E4, H)
+        self.mytone(n['Ab3'], Q)
+        self.mytone(n['F3'], E + S)
+        self.mytone(n['C4'], S)
+        self.mytone(n['LA3'], H)
 
-    mytone(LA4, Q)
-    mytone(LA3, E + S)
-    mytone(LA3, S)
-    mytone(LA4, Q)
-    mytone(Ab4, E + S)
-    mytone(G4, S)
-    
-    mytone(Gb4, S)
-    mytone(E4, S)
-    mytone(F4, E)
-    sleep_ms(E)
-    mytone(Bb3, E)
-    mytone(Eb4, Q)
-    mytone(D4, E + S)
-    mytone(Db4, S)
+        self.mytone(n['LA4'], Q)
+        self.mytone(n['LA3'], E + S)
+        self.mytone(n['LA3'], S)
+        self.mytone(n['LA4'], Q)
+        self.mytone(n['Ab4'], E + S)
+        self.mytone(n['G4'], S)
 
-    mytone(C4, S)
-    mytone(B3, S)
-    mytone(C4, E)
-    sleep_ms(E)
-    mytone(F3, E)
-    mytone(Ab3, Q)
-    mytone(F3, E + S)
-    mytone(C4, S)
+        self.mytone(n['Gb4'], S)
+        self.mytone(n['E4'], S)
+        self.mytone(n['F4'], E)
+        sleep_ms(E)
+        self.mytone(n['Bb3'], E)
+        self.mytone(n['Eb4'], Q)
+        self.mytone(n['D4'], E + S)
+        self.mytone(n['Db4'], S)
 
-    mytone(LA3, Q)
-    mytone(F3, E + S)
-    mytone(C4, S)
-    mytone(LA3, H)
+        self.mytone(n['C4'], S)
+        self.mytone(n['B3'], S)
+        self.mytone(n['C4'], E)
+        sleep_ms(E)
+        self.mytone(n['F3'], E)
+        self.mytone(n['Ab3'], Q)
+        self.mytone(n['F3'], E + S)
+        self.mytone(n['LA3'], S)
 
-    sleep_ms(2 * H)
+        self.mytone(n['C4'], Q)
+        self.mytone(n['LA3'], E + S)
+        self.mytone(n['C4'], S)
+        self.mytone(n['E4'], H)
 
-# Run once or in a loop
-play_melody()
+        self.mytone(n['LA4'], Q)
+        self.mytone(n['LA3'], E + S)
+        self.mytone(n['LA3'], S)
+        self.mytone(n['LA4'], Q)
+        self.mytone(n['Ab4'], E + S)
+        self.mytone(n['G4'], S)
+
+        self.mytone(n['Gb4'], S)
+        self.mytone(n['E4'], S)
+        self.mytone(n['F4'], E)
+        sleep_ms(E)
+        self.mytone(n['Bb3'], E)
+        self.mytone(n['Eb4'], Q)
+        self.mytone(n['D4'], E + S)
+        self.mytone(n['Db4'], S)
+
+        self.mytone(n['C4'], S)
+        self.mytone(n['B3'], S)
+        self.mytone(n['C4'], E)
+        sleep_ms(E)
+        self.mytone(n['F3'], E)
+        self.mytone(n['Ab3'], Q)
+        self.mytone(n['F3'], E + S)
+        self.mytone(n['C4'], S)
+
+        self.mytone(n['LA3'], Q)
+        self.mytone(n['F3'], E + S)
+        self.mytone(n['C4'], S)
+        self.mytone(n['LA3'], H)
+
+        sleep_ms(2 * H)
+
+# Usage
+app = App()
+app.play()
