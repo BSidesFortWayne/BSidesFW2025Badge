@@ -15,7 +15,7 @@ class ImperialMarch(BaseApp):
         self.buzzer.duty(0)
 
         self.notes = {
-            'A3': 220, 'A4': 440, 'A5': 880,
+            'LA3': 220, 'LA4': 440, 'A5': 880,
             'C4': 262, 'C5': 523, 'C#4': 277, 'C#5': 554,
             'D4': 294, 'D5': 587,
             'E4': 330, 'E5': 659,
@@ -27,55 +27,57 @@ class ImperialMarch(BaseApp):
 
         # Full Imperial March melody, with corresponding note durations
         self.melody = [
-            ('A4', self.Q), ('A4', self.Q), ('A4', self.Q),
+            ('LA4', self.Q), ('LA4', self.Q), ('LA4', self.Q),
             ('F4', self.E), ('C5', self.S),
-            ('A4', self.Q), ('F4', self.E), ('C5', self.S), ('A4', self.H),
+            ('LA4', self.Q), ('F4', self.E), ('C5', self.S), ('LA4', self.H),
 
             ('E5', self.Q), ('E5', self.Q), ('E5', self.Q),
             ('F5', self.E), ('C5', self.S),
-            ('G#4', self.Q), ('F4', self.E), ('C5', self.S), ('A4', self.H),
+            ('G#4', self.Q), ('F4', self.E), ('C5', self.S), ('LA4', self.H),
 
             # Pause after first section
             ('REST', self.H),
 
-            ('A5', self.Q), ('A4', self.E), ('A4', self.S),
+            ('A5', self.Q), ('LA4', self.E), ('LA4', self.S),
             ('A5', self.Q), ('G#5', self.E), ('G5', self.S),
             ('F5', self.S), ('E5', self.S), ('F5', self.E),
             ('REST', self.E),
 
-            ('A4', self.E), ('C5', self.Q), ('A4', self.E),
+            ('LA4', self.E), ('C5', self.Q), ('LA4', self.E),
             ('C5', self.Q), ('E5', self.H),
 
             # Next section
-            ('A4', self.Q), ('A4', self.Q), ('A4', self.Q),
+            ('LA4', self.Q), ('LA4', self.Q), ('LA4', self.Q),
             ('F4', self.E), ('C5', self.S),
-            ('A4', self.Q), ('F4', self.E), ('C5', self.S), ('A4', self.H),
+            ('LA4', self.Q), ('F4', self.E), ('C5', self.S), ('LA4', self.H),
 
             ('E5', self.Q), ('E5', self.Q), ('E5', self.Q),
             ('F5', self.E), ('C5', self.S),
-            ('G#4', self.Q), ('F4', self.E), ('C5', self.S), ('A4', self.H),
+            ('G#4', self.Q), ('F4', self.E), ('C5', self.S), ('LA4', self.H),
 
             # Section with variation
-            ('A5', self.Q), ('A4', self.E), ('A4', self.S),
+            ('A5', self.Q), ('LA4', self.E), ('LA4', self.S),
             ('A5', self.Q), ('G#5', self.E), ('G5', self.S),
             ('F5', self.S), ('E5', self.S), ('F5', self.E),
             ('REST', self.E),
 
-            ('A4', self.E), ('C5', self.Q), ('A4', self.E),
+            ('LA4', self.E), ('C5', self.Q), ('LA4', self.E),
             ('C5', self.Q), ('E5', self.H),
 
             # Final repeat section
-            ('A4', self.Q), ('A4', self.Q), ('A4', self.Q),
+            ('LA4', self.Q), ('LA4', self.Q), ('LA4', self.Q),
             ('F4', self.E), ('C5', self.S),
-            ('A4', self.Q), ('F4', self.E), ('C5', self.S), ('A4', self.H),
+            ('LA4', self.Q), ('F4', self.E), ('C5', self.S), ('LA4', self.H),
 
             ('E5', self.Q), ('E5', self.Q), ('E5', self.Q),
             ('F5', self.E), ('C5', self.S),
-            ('G#4', self.Q), ('F4', self.E), ('C5', self.S), ('A4', self.H),
+            ('G#4', self.Q), ('F4', self.E), ('C5', self.S), ('LA4', self.H),
             
             # End
             ('REST', self.H),
         ]
+
+        self.play()
 
     def tone(self, note, duration):
         freq = self.notes.get(note, 0)
