@@ -92,7 +92,3 @@ class ImperialMarch(BaseApp):
     def play(self):
         for note, duration in self.melody:
             self.tone(note, duration)
-
-# Usage
-march = ImperialMarch(buzzer_pin=12, bpm=100)
-march.play()
