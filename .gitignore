@@ -5,6 +5,10 @@ node_modules
 src/config/*.json
 src/config/**/*.json
 
+# Hide the CTF related files... :-) 
+src/apps/*ctf.py
+tests/test_ctf.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
