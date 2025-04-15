@@ -1,8 +1,10 @@
-from typer import Typer
+import typer
 import os
 import time
+import mido
+import json
 
-app = Typer()
+app = typer.Typer()
 
 
 @app.command()
@@ -11,6 +13,55 @@ def erase_flash(device="/dev/ttyUSB0"):
     Erase the flash memory of the ESP32 device using esptool.
     """
     os.system("esptool.py --chip esp32 erase_flash")
+
+@app.command()
+def add_song(midi_filename: str, song_id: str):
+    """
+    Adds a MIDI file into the project that can be accessible in the code by the provided song id.
+    """
+
+    if not os.path.exists(midi_filename):
+        raise typer.BadParameter('MIDI file does not exist.')
+    
+    if os.path.exists(f'src/songs/{song_id}.json'):
+        raise typer.BadParameter('Song ID already in use.')
+    
+    mid = mido.MidiFile(midi_filename)
+    
+    notes_data = []
+    time = 0
+    tempo = 500000
+    ticks_per_beat = mid.ticks_per_beat
+    active_notes = {}
+    
+    for track in mid.tracks:
+        for msg in track:
+            time += msg.time
+            
+            if msg.type == 'set_tempo':
+                tempo = msg.tempo
+            
+            if msg.type == 'note_on':
+                frequency = 440 * 2 ** ((msg.note - 69) / 12)
+                
+                active_notes[msg.note] = {
+                    'frequency': frequency,
+                    'start_time': time
+                }
+            
+            elif msg.type == 'note_off':
+                if msg.note in active_notes:
+                    note_data = active_notes.pop(msg.note)
+                    start_time = note_data['start_time']
+                    
+                    duration_ticks = time - start_time
+                    duration_seconds = (duration_ticks / ticks_per_beat) * (tempo / 1000000)
+                    
+                    notes_data.append((note_data['frequency'], duration_seconds))
+    
+    song_file = open(f'src/songs/{song_id}.json', 'x')
+    song_file.write(json.dumps(notes_data))
+    song_file.close()
 
 @app.command()
 def write_flash(
