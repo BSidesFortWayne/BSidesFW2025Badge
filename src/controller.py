@@ -113,6 +113,8 @@ class Controller(IController):
             print(f"App {app_name} not found")
             return
 
+        self.bsp.speaker.stop_song()
+
         if app.constructor:
             print(f"Switched to {app_name} (already loaded)")
             async with self.current_app_lock:
