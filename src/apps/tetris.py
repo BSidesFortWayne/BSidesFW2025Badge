@@ -40,7 +40,7 @@ class View(BaseApp):
         self.next_block_size = 20
         self.score = 0
         self.lines = 0
-        controller.bsp.speaker.start_tetris()
+        controller.bsp.speaker.start_song('tetris', repeat=True)
         self.grid = [[0 for column in range(self.columns)] for row in range(self.rows)]
         self.blocks = [
             [
