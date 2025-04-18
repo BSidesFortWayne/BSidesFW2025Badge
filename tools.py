@@ -113,7 +113,7 @@ def write_flash(
     device: str = "/dev/ttyUSB0", 
     erase: bool = True,
     verbose: bool = False,
-    baud_rate: int = 460800,
+    baud_rate: int = 1843200,
 ):
     """
     Write a file to the ESP32 device using mpremote.
@@ -136,7 +136,9 @@ def write_flash(
     return elapsed_time
 
 
-@app.command()
+@app.command(
+    help="Write a .bin file to the flash"
+)
 def program_device(
     firmware: str = "firmware_SPIRAM_8MiB.bin", 
     reinstall_base_image: bool = False,
@@ -167,7 +169,9 @@ def program_device(
     os.system('mpremote reset')
 
 
-@app.command()
+@app.command(
+    help="Automatically detect and program devices plugged into new USB ports"
+)
 def auto_programmer():
     """
     Automatically program the device with the latest firmware and code.
@@ -182,7 +186,9 @@ def auto_programmer():
 
     """
 
-@app.command()
+@app.command(
+    help="Offline generate an app cache based on the apps in a specific directory. Useful for debugging app directory issues"
+)
 def generate_app_cache(app_directory="src/apps"):
     from src.app_directory import AppDirectory
     app_dir = AppDirectory(app_directory)
@@ -191,7 +197,9 @@ def generate_app_cache(app_directory="src/apps"):
     
 
     
-@app.command()
+@app.command(
+    help="Recursively copy `files` to the device root using mpremote. By default uses our src/ directory which is why this is called a 'deployment script'"
+)
 def deploy_app_to_device(files: list[str] = []):
     # Use mpremote to sync src/ folder to the device root
     # Execute this shell command
@@ -202,7 +210,9 @@ def deploy_app_to_device(files: list[str] = []):
 
     os.system("mpremote cp -r src/* :")
 
-
+@app.command(
+    help="Simple program to write name data to the badge. Sample for registration programming"
+)
 def program_name(
     first_name: str,
     last_name: str,

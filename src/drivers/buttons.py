@@ -43,9 +43,6 @@ class Buttons():
         self.last_release_times: list[int] = [0 for _ in range(total_buttons)]
         self.last_long_press_time: list[int] = [0 for _ in range(total_buttons)]
 
-
-        print(f"Registered {len(self.gpio_buttons)} buttons")
-
         # V1 hardware uses all GPIO buttons
         if hardware_rev == HardwareRev.V2:
             timer = Timer(3)

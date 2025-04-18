@@ -1,4 +1,4 @@
-from machine import Pin  
+from machine import Pin
 import neopixel 
 import time
 
@@ -27,7 +27,7 @@ def wheel(pos):
 class LEDs:
     def __init__(self):
         # Pin where WS2812 LEDs are connected
-        LEDpin = Pin(26)
+        self.LEDpin = Pin(26)
 
         # Maximum brightness constant (0 to 1)
         self.max_brightness = 0.1
@@ -58,7 +58,7 @@ class LEDs:
         CUSTOM_TIMINGS = (400, 5000, 5000, 450)
         
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=CUSTOM_TIMINGS)
+        self.leds = neopixel.NeoPixel(self.LEDpin, NUM_LEDS, timing=DEFAULT_TIMINGS)
 
 
     def set_led_color(self, led_index: int, color: LED_COLOR):

@@ -1,10 +1,11 @@
 from lib.smart_config import Config
+from icontroller import IController
 
 class BaseApp:
     name = ""
     version = "0.0.1"
     module = "no_module"
-    def __init__(self, controller):
+    def __init__(self, controller: IController):
         super().__init__()
         self.controller = controller
         self.config = Config(f"config/apps/{self.name}.json")

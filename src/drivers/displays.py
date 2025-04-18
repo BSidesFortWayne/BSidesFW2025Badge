@@ -28,13 +28,13 @@ class Displays:
         "white": gc9a01.WHITE,
     }
 
-    def __init__(self):
+    def __init__(self, spi_freq: int = 0):
         disp_en = Pin(self.DISP_EN, Pin.OUT)
         disp_en.value(1)
 
-        spi_freq = machine.freq() // 2
+        spi_freq = spi_freq or machine.freq() // 2
         print(f"SPI Frequency: {spi_freq}")
-        spi = SPI(1, baudrate=machine.freq() // 2, sck=Pin(self.SCK), mosi=Pin(self.MOSI))
+        spi = SPI(1, baudrate=spi_freq, sck=Pin(self.SCK), mosi=Pin(self.MOSI))
 
         self.display1 = gc9a01.GC9A01(
             spi, 
