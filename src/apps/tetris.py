@@ -1,12 +1,15 @@
 import asyncio
 
+import micropython
+
 import gc9a01
 from apps.app import BaseApp
 import random
 import vga2_bold_16x32 as font 
 import vga2_8x16 as font_small 
-from array import array
 import framebuf
+
+from src import single_app_runner
 
 @micropython.viper
 def swap16(buf: ptr8, n: int):
@@ -72,7 +75,7 @@ class View(BaseApp):
         self.is_game_over = False
 
         self.display1_mem_buf = bytearray(240*240*2)
-
+        self.display1_fbuf_mv = memoryview(self.display1_mem_buf)
         self.display1_fbuf = framebuf.FrameBuffer(
             self.display1_mem_buf, 
             240, 
@@ -394,3 +397,6 @@ class View(BaseApp):
         self.update_stats()
         while self.is_game_over:
             await asyncio.sleep(0.05)
+
+if __name__ == "__main__":
+    single_app_runner(Tetris, perf)
