@@ -60,7 +60,6 @@ class Menu(BaseApp):
         #         40 + (i * 40),
         #         display_index=2
         #     )
-        self.controller.bsp.buttons.button_pressed_callbacks.append(self.button_press)
 
         self.fbuf_width = 200
         self.fbuf_height = 240
@@ -77,11 +76,6 @@ class Menu(BaseApp):
 
         self.queue = queue.Queue(maxsize=10)
         self.index = 0
-
-
-    def __del__(self):
-        self.controller.bsp.buttons.button_pressed_callbacks.remove(self.button_press)
-    
 
     def put_queue_action(self, direction):
         try:

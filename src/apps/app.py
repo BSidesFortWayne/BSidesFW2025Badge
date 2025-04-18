@@ -24,3 +24,24 @@ class BaseApp:
         """
 
         pass
+    
+    def button_click(self, button):
+        """
+        Called when a button is clicked (called on release, but is not called with a long press)
+        """
+
+        pass
+
+    def button_release(self, button):
+        """
+        Called when a button is released.
+        """
+
+        pass
+
+    def button_long_press(self, button):
+        """
+        Called when a button is long pressed.
+        """
+
+        pass
