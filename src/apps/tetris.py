@@ -5,24 +5,20 @@ from apps.app import BaseApp
 import random
 import vga2_bold_16x32 as font 
 import vga2_8x16 as font_small 
+from array import array
+import framebuf
+
+@micropython.viper
+def swap16(buf: ptr8, n: int):
+    for i in range(n):
+        t         = buf[i*2]
+        buf[i*2]  = buf[i*2+1]
+        buf[i*2+1]= t
+
 
 class View(BaseApp):
     """
     Tetris
-
-    V1:
-
-    SW4 - Drop
-    SW3 - Rotate
-    SW2 - Right
-    SW1 - Left
-
-    V2:
-
-    SW3 - Rotate
-    SW5 - Right
-    SW6 - Left
-    SW4 - Drop
     """
 
     name = "Tetris"
@@ -75,10 +71,19 @@ class View(BaseApp):
         self.current_block = None
         self.is_game_over = False
 
+        self.display1_mem_buf = bytearray(240*240*2)
+
+        self.display1_fbuf = framebuf.FrameBuffer(
+            self.display1_mem_buf, 
+            240, 
+            240, 
+            framebuf.RGB565
+        )
+
         x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
         y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)
 
-        self.controller.displays.display1.fill_rect(
+        self.display1_fbuf.fill_rect(
             x_offset-5, 
             y_offset-5, 
             (self.columns * self.block_size)+10, 
@@ -91,43 +96,29 @@ class View(BaseApp):
 
     def button_press(self, button):
         if self.is_game_over:
-            if button == 2:
+            if button == 6:
                 self.__init__(self.controller)
             return
-        if self.controller.bsp.hardware_version == 1:
-            if button == 1:
-                # Move left
-                self.move_block_horizontal(-1)
-                self.draw_scene()
-            elif button == 2:
-                # Move right
-                self.move_block_horizontal(1)
-                self.draw_scene()
-            elif button == 4:
-                # Drop the current block all the way down
-                self.drop_current_block()
-                self.draw_scene()
-            elif button == 3:
-                # Rotate block and immediately redraw
-                self.rotate_current_block()
-                self.draw_scene()
-        else:
-            if button == 6:
-                # Move left
-                self.move_block_horizontal(-1)
-                self.draw_scene()
-            elif button == 5:
-                # Move right
-                self.move_block_horizontal(1)
-                self.draw_scene()
-            elif button == 4:
-                # Drop the current block all the way down
-                self.drop_current_block()
-                self.draw_scene()
-            elif button == 3:
-                # Rotate block and immediately redraw
-                self.rotate_current_block()
-                self.draw_scene()
+        if button == 5:
+            # Move left
+            self.move_block_horizontal(-1)
+            self.draw_scene()
+        elif button == 4:
+            # Move right
+            self.move_block_horizontal(1)
+            self.draw_scene()
+    
+    def button_click(self, button):
+        if button == 6:
+            # Rotate block and immediately redraw
+            self.rotate_current_block()
+            self.draw_scene()
+
+    def button_long_press(self, button):
+        if button == 6:
+            # Drop the current block all the way down
+            self.drop_current_block()
+            self.draw_scene()
 
     def update_stats(self):
         displays = self.controller.displays
@@ -347,9 +338,9 @@ class View(BaseApp):
             x_pix = x_offset
             for cell in row:
                 if cell:
-                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, red)
+                    self.display1_fbuf.fill_rect(x_pix, y_pix, self.block_size, self.block_size, red)
                 else:
-                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, black)
+                    self.display1_fbuf.fill_rect(x_pix, y_pix, self.block_size, self.block_size, black)
                 x_pix += self.block_size
             y_pix += self.block_size
 
@@ -362,7 +353,11 @@ class View(BaseApp):
                     if cell:
                         pixel_x = x_offset + (gx + col_i) * self.block_size
                         pixel_y = y_offset + (ghost_y + row_i) * self.block_size
-                        disp.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, 0x7800)
+                        self.display1_fbuf.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, 0x7800)
+
+        swap16(self.display1_mem_buf, 240*240)
+        self.controller.displays.display1.blit_buffer(self.display1_mem_buf, 0, 0, 240, 240)
+        swap16(self.display1_mem_buf, 240*240)
 
     async def update(self):
         if self.is_game_over:
@@ -370,8 +365,8 @@ class View(BaseApp):
             return
         y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
         x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
-        self.controller.displays.display1.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, gc9a01.color565(20, 20, 20))
-        self.controller.displays.display1.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, gc9a01.BLACK)
+        self.display1_fbuf.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, gc9a01.color565(20, 20, 20))
+        self.display1_fbuf.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, gc9a01.BLACK)
         self.draw_scene()
         self.move_block_down()
         await asyncio.sleep(0.5)
@@ -390,8 +385,8 @@ class View(BaseApp):
             font)
         self.controller.displays.display1.text(
             font_small,
-            "SW2 to retry",
-            int((self.controller.displays.display1.width()/2) - ((font_small.WIDTH*len("SW2 to retry")/2))),
+            "SEL to retry",
+            int((self.controller.displays.display1.width()/2) - ((font_small.WIDTH*len("SEL to retry")/2))),
             int((self.controller.displays.display1.height()/2) - (font_small.HEIGHT/2)) + font_small.HEIGHT*2,
             red,
             black

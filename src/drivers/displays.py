@@ -47,6 +47,7 @@ class Displays:
             options=0, 
             buffer_size=0
         )
+
         self.display2 = gc9a01.GC9A01(
             spi, 
             240, 

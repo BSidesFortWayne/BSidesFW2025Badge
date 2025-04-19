@@ -58,6 +58,7 @@ class Controller(IController):
 
         print("Register buttons")
         self.bsp.buttons.button_pressed_callbacks.append(self.button_press)
+        self.bsp.buttons.button_clicked_callbacks.append(self.button_click)
         self.bsp.buttons.button_released_callbacks.append(self.button_release)
         self.bsp.buttons.button_long_press_callbacks.append(self.button_long_press)
 
@@ -85,13 +86,21 @@ class Controller(IController):
 
 
     def button_long_press(self, button: int):
+        print(f'Button long press {button}')
+        self.current_view.button_long_press(button)
         if button == 3:
             asyncio.create_task(self.switch_app("Menu"))
 
     def button_press(self, button: int):
+        self.current_view.button_press(button)
         print(f"Button Press {button}")
 
+    def button_click(self, button: int):
+        print(f'Button click {button}')
+        self.current_view.button_click(button)
+
     def button_release(self, button: int):
+        self.current_view.button_release(button)
         print(f"Button Relased {button}")
 
     async def update(self):
