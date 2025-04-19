@@ -332,11 +332,8 @@ class View(BaseApp):
         displays = self.controller.displays
         disp = displays.display1
 
-        red = rgb((255, 0, 0))
-        black = rgb((0, 0, 0))
         red = displays.COLOR_LOOKUP['fbuf']['red']
         black = displays.COLOR_LOOKUP['fbuf']['black']
-        
 
         x_offset = round((disp.width() - (self.columns * self.block_size)) / 2)
         y_offset = round((disp.height() - (self.rows * self.block_size)) / 2)

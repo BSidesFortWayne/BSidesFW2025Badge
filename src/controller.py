@@ -13,7 +13,7 @@ from icontroller import IController
 class Controller(IController):
     # This is a singleton pattern which gives us a single instance of the 
     # controller object. This is useful for global state 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args):
         """ creates a singleton object, if it is not created, 
         or else returns the previous singleton object"""
         
