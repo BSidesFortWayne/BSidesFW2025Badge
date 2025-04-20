@@ -11,6 +11,7 @@ import framebuf
 
 from single_app_runner import run_app
 from drivers.displays import rgb
+import gc9a01
 
 
 @micropython.viper
@@ -139,7 +140,7 @@ class View(BaseApp):
                 y-5, 
                 (len(self.next_block[0]) * self.next_block_size)+10, 
                 (len(self.next_block) * self.next_block_size)+10, 
-                rgb((20, 20, 20))
+                gc9a01.color565(20, 20, 20)
             )
             for row_number, row in enumerate(self.next_block):
                 for column_number, cell in enumerate(row):
@@ -359,7 +360,7 @@ class View(BaseApp):
                     if cell:
                         pixel_x = x_offset + (gx + col_i) * self.block_size
                         pixel_y = y_offset + (ghost_y + row_i) * self.block_size
-                        self.display1_fbuf.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, red)
+                        self.display1_fbuf.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, 0x78)
 
         self.controller.displays.display1.blit_buffer(self.display1_fbuf_mv, 0, 0, 240, 240)
 
