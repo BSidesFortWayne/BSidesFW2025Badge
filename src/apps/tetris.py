@@ -1,12 +1,17 @@
 import asyncio
 
-import gc9a01
+import micropython
+
+import time
 from apps.app import BaseApp
 import random
 import vga2_bold_16x32 as font 
 import vga2_8x16 as font_small 
-from array import array
 import framebuf
+
+from single_app_runner import run_app
+from drivers.displays import rgb
+
 
 @micropython.viper
 def swap16(buf: ptr8, n: int):
@@ -27,7 +32,7 @@ class View(BaseApp):
         self.controller.neopixel.fill((0, 0, 0))
         self.controller.neopixel.write()
         displays = self.controller.displays
-        black = displays.COLOR_LOOKUP['black']
+        black = displays.COLOR_LOOKUP['fbuf']['black']
         displays.display1.fill(black)
         displays.display2.fill(black)
         self.rows = 20
@@ -72,7 +77,7 @@ class View(BaseApp):
         self.is_game_over = False
 
         self.display1_mem_buf = bytearray(240*240*2)
-
+        self.display1_fbuf_mv = memoryview(self.display1_mem_buf)
         self.display1_fbuf = framebuf.FrameBuffer(
             self.display1_mem_buf, 
             240, 
@@ -88,7 +93,7 @@ class View(BaseApp):
             y_offset-5, 
             (self.columns * self.block_size)+10, 
             (self.rows * self.block_size)+10, 
-            gc9a01.color565(20, 20, 20)
+            rgb((20, 20, 20))
         )
         self.next_block = random.choice(self.blocks)
 
@@ -122,9 +127,9 @@ class View(BaseApp):
 
     def update_stats(self):
         displays = self.controller.displays
-        black = displays.COLOR_LOOKUP['black']
-        white = displays.COLOR_LOOKUP['white']
-        red = displays.COLOR_LOOKUP['red']
+        black = displays.COLOR_LOOKUP['gc9a01']['black']
+        white = displays.COLOR_LOOKUP['gc9a01']['white']
+        red = displays.COLOR_LOOKUP['gc9a01']['red']
         self.controller.displays.display2.fill(black)
         if not self.is_game_over:
             x = round(self.controller.displays.display2.width()/4)
@@ -134,7 +139,7 @@ class View(BaseApp):
                 y-5, 
                 (len(self.next_block[0]) * self.next_block_size)+10, 
                 (len(self.next_block) * self.next_block_size)+10, 
-                gc9a01.color565(20, 20, 20)
+                rgb((20, 20, 20))
             )
             for row_number, row in enumerate(self.next_block):
                 for column_number, cell in enumerate(row):
@@ -326,9 +331,9 @@ class View(BaseApp):
 
         displays = self.controller.displays
         disp = displays.display1
-        red = displays.COLOR_LOOKUP['red']
-        black = displays.COLOR_LOOKUP['black']
-        
+
+        red = displays.COLOR_LOOKUP['fbuf']['red']
+        black = displays.COLOR_LOOKUP['fbuf']['black']
 
         x_offset = round((disp.width() - (self.columns * self.block_size)) / 2)
         y_offset = round((disp.height() - (self.rows * self.block_size)) / 2)
@@ -344,6 +349,7 @@ class View(BaseApp):
                 x_pix += self.block_size
             y_pix += self.block_size
 
+        
         if self.current_block:
             # draw the ghost
             shape = self.current_block['block']
@@ -353,27 +359,36 @@ class View(BaseApp):
                     if cell:
                         pixel_x = x_offset + (gx + col_i) * self.block_size
                         pixel_y = y_offset + (ghost_y + row_i) * self.block_size
-                        self.display1_fbuf.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, 0x7800)
+                        self.display1_fbuf.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, red)
 
-        swap16(self.display1_mem_buf, 240*240)
-        self.controller.displays.display1.blit_buffer(self.display1_mem_buf, 0, 0, 240, 240)
-        swap16(self.display1_mem_buf, 240*240)
+        self.controller.displays.display1.blit_buffer(self.display1_fbuf_mv, 0, 0, 240, 240)
 
     async def update(self):
+        debug = False
+        t_start = time.time_ns()
         if self.is_game_over:
             await self.game_over()
             return
         y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
         x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
-        self.display1_fbuf.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, gc9a01.color565(20, 20, 20))
-        self.display1_fbuf.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, gc9a01.BLACK)
+        self.display1_fbuf.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, rgb((20, 20, 20)))
+        self.display1_fbuf.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, rgb((0, 0, 0)))
+        t1 = time.time_ns()
         self.draw_scene()
+        t2 = time.time_ns()
         self.move_block_down()
-        await asyncio.sleep(0.5)
+
+        t_end = time.time_ns()
+        total_time_s = (t_end - t_start)/1_000_000_000
+        if debug:
+            print(f"Update time: {(t_end - t_start)/1_000_000} ms, Draw time: {(t2 - t1)/1_000_000} ms, Move time: {(t_end - t2)/1_000_000} ms")
+        
+        # If the render gets delayed, we will take that into account when we sleep
+        await asyncio.sleep(0.5 - total_time_s)
 
     async def game_over(self):
-        black = self.controller.displays.COLOR_LOOKUP['black']
-        red = self.controller.displays.COLOR_LOOKUP['red']
+        black = self.controller.displays.COLOR_LOOKUP['gc9a01']['black']
+        red = self.controller.displays.COLOR_LOOKUP['gc9a01']['red']
         self.controller.neopixel.fill((40, 0, 0))
         self.controller.neopixel.write()
         self.controller.displays.display1.fill(black)
@@ -394,3 +409,6 @@ class View(BaseApp):
         self.update_stats()
         while self.is_game_over:
             await asyncio.sleep(0.05)
+
+if __name__ == "__main__":
+    run_app(View, perf=True)

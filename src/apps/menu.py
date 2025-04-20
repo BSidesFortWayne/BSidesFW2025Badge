@@ -93,6 +93,7 @@ class Menu(BaseApp):
         self.put_queue_action(UP)
     
     def button_press(self, button: int):
+        print(f"Menu button press {button}")
         if self.controller.bsp.hardware_version == HardwareRev.V3:
             if button == 4:
                 self.menu_move_down()
