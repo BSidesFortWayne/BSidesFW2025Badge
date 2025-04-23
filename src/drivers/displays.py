@@ -35,6 +35,7 @@ class Displays:
         spi_freq = spi_freq or machine.freq() // 2
         print(f"SPI Frequency: {spi_freq}")
         spi = SPI(1, baudrate=spi_freq, sck=Pin(self.SCK), mosi=Pin(self.MOSI))
+        spi.init(baudrate=40000000)
 
         self.display1 = gc9a01.GC9A01(
             spi, 
