@@ -2,8 +2,7 @@ from machine import Pin, SPI
 import gc9a01 
 import vga1_bold_16x32
 import machine
-
-
+                    
 class Displays:    
     SCK = 18
     MOSI = 23
@@ -65,7 +64,7 @@ class Displays:
 
         self.display1.fill(gc9a01.BLACK)
         self.display2.fill(gc9a01.BLUE)
-
+                
     @staticmethod
     def rgb_to_565(r: int, g: int, b: int):
         return (r & 0xF8) | ((g & 0xE0) >> 5) | ((g & 0x1C) << 11) | ((b & 0xF8) << 5)
@@ -93,7 +92,6 @@ class Displays:
         display = self[display_index-1]
         display.text(font, text, x, y, fg, bg)
     
-
     def __getitem__(self, index):
         if index == 0:
             return self.display1
