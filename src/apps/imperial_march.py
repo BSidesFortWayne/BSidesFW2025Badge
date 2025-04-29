@@ -1,3 +1,4 @@
+import asyncio
 from apps.app import BaseApp
 from machine import Pin, PWM
 from time import sleep, ticks_ms, ticks_diff
@@ -31,12 +32,17 @@ class ImperialMarch(BaseApp):
         self.animate_title_start = ticks_ms()
 
         print("Playing Imperial March")
-        self.play_song()
+        # self.play_song()
         self.display.fill(color565(0, 0, 0))
         self.display2.fill(color565(0, 0, 0))
-        self.display_center_text("Main Menu")
-        self.controller.exit_app()
-        controller.app_return_to_menu()
+        # asyncio.create_task(self.controller.switch_app("Menu"))
+        # self.display_center_text("Main Menu")
+        # self.controller.exit_app()
+        # controller.app_return_to_menu()
+
+    async def update(self):
+        self.animate_title()
+        await asyncio.sleep(0.033)
 
     def display_center_text(self, text):
         # Get dimensions and font size
@@ -85,7 +91,7 @@ class ImperialMarch(BaseApp):
             ('f', 350), ('cH', 150), ('a', 650), ('eH', 500), ('eH', 500), ('eH', 500),
             ('fH', 350), ('cH', 150), ('gS', 500), ('f', 350), ('cH', 150), ('a', 650)
         ]:
-            self.animate_title()
+            # self.animate_title()
             self.beep(n, d)
         sleep(0.5)
 
@@ -95,7 +101,7 @@ class ImperialMarch(BaseApp):
             ('fSH', 125), ('fH', 125), ('fSH', 250), ('aS', 250), ('dSH', 500),
             ('dH', 325), ('cSH', 175), ('cH', 125), ('b', 125), ('cH', 250)
         ]:
-            self.animate_title()
+            # self.animate_title()
             self.beep(n, d)
         sleep(0.35)
 
@@ -107,7 +113,7 @@ class ImperialMarch(BaseApp):
             ('f', 250), ('gS', 500), ('f', 350), ('a', 125), ('cH', 500),
             ('a', 375), ('cH', 125), ('eH', 650)
         ]:
-            self.animate_title()
+            # self.animate_title()
             self.beep(n, d)
 
         sleep(0.5)
@@ -117,7 +123,11 @@ class ImperialMarch(BaseApp):
             ('f', 250), ('gS', 500), ('f', 375), ('cH', 125), ('a', 500),
             ('f', 375), ('cH', 125), ('a', 650)
         ]:
-            self.animate_title()
+            # self.animate_title()
             self.beep(n, d)
 
         sleep(0.65)
+
+if __name__ == "__main__":
+    from single_app_runner import run_app
+    run_app(ImperialMarch)

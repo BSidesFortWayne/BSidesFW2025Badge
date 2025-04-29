@@ -11,6 +11,20 @@ class BaseApp:
         self.config = Config(f"config/apps/{self.name}.json")
         print(f"BaseApp {self.name} {self.version}")
 
+    async def setup(self):
+        """
+        Is called when the app is started.
+        """
+        
+        return None
+
+    async def teardown(self):
+        """
+        Is called when the app is stopped.
+        """
+        
+        return None
+    
     async def update(self):
         """
         Is called every 50 milliseconds.
