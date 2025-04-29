@@ -13,15 +13,15 @@ from icontroller import IController
 class Controller(IController):
     # This is a singleton pattern which gives us a single instance of the 
     # controller object. This is useful for global state 
-    def __new__(cls):
+    def __new__(cls, *args):
         """ creates a singleton object, if it is not created, 
         or else returns the previous singleton object"""
         
         if not hasattr(cls, 'instance'):
-            cls.instance = super(Controller, cls).__new__(cls)
+            cls.instance = super(Controller, cls).__new__(cls, *args)
         return cls.instance
 
-    def __init__(self):
+    def __init__(self, load_menu: bool = True):
         # some things that the views will need
         self._bsp = BSP(HardwareRev.V3)
 
@@ -64,7 +64,8 @@ class Controller(IController):
 
         self.current_app_lock = asyncio.Lock()
 
-        asyncio.run(self.switch_app("Menu"))
+        if load_menu:
+            asyncio.run(self.switch_app("Menu"))
 
 
     async def run(self):
@@ -87,21 +88,25 @@ class Controller(IController):
 
     def button_long_press(self, button: int):
         print(f'Button long press {button}')
-        self.current_view.button_long_press(button)
+        if self.current_view:
+            self.current_view.button_long_press(button)
         if button == 3:
             asyncio.create_task(self.switch_app("Menu"))
 
     def button_press(self, button: int):
-        self.current_view.button_press(button)
+        if self.current_view:
+            self.current_view.button_press(button)
         print(f"Button Press {button}")
 
     def button_click(self, button: int):
         print(f'Button click {button}')
-        self.current_view.button_click(button)
+        if self.current_view:
+            self.current_view.button_click(button)
 
     def button_release(self, button: int):
-        self.current_view.button_release(button)
-        print(f"Button Relased {button}")
+        if self.current_view:
+            self.current_view.button_release(button)
+        print(f"Button Released {button}")
 
     async def update(self):
         if self.current_view:
