@@ -24,7 +24,7 @@ class FSEventHandler(watchdog.events.FileSystemEventHandler):
             os.system(f'mpremote cp {event.src_path} {event.src_path.replace('src', ':')}')
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent) -> None:
-        if type(event) == watchdog.events.FileModifiedEvent or type(event) == watchdog.events.FileMovedEvent or type(event) == watchdog.events.FileDeletedEvent:
+        if type(event) is watchdog.events.FileModifiedEvent or type(event) is watchdog.events.FileMovedEvent or type(event) is watchdog.events.FileDeletedEvent:
             now = time.time()
             last_time = self.last_modified.get(event.src_path, 0)
             if now - last_time > 3: # debounce

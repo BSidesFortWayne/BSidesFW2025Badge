@@ -119,7 +119,6 @@ class Menu(BaseApp):
         fbuf_height = self.fbuf_height
         fbuf_mv = self.fbuf_mv
         fbuf = self.fbuf
-        focus_index = self.focus_index
         display = self.controller.bsp.displays.display2
         animate = self.config['animate'].value()
 

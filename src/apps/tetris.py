@@ -76,8 +76,8 @@ class View(BaseApp):
             framebuf.RGB565
         )
 
-        x_offset = round((self.controller.displays.display1._width() - (self.columns * self.block_size)) / 2)
-        y_offset = round((self.controller.displays.display1._height() - (self.rows * self.block_size)) / 2)
+        x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
+        y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)
 
         self.display1_fbuf.fill_rect(
             x_offset-5, 
@@ -123,7 +123,7 @@ class View(BaseApp):
         red = displays.COLOR_LOOKUP['gc9a01']['red']
         self.controller.displays.display2.fill(black)
         if not self.is_game_over:
-            x = round(self.controller.displays.display2._width()/4)
+            x = round(self.controller.displays.display2.width()/4)
             y = 60
             self.controller.displays.display2.fill_rect(
                 x-5, 
@@ -139,12 +139,12 @@ class View(BaseApp):
                     else:
                         self.controller.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, black)
                     x += self.next_block_size
-                x = round(self.controller.displays.display2._width()/4)
+                x = round(self.controller.displays.display2.width()/4)
                 y += self.next_block_size
             self.controller.displays.display2.text(
                 font_small,
                 "Next",
-                round(self.controller.displays.display2._width()/4),
+                round(self.controller.displays.display2.width()/4),
                 60 - font_small.HEIGHT,
                 white,
                 black
@@ -152,7 +152,7 @@ class View(BaseApp):
         self.controller.displays.display2.text(
             font_small,
             f"Score: {self.score}",
-            round(self.controller.displays.display2._width()/4),
+            round(self.controller.displays.display2.width()/4),
             120,
             white,
             black
@@ -160,7 +160,7 @@ class View(BaseApp):
         self.controller.displays.display2.text(
             font_small,
             f"Lines: {self.lines}",
-            round(self.controller.displays.display2._width()/4),
+            round(self.controller.displays.display2.width()/4),
             120 + font_small.HEIGHT,
             white,
             black
@@ -361,10 +361,10 @@ class View(BaseApp):
         if self.is_game_over:
             await self.game_over()
             return
-        y_offset = round((self.controller.displays.display1._height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
-        x_offset = round((self.controller.displays.display1._width() - (self.columns * self.block_size)) / 2)
-        self.display1_fbuf.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1._width(), 5, rgb((20, 20, 20)))
-        self.display1_fbuf.fill_rect(0, y_offset, self.controller.displays.display1._width(), self.controller.displays.display1._height()-y_offset, rgb((0, 0, 0)))
+        y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
+        x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
+        self.display1_fbuf.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, rgb((20, 20, 20)))
+        self.display1_fbuf.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, rgb((0, 0, 0)))
         t1 = time.time_ns()
         self.draw_scene()
         t2 = time.time_ns()
@@ -393,8 +393,8 @@ class View(BaseApp):
         self.controller.displays.display1.text(
             font_small,
             "SEL to retry",
-            int((self.controller.displays.display1._width()/2) - ((font_small.WIDTH*len("SEL to retry")/2))),
-            int((self.controller.displays.display1._height()/2) - (font_small.HEIGHT/2)) + font_small.HEIGHT*2,
+            int((self.controller.displays.display1.width()/2) - ((font_small.WIDTH*len("SEL to retry")/2))),
+            int((self.controller.displays.display1.height()/2) - (font_small.HEIGHT/2)) + font_small.HEIGHT*2,
             red,
             black
         )

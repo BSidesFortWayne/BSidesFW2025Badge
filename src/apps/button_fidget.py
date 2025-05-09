@@ -1,4 +1,3 @@
-import asyncio
 import time
 from apps.app import BaseApp
 import framebuf
@@ -138,9 +137,7 @@ class ButtonFidget(BaseApp):
             )
         else:
             self.start_time = 0
-    
-        gen_end = time.ticks_ms()
-        
+            
         self.controller.bsp.displays.display1.blit_buffer(
             self.fbuf_mv,
             x,
@@ -156,15 +153,6 @@ class ButtonFidget(BaseApp):
             self.fbuf_width,
             self.fbuf_height,
         )
-
-        # frame_count += 1
-        # if frame_count % 100 == 0:
-        #     time_end = time.ticks_ms()
-        #     diff_s = (time_end - time_start) / 1000
-        #     total_frames = frame_count - last_frame_count
-        #     print(f'{total_frames / diff_s} FPS')
-        #     time_start = time.ticks_ms()
-        #     last_frame_count = frame_count
 
 
 if __name__ == "__main__":
