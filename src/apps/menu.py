@@ -84,6 +84,11 @@ class Menu(BaseApp):
             self.queue.get_nowait()
             self.queue.put_nowait(direction)
 
+    async def teardown(self):
+        self.title_display.fill(gc9a01.BLACK)
+        self.app_selection.fill(gc9a01.BLACK)
+
+
     def menu_move_down(self):
         self.put_queue_action(DOWN)
         
@@ -108,9 +113,6 @@ class Menu(BaseApp):
                 asyncio.create_task(self.controller.switch_app(self.display_items[SELECTED_INDEX]))
 
     async def update(self):
-        print("Menu Render")
-        # self.title_display.fill(gc9a01.BLACK)
-        # self.app_selection.fill(gc9a01.BLACK)
         debug_mode = False
         x_offset = self.config['x_offset']
         y_offset = self.config['y_offset']
