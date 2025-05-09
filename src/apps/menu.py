@@ -122,6 +122,8 @@ class Menu(BaseApp):
         display = self.controller.bsp.displays.display2
         animate = self.config['animate'].value()
 
+        display_items = self.display_items
+
         if not self.queue.empty():
             direction = await self.queue.get()
             if animate:
@@ -138,11 +140,11 @@ class Menu(BaseApp):
 
             self.selected_index = (self.selected_index + direction) % len(self.menu_items)
             item_count = len(self.menu_items)
-            self.display_items = [self.menu_items[i % item_count] for i in range(self.selected_index - 2, self.selected_index + 4)]
+            display_items = [self.menu_items[i % item_count] for i in range(self.selected_index - 2, self.selected_index + 4)]
             
 
         fbuf.fill(gc9a01.BLACK)
-        for i, item in enumerate(self.display_items):
+        for i, item in enumerate(display_items):
             off_x, off_y = self.font.write(
                 item, 
                 fbuf_mv, 
@@ -179,3 +181,5 @@ class Menu(BaseApp):
             fbuf_width,
             fbuf_height
         )
+
+        self.display_items = display_items
