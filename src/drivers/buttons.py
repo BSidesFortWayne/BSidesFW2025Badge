@@ -3,7 +3,7 @@ from machine import Pin, Timer
 import time 
 from drivers.pca9535 import PCA9535
 
-LONG_CLICK_DURATION_MS = 1000
+LONG_CLICK_DURATION_MS = 750
 def no_callback(button: int):
     print(f'Button {button} pressed')
 
@@ -22,6 +22,7 @@ class Buttons():
         # so that we can reset the long press timer when the button is released
         self.button_released_callbacks = [self.reset_button_long_press]
         self.button_long_press_callbacks = []
+        self.button_clicked_callbacks = []
         self.last_iox_state = 0
         self.iox = iox
 
@@ -78,8 +79,7 @@ class Buttons():
             print(f"Button {button} was long pressed, resetting")
             self.last_long_press_time[button] = 0
         else:
-            # TODO If this button wasn't long pressed, send a "clicked" event?
-            pass
+            [callback(button) for callback in self.button_clicked_callbacks]
         self.last_press_times[button] = 0
         self.last_long_press_time[button] = 0
 

@@ -29,10 +29,10 @@ class MicroFont:
             struct.unpack("<4sBBBBL",header_data)
         if magic != b'MFNT':
             raise ValueError(f"{filename} is not a MicroFont file")
-        self.height = height
-        self.baseline = baseline
-        self.max_width = max_width
-        self.monospaced = True if monospaced else False
+        self.height: int = height
+        self.baseline: int = baseline
+        self.max_width: int = max_width
+        self.monospaced: bool = True if monospaced else False
         self.index_len = index_len # Sparse index length on disk.
         self.cache_chars = cache_chars
         self.cache_index = cache_index or cache_chars
@@ -40,10 +40,10 @@ class MicroFont:
         self.cache = {}
         self.stream = stream # We keep the file open for lower latecy.
 
-    def height(): return self.height
-    def baseline(): return self.baseline
-    def max_width(): return self.max_width
-    def monospaced(): return self.monospaced
+    def height(self): return self.height
+    def baseline(self): return self.baseline
+    def max_width(self): return self.max_width
+    def monospaced(self): return self.monospaced
 
     def read_int_16(self,l):
         return l[0] | (l[1] << 8)
@@ -198,4 +198,5 @@ class MicroFont:
             self.draw_ch(ch,fb,fb_fmt,fb_width,fb_height,x,y,color,off_x,off_y,rot)
             off_x += x_spacing + ch[2]
     
-        return off_x, off_y or self.height
+        off_y = off_y or self.height
+        return off_x, off_y

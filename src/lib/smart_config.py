@@ -1,6 +1,8 @@
 import json
 import os
 
+from lib.file_hash import calculate_file_hash
+
 
 def python_type_to_html_type(value_type):
     if value_type is str:
@@ -57,7 +59,7 @@ class SmartConfigValue(dict):
     # TODO develop base "renderable" component for on screen editing of config values
 
 
-    # TODO deal with serializaton and deserialziation of smart config values...
+    # TODO deal with serializaton and deserialization of smart config values...
 #     def to_json(self):
 #         return json.dumps(self)
 
@@ -197,6 +199,10 @@ class Config(dict):
             return value
         else:
             return self.setdefault(key, value)
+
+    def checksum(self):
+        print(f'Calculating checksum for {self.filename}')
+        return calculate_file_hash(self.filename)
 
     def update(self, data: dict):
         updates = {}

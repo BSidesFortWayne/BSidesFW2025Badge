@@ -113,7 +113,7 @@ def write_flash(
     device: str = "/dev/ttyUSB0", 
     erase: bool = True,
     verbose: bool = False,
-    baud_rate: int = 1843200,
+    baud_rate: int = 921600,
 ):
     """
     Write a file to the ESP32 device using mpremote.
@@ -158,7 +158,7 @@ def program_device(
 
     # Load python code with mpremote
     start_file_send_time = time.time()
-    os.system("mpremote cp -r src/* :")
+    deploy_app_to_device()
     end_file_send_time = time.time()
     elapsed_file_send_time = end_file_send_time - start_file_send_time
     if verbose:
@@ -205,6 +205,12 @@ def deploy_app_to_device(files: list[str] = []):
     # Execute this shell command
     # mpremote cp src/* :
 
+    # Remove all .pyc before deployment
+    os.system("find src/ -name '*.pyc' -delete")
+
+    # Remove all __pycache__ folders before deployment
+    os.system("find src/ -name '__pycache__' -delete")
+
     print("Syncing files to device")
     print(files)
 
@@ -233,7 +239,9 @@ def program_name(
         )
     
     # Execute this shell command
-    os.system("uv run mpremote cp name.json :")
+    os.system("uv run mpremote mkdir :config")
+    os.system("uv run mpremote mkdir :config/apps")
+    os.system("uv run mpremote cp name.json :config/apps/Badge.json + reset")
 
 if __name__ == "__main__":
     app()

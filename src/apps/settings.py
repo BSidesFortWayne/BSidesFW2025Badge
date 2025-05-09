@@ -84,14 +84,20 @@ class App(BaseApp):
 
         @app.route('/config')
         async def index(request):
+            if not self.controller.current_view:
+                return 404
             return json.dumps(self.controller.current_view.config)
         
         @app.route('/config/<key>')
         async def get_key(request, key):
+            if not self.controller.current_view:
+                return 404
             return self.controller.current_view.config[key]
         
         @app.route('/config/<key>', methods=['POST'])
         async def set_key(request, key):
+            if not self.controller.current_view:
+                return 500
             self.controller.current_view.config[key] = request.body
             return json.dumps(self.controller.current_view.config)
         

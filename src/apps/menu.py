@@ -8,23 +8,23 @@ from lib import queue
 from lib.microfont import MicroFont
 from lib.smart_config import BoolDropdownConfig
 
-class IconMenu(BaseApp):
-    name = "Icon Menu"
-    version = "0.0.1"
-    def __init__(self, controller):
-        super().__init__(controller)
-        self.display1 = self.controller.bsp.displays.display1
-        self.display2 = self.controller.bsp.displays.display2
+# class IconMenu(BaseApp):
+#     name = "Icon Menu"
+#     version = "0.0.1"
+#     def __init__(self, controller):
+#         super().__init__(controller)
+#         self.display1 = self.controller.bsp.displays.display1
+#         self.display2 = self.controller.bsp.displays.display2
 
-        self.display1.fill(gc9a01.WHITE)
-        self.display2.fill(gc9a01.WHITE)
+#         self.display1.fill(gc9a01.WHITE)
+#         self.display2.fill(gc9a01.WHITE)
 
-        self.icon_size = 40
-        self.icon_spacing = 10
-        self.icons_per_row = 5
-        self.icon_rows = 3
+#         self.icon_size = 40
+#         self.icon_spacing = 10
+#         self.icons_per_row = 5
+#         self.icon_rows = 3
 
-        # self.icons = [app.icon for app in self.controller.app_directory]
+#         # self.icons = [app.icon for app in self.controller.app_directory]
 
 SELECTED_INDEX = 2
 DOWN = 1
@@ -60,7 +60,6 @@ class Menu(BaseApp):
         #         40 + (i * 40),
         #         display_index=2
         #     )
-        self.controller.bsp.buttons.button_pressed_callbacks.append(self.button_press)
 
         self.fbuf_width = 200
         self.fbuf_height = 240
@@ -73,15 +72,10 @@ class Menu(BaseApp):
             framebuf.RGB565
         )
         self.fbuf_mv = memoryview(self.fbuf_mem)
-        self.font = MicroFont("fonts/victor_R_24.mfnt", cache_index=True)
+        self.font = MicroFont("fonts/victor_R_24.mfnt", cache_index=True, cache_chars=True)
 
         self.queue = queue.Queue(maxsize=10)
         self.index = 0
-
-
-    def __del__(self):
-        self.controller.bsp.buttons.button_pressed_callbacks.remove(self.button_press)
-    
 
     def put_queue_action(self, direction):
         try:
@@ -99,6 +93,7 @@ class Menu(BaseApp):
         self.put_queue_action(UP)
     
     def button_press(self, button: int):
+        print(f"Menu button press {button}")
         if self.controller.bsp.hardware_version == HardwareRev.V3:
             if button == 4:
                 self.menu_move_down()
@@ -113,6 +108,7 @@ class Menu(BaseApp):
                 asyncio.create_task(self.controller.switch_app(self.display_items[SELECTED_INDEX]))
 
     async def update(self):
+        print("Menu Render")
         # self.title_display.fill(gc9a01.BLACK)
         # self.app_selection.fill(gc9a01.BLACK)
         debug_mode = False

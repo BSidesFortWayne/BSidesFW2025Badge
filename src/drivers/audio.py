@@ -34,7 +34,7 @@ class Speaker:
         song_file.close()
 
         if self.state == AUDIO_PLAYING:
-            self.current_song_task.cancel()
+            self.state = AUDIO_STOPPED
         
         self.current_song = song_id
 
@@ -50,8 +50,11 @@ class Speaker:
         self.duration = self.get_song_duration(song)
         print(f"Song Duration Is: {self.duration}")
         self.state = AUDIO_PLAYING
-        while self.state:
+        while self.state != AUDIO_STOPPED:
             for note, duration in song:
+                if self.state == AUDIO_STOPPED:
+                    break
+                
                 if note != 'R':
                     self.pwm.freq(int(note/2))
                     self.pwm.duty(30)
@@ -66,7 +69,7 @@ class Speaker:
                         await asyncio.sleep(0.1)
             if not repeat:
                 break
-        self.state = AUDIO_STOPPED
+        # self.state = AUDIO_STOPPED
         self.current_song = None
 
 

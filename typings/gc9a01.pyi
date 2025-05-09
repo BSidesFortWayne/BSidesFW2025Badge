@@ -11,8 +11,8 @@ WRAP_V = 0x01
 WRAP_H = 0x02
 WRAP = 0x03
 
-JPG_MODE_FAST = 0
-JPG_MODE_SLOW = 1
+FAST = 0
+SLOW = 1
 
 
 def color565(r: int, g: int, b: int):

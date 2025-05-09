@@ -21,7 +21,7 @@ fbuf = framebuf.FrameBuffer(
     framebuf.RGB565
 )
 
-font = MicroFont("fonts/victor_B_70.mfnt", cache_index=True)
+font = MicroFont("fonts/victor_B_70.mfnt", cache_index=True, cache_chars=True)
 
 color = 0xFFFF # Color must be in the framebuffer color mode format.
 angle = 0

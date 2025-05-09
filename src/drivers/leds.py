@@ -58,7 +58,7 @@ class LEDs:
         CUSTOM_TIMINGS = (400, 5000, 5000, 450)
         
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(self.LEDpin, NUM_LEDS, timing=DEFAULT_TIMINGS)
+        self.leds = neopixel.NeoPixel(self.LEDpin, NUM_LEDS, timing=CUSTOM_TIMINGS)
 
 
     def set_led_color(self, led_index: int, color: LED_COLOR):

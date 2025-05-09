@@ -19,7 +19,7 @@ class Level(BaseApp):
     def __init__(self, controller):
         super().__init__(controller)
 
-        self.font = MicroFont("fonts/victor_B_32.mfnt", cache_index=True)
+        self.font = MicroFont("fonts/victor_B_32.mfnt", cache_index=True, cache_chars=True)
 
         self.fbuf_width = 240
         self.fbuf_height = 240

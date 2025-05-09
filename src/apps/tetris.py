@@ -1,28 +1,20 @@
 import asyncio
 
-import gc9a01
+import time
 from apps.app import BaseApp
 import random
 import vga2_bold_16x32 as font 
 import vga2_8x16 as font_small 
+import framebuf
+
+from single_app_runner import run_app
+from drivers.displays import rgb
+import gc9a01
+
 
 class View(BaseApp):
     """
     Tetris
-
-    V1:
-
-    SW4 - Drop
-    SW3 - Rotate
-    SW2 - Right
-    SW1 - Left
-
-    V2:
-
-    SW3 - Rotate
-    SW5 - Right
-    SW6 - Left
-    SW4 - Drop
     """
 
     name = "Tetris"
@@ -31,7 +23,7 @@ class View(BaseApp):
         self.controller.neopixel.fill((0, 0, 0))
         self.controller.neopixel.write()
         displays = self.controller.displays
-        black = displays.COLOR_LOOKUP['black']
+        black = displays.COLOR_LOOKUP['fbuf']['black']
         displays.display1.fill(black)
         displays.display2.fill(black)
         self.rows = 20
@@ -75,15 +67,24 @@ class View(BaseApp):
         self.current_block = None
         self.is_game_over = False
 
-        x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
-        y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)
+        self.display1_mem_buf = bytearray(240*240*2)
+        self.display1_fbuf_mv = memoryview(self.display1_mem_buf)
+        self.display1_fbuf = framebuf.FrameBuffer(
+            self.display1_mem_buf, 
+            240, 
+            240, 
+            framebuf.RGB565
+        )
 
-        self.controller.displays.display1.fill_rect(
+        x_offset = round((self.controller.displays.display1._width() - (self.columns * self.block_size)) / 2)
+        y_offset = round((self.controller.displays.display1._height() - (self.rows * self.block_size)) / 2)
+
+        self.display1_fbuf.fill_rect(
             x_offset-5, 
             y_offset-5, 
             (self.columns * self.block_size)+10, 
             (self.rows * self.block_size)+10, 
-            gc9a01.color565(20, 20, 20)
+            rgb((20, 20, 20))
         )
         self.next_block = random.choice(self.blocks)
 
@@ -91,52 +92,38 @@ class View(BaseApp):
 
     def button_press(self, button):
         if self.is_game_over:
-            if button == 2:
+            if button == 6:
                 self.__init__(self.controller)
             return
-        if self.controller.bsp.hardware_version == 1:
-            if button == 1:
-                # Move left
-                self.move_block_horizontal(-1)
-                self.draw_scene()
-            elif button == 2:
-                # Move right
-                self.move_block_horizontal(1)
-                self.draw_scene()
-            elif button == 4:
-                # Drop the current block all the way down
-                self.drop_current_block()
-                self.draw_scene()
-            elif button == 3:
-                # Rotate block and immediately redraw
-                self.rotate_current_block()
-                self.draw_scene()
-        else:
-            if button == 6:
-                # Move left
-                self.move_block_horizontal(-1)
-                self.draw_scene()
-            elif button == 5:
-                # Move right
-                self.move_block_horizontal(1)
-                self.draw_scene()
-            elif button == 4:
-                # Drop the current block all the way down
-                self.drop_current_block()
-                self.draw_scene()
-            elif button == 3:
-                # Rotate block and immediately redraw
-                self.rotate_current_block()
-                self.draw_scene()
+        if button == 5:
+            # Move left
+            self.move_block_horizontal(-1)
+            self.draw_scene()
+        elif button == 4:
+            # Move right
+            self.move_block_horizontal(1)
+            self.draw_scene()
+    
+    def button_click(self, button):
+        if button == 6:
+            # Rotate block and immediately redraw
+            self.rotate_current_block()
+            self.draw_scene()
+
+    def button_long_press(self, button):
+        if button == 6:
+            # Drop the current block all the way down
+            self.drop_current_block()
+            self.draw_scene()
 
     def update_stats(self):
         displays = self.controller.displays
-        black = displays.COLOR_LOOKUP['black']
-        white = displays.COLOR_LOOKUP['white']
-        red = displays.COLOR_LOOKUP['red']
+        black = displays.COLOR_LOOKUP['gc9a01']['black']
+        white = displays.COLOR_LOOKUP['gc9a01']['white']
+        red = displays.COLOR_LOOKUP['gc9a01']['red']
         self.controller.displays.display2.fill(black)
         if not self.is_game_over:
-            x = round(self.controller.displays.display2.width()/4)
+            x = round(self.controller.displays.display2._width()/4)
             y = 60
             self.controller.displays.display2.fill_rect(
                 x-5, 
@@ -152,12 +139,12 @@ class View(BaseApp):
                     else:
                         self.controller.displays.display2.fill_rect(x, y, self.next_block_size, self.next_block_size, black)
                     x += self.next_block_size
-                x = round(self.controller.displays.display2.width()/4)
+                x = round(self.controller.displays.display2._width()/4)
                 y += self.next_block_size
             self.controller.displays.display2.text(
                 font_small,
                 "Next",
-                round(self.controller.displays.display2.width()/4),
+                round(self.controller.displays.display2._width()/4),
                 60 - font_small.HEIGHT,
                 white,
                 black
@@ -165,7 +152,7 @@ class View(BaseApp):
         self.controller.displays.display2.text(
             font_small,
             f"Score: {self.score}",
-            round(self.controller.displays.display2.width()/4),
+            round(self.controller.displays.display2._width()/4),
             120,
             white,
             black
@@ -173,7 +160,7 @@ class View(BaseApp):
         self.controller.displays.display2.text(
             font_small,
             f"Lines: {self.lines}",
-            round(self.controller.displays.display2.width()/4),
+            round(self.controller.displays.display2._width()/4),
             120 + font_small.HEIGHT,
             white,
             black
@@ -191,6 +178,7 @@ class View(BaseApp):
         }
 
         if self.collision(x, y, self.next_block):
+            asyncio.run(self.game_over())
             self.is_game_over = True
             return
 
@@ -335,9 +323,9 @@ class View(BaseApp):
 
         displays = self.controller.displays
         disp = displays.display1
-        red = displays.COLOR_LOOKUP['red']
-        black = displays.COLOR_LOOKUP['black']
-        
+
+        red = displays.COLOR_LOOKUP['fbuf']['red']
+        black = displays.COLOR_LOOKUP['fbuf']['black']
 
         x_offset = round((disp.width() - (self.columns * self.block_size)) / 2)
         y_offset = round((disp.height() - (self.rows * self.block_size)) / 2)
@@ -347,12 +335,13 @@ class View(BaseApp):
             x_pix = x_offset
             for cell in row:
                 if cell:
-                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, red)
+                    self.display1_fbuf.fill_rect(x_pix, y_pix, self.block_size, self.block_size, red)
                 else:
-                    disp.fill_rect(x_pix, y_pix, self.block_size, self.block_size, black)
+                    self.display1_fbuf.fill_rect(x_pix, y_pix, self.block_size, self.block_size, black)
                 x_pix += self.block_size
             y_pix += self.block_size
 
+        
         if self.current_block:
             # draw the ghost
             shape = self.current_block['block']
@@ -362,23 +351,36 @@ class View(BaseApp):
                     if cell:
                         pixel_x = x_offset + (gx + col_i) * self.block_size
                         pixel_y = y_offset + (ghost_y + row_i) * self.block_size
-                        disp.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, 0x7800)
+                        self.display1_fbuf.fill_rect(pixel_x, pixel_y, self.block_size, self.block_size, 0x78)
+
+        self.controller.displays.display1.blit_buffer(self.display1_fbuf_mv, 0, 0, 240, 240)
 
     async def update(self):
+        debug = False
+        t_start = time.time_ns()
         if self.is_game_over:
             await self.game_over()
             return
-        y_offset = round((self.controller.displays.display1.height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
-        x_offset = round((self.controller.displays.display1.width() - (self.columns * self.block_size)) / 2)
-        self.controller.displays.display1.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1.width(), 5, gc9a01.color565(20, 20, 20))
-        self.controller.displays.display1.fill_rect(0, y_offset, self.controller.displays.display1.width(), self.controller.displays.display1.height()-y_offset, gc9a01.BLACK)
+        y_offset = round((self.controller.displays.display1._height() - (self.rows * self.block_size)) / 2)+(self.rows * self.block_size)+5
+        x_offset = round((self.controller.displays.display1._width() - (self.columns * self.block_size)) / 2)
+        self.display1_fbuf.fill_rect(x_offset-5, y_offset-10, self.controller.displays.display1._width(), 5, rgb((20, 20, 20)))
+        self.display1_fbuf.fill_rect(0, y_offset, self.controller.displays.display1._width(), self.controller.displays.display1._height()-y_offset, rgb((0, 0, 0)))
+        t1 = time.time_ns()
         self.draw_scene()
+        t2 = time.time_ns()
         self.move_block_down()
-        await asyncio.sleep(0.5)
+
+        t_end = time.time_ns()
+        total_time_s = (t_end - t_start)/1_000_000_000
+        if debug:
+            print(f"Update time: {(t_end - t_start)/1_000_000} ms, Draw time: {(t2 - t1)/1_000_000} ms, Move time: {(t_end - t2)/1_000_000} ms")
+        
+        # If the render gets delayed, we will take that into account when we sleep
+        await asyncio.sleep(0.5 - total_time_s)
 
     async def game_over(self):
-        black = self.controller.displays.COLOR_LOOKUP['black']
-        red = self.controller.displays.COLOR_LOOKUP['red']
+        black = self.controller.displays.COLOR_LOOKUP['gc9a01']['black']
+        red = self.controller.displays.COLOR_LOOKUP['gc9a01']['red']
         self.controller.neopixel.fill((40, 0, 0))
         self.controller.neopixel.write()
         self.controller.displays.display1.fill(black)
@@ -390,12 +392,19 @@ class View(BaseApp):
             font)
         self.controller.displays.display1.text(
             font_small,
-            "SW2 to retry",
-            int((self.controller.displays.display1.width()/2) - ((font_small.WIDTH*len("SW2 to retry")/2))),
-            int((self.controller.displays.display1.height()/2) - (font_small.HEIGHT/2)) + font_small.HEIGHT*2,
+            "SEL to retry",
+            int((self.controller.displays.display1._width()/2) - ((font_small.WIDTH*len("SEL to retry")/2))),
+            int((self.controller.displays.display1._height()/2) - (font_small.HEIGHT/2)) + font_small.HEIGHT*2,
             red,
             black
         )
         self.update_stats()
-        while self.is_game_over:
-            await asyncio.sleep(0.05)
+        await asyncio.sleep(0.05)
+    
+    async def teardown(self):
+        self.controller.bsp.speaker.stop_song()
+        self.controller.neopixel.fill((0, 0, 0))
+        self.controller.neopixel.write()
+
+if __name__ == "__main__":
+    run_app(View, perf=True)

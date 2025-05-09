@@ -76,6 +76,9 @@ MAGENTA = const(0xF81F)
 YELLOW = const(0xFFE0)
 WHITE = const(0xFFFF)
 
+FAST = 0
+SLOW = 1
+
 _ENCODE_PIXEL = ">H"
 _ENCODE_POS = ">HH"
 _DECODE_PIXEL = ">BBB"
@@ -134,14 +137,17 @@ class GC9A01():
         rotation (int): display rotation
     """
 
-    def __init__(
-            self,
-            spi=None,
-            dc=None,
-            cs=None,
-            reset=None,
-            backlight=None,
-            rotation=0):
+    def __init__(self, 
+                 spi, 
+                 width: int = 240, 
+                 height: int = 240, 
+                 reset=None, 
+                 dc=None, 
+                 cs=None, 
+                 backlight=None, 
+                 rotation: int = 0,
+                 buffer_size: int = 0
+    ):
         """
         Initialize display.
         """
@@ -151,8 +157,8 @@ class GC9A01():
         if dc is None:
             raise ValueError("dc pin is required.")
 
-        self.width = 240
-        self.height = 240
+        self._width = width
+        self._height = height
         self.spi = spi
         self.reset = reset
         self.dc = dc
@@ -234,7 +240,33 @@ class GC9A01():
         if backlight is not None:
             backlight.value(1)
 
+    def init(self):
+        # this driver initalizes itself in the constructor... 
+        pass
+
+
+    def width(self):
+        return self._width
+
+    def height(self):
+        return self._height
     
+    def circle(self, x: int, y: int, radius: int, color: int):
+        """
+        Draw a circle at the given location and color.
+
+        Args:
+            x (int): x coordinate
+            Y (int): y coordinate
+            radius (int): radius of circle
+            color (int): 565 encoded color
+        """
+        self._set_window(x - radius, y - radius, x + radius, y + radius)
+        self._write(None, _encode_pixel(color) * (radius * radius * 4))
+        self._write(None, _encode_pixel(color) * (radius * radius * 4))
+        self._write(None, _encode_pixel(color) * (radius * radius * 4))
+        self._write(None, _encode_pixel(color) * (radius * radius * 4))
+
     def _write(self, command=None, data=None):
         """SPI write to the device: commands and data."""
         if self.cs:
@@ -329,7 +361,7 @@ class GC9A01():
             start (int): column start address
             end (int): column end address
         """
-        if start <= end <= self.width:
+        if start <= end <= self._width:
             self._write(GC9A01_CASET, _encode_pos(
                 start, end))
 
@@ -341,7 +373,7 @@ class GC9A01():
             start (int): row start address
             end (int): row end address
        """
-        if start <= end <= self.height:
+        if start <= end <= self._height:
             self._write(GC9A01_RASET, _encode_pos(
                 start, end))
 
@@ -394,6 +426,20 @@ class GC9A01():
         """
         self._set_window(x, y, x, y)
         self._write(None, _encode_pixel(color))
+
+
+    def jpg(self, buffer, x, y, options=0):
+        """
+        Write a JPEG image to the display.
+
+        Args:
+            buffer (bytes): JPEG image data
+            x (int): Top left corner x coordinate
+            y (int): Top left corner y coordinate
+            options (int): Options for JPEG decoding
+        """
+        self._set_window(x, y, x + 240 - 1, y + 240 - 1)
+        self._write(None, buffer)
 
     def blit_buffer(self, buffer, x, y, width, height):
         """
@@ -455,7 +501,7 @@ class GC9A01():
         Args:
             color (int): 565 encoded color
         """
-        self.fill_rect(0, 0, self.width, self.height, color)
+        self.fill_rect(0, 0, self._width, self._height, color)
 
     def line(self, x0, y0, x1, y1, color):
         """
@@ -530,6 +576,14 @@ class GC9A01():
         """
         self._write(GC9A01_VSCSAD, struct.pack(">H", vssa))
 
+    def write_len(self, font, text: str | int) -> int:
+        """Returns the width of the string or character in pixels if printed in the font.
+          :param font: font to use
+          :param text: string or character to draw
+          :returns: width of the string in pixels
+        """
+        ...
+        
     def _text8(self, font, text, x0, y0, color=WHITE, background=BLACK):
         """
         Internal method to write characters with width of 8 and
@@ -546,8 +600,8 @@ class GC9A01():
         for char in text:
             ch = ord(char)
             if (font.FIRST <= ch < font.LAST
-                    and x0+font.WIDTH <= self.width
-                    and y0+font.HEIGHT <= self.height):
+                    and x0+font.WIDTH <= self._width
+                    and y0+font.HEIGHT <= self._height):
 
                 if font.HEIGHT == 8:
                     passes = 1
@@ -650,8 +704,8 @@ class GC9A01():
         for char in text:
             ch = ord(char)
             if (font.FIRST <= ch < font.LAST
-                    and x0+font.WIDTH <= self.width
-                    and y0+font.HEIGHT <= self.height):
+                    and x0+font.WIDTH <= self._width
+                    and y0+font.HEIGHT <= self._height):
 
                 if font.HEIGHT == 16:
                     passes = 2
@@ -898,7 +952,7 @@ class GC9A01():
 
                 to_col = x + char_width - 1
                 to_row = y + font.HEIGHT - 1
-                if self.width > to_col and self.height > to_row:
+                if self._width > to_col and self._height > to_row:
                     self._set_window(x, y, to_col, to_row)
                     self._write(None, buffer[0:buffer_needed])
 
