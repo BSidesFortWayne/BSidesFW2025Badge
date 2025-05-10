@@ -103,6 +103,12 @@ class View(BaseApp):
             # Move right
             self.move_block_horizontal(1)
             self.draw_scene()
+        elif button == 0:
+            # Mute Toggle
+            if self.controller.bsp.speaker.state == 2: # AUDIO_PAUSED
+                self.controller.bsp.speaker.resume_song()
+            elif self.controller.bsp.speaker.state == 1: # AUDIO_PLAYING
+                self.controller.bsp.speaker.pause_song()
     
     def button_click(self, button):
         if button == 6:
