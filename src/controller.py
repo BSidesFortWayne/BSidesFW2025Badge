@@ -21,9 +21,9 @@ class Controller(IController):
     #         cls.instance = super(Controller, cls).__new__(cls, load_menu=load_menu)
     #     return cls.instance
 
-    def __init__(self, load_menu: bool = True):
+    def __init__(self, displays, load_menu: bool = True):
         # some things that the views will need
-        self._bsp = BSP(HardwareRev.V3)
+        self._bsp = BSP(HardwareRev.V3, displays)
 
         print("Callback handlers")
 
