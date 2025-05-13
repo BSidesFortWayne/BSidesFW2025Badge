@@ -8,9 +8,8 @@ gc.enable()
 gc.collect()
 
 
-async def main():
-    controller = Controller()
-
+async def main(displays):
+    controller = Controller(displays)
     # TODO conditionally start based on 
     # - Network is started
     # - User has setup configuration to auto-run HTTP server
@@ -24,4 +23,4 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(main())
+    asyncio.run(main(displays))

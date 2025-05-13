@@ -87,8 +87,8 @@ class Displays:
         self.display1.init()
         self.display2.init()
 
-        self.display1.fill(gc9a01.BLACK)
-        self.display2.fill(gc9a01.BLUE)
+        self.display1.jpg('/img/bsides_logo.jpg', 0, 0, gc9a01.FAST)
+        self.display2.jpg('/img/gigtel_logo.jpg', 0, 0, gc9a01.FAST)
 
     @staticmethod
     def rgb_to_565(r: int, g: int, b: int):
