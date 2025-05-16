@@ -185,3 +185,5 @@ class Menu(BaseApp):
         )
 
         self.display_items = display_items
+
+        self.controller.battery.draw_battery(self.controller.displays.display1, (120-15, 240-60))

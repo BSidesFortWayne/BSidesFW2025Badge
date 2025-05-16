@@ -9,6 +9,7 @@ import apps.app
 from bsp import BSP
 from hardware_rev import HardwareRev
 from icontroller import IController
+import lib.battery
 
 class Controller(IController):
     # This is a singleton pattern which gives us a single instance of the 
@@ -24,6 +25,8 @@ class Controller(IController):
     def __init__(self, displays, load_menu: bool = True):
         # some things that the views will need
         self._bsp = BSP(HardwareRev.V3, displays)
+
+        self.battery = lib.battery.Battery(self)
 
         print("Callback handlers")
 
