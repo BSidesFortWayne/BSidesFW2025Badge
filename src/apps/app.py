@@ -9,6 +9,7 @@ class BaseApp:
         super().__init__()
         self.controller = controller
         self.config = Config(f"config/apps/{self.name}.json")
+        self.controller.app_configs[self.name] = self.config
         print(f"BaseApp {self.name} {self.version}")
 
     async def setup(self):

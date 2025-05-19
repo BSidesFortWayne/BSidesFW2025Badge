@@ -1,0 +1,10 @@
+:root {
+    --background-color: #444;
+    --foreground-color: white;
+    --navbar-background-color: #333;
+    --accent-color: #006eff;
+    --navbar-foreground-color: white;
+    --button-foreground-color: white;
+    --input-background-color: #333;
+    --input-foreground-color: white;
+}

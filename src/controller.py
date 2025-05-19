@@ -28,6 +28,8 @@ class Controller(IController):
 
         self.battery = lib.battery.Battery(self)
 
+        self.app_configs = {}
+
         print("Callback handlers")
 
         self.app_directory = AppDirectory()
