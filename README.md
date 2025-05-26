@@ -90,7 +90,7 @@ This section describes the technical specifications of the board to aid in devel
 
 ### Schematic Overview
 
-Within the schematics/Badge Schematic V4.pdf (https://github.com/commputethis/BSidesFW2025Badge/blob/68bb887bfc6d0544537c8bf179ed645db8c0f13b/schematics/BSides%20Badge%20V2%20Schematic.pdf) you will find the electrical schematic of the device including the part numbers and connections between components identified as net labels. Each section of the schematic will be described below and applicable datasheets will be linked.
+Within the [schematics/Badge Schematic V4.pdf](https://github.com/commputethis/BSidesFW2025Badge/blob/68bb887bfc6d0544537c8bf179ed645db8c0f13b/schematics/BSides%20Badge%20V2%20Schematic.pdf) you will find the electrical schematic of the device including the part numbers and connections between components identified as net labels. Each section of the schematic will be described below and applicable datasheets will be linked.
 
 ### ESP32-WROVER-E-N8R8
 
