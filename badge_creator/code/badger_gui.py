@@ -20,7 +20,7 @@ args = parser.parse_args()
 # Set global variables
 local_path = args.localpath
 conference = args.conference
-badge_logo = '../images/badges/BadgeLogo.jpg'
+badge_logo = 'badges/BadgeLogo.jpg'
 badge_creator_logo = local_path + 'images/BSidesLogo.png'
 badge_file = local_path + "code/badge.txt"
 badge_image = local_path + args.formimage
@@ -213,7 +213,6 @@ class BadgeForm:
         self.entry_lastname.delete(0, tk.END)
         self.entry_company.delete(0, tk.END)
         self.status_var.set(self.options[0])
-        self.badgetype_var.set(self.badge_options[0])
         self.entry_firstname.focus_set()
 
     def create_badge_bsfw_2025_badge(self):
@@ -251,7 +250,6 @@ class BadgeForm:
         self.entry_lastname.delete(0, tk.END)
         self.entry_company.delete(0, tk.END)
         self.status_var.set(self.options[0])
-        self.badgetype_var.set(self.badge_options[0])
         self.entry_firstname.focus_set()
 
 
