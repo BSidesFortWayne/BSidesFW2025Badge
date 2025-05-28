@@ -223,7 +223,7 @@ class BadgeForm:
         status = self.status_var.get()
 
         # Write user information to name.json file
-        with open("name.json", "w") as f:
+        with open(f"{local_path}name.json", "w") as f:
             f.write(
                 f"""
                     {{
@@ -236,7 +236,7 @@ class BadgeForm:
             )
         
         # Push name.json file to badge
-        os.system("uv run mpremote cp name.json :")
+        os.system(f"uv run mpremote cp {local_path}name.json :")
     
         # Send soft reboot to MicroPython
         os.system("uv run mpremote reset")
