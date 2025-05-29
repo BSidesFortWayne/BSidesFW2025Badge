@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 # Add command-line arguments for name, company, and title
 parser.add_argument("--conference", help="Enter Conference Name", default="BSides Fort Wayne 2025")
 parser.add_argument("--formimage", help="Enter location of form logo", default="images/BadgeLogo.jpg")
-parser.add_argument("--localpath", help="Enter location of local files", default="/home/registration/Documents/Badger_2040/")
+parser.add_argument("--localpath", help="Enter location of local files", default="/home/registration/Documents/badge_creator/")
 
 # Parse the command-line arguments
 args = parser.parse_args()
@@ -22,7 +22,8 @@ local_path = args.localpath
 conference = args.conference
 badge_logo = 'badges/BadgeLogo.jpg'
 badge_creator_logo = local_path + 'images/BSidesLogo.png'
-badge_file = local_path + "code/badge.txt"
+badger_badge_file = local_path + "code/badge.txt"
+gigtel_badge_file = local_path + "code/name.json"
 badge_image = local_path + args.formimage
 serial_port = '/dev/ttyACM0'
 status = ['Attendee', 'Sponsor', 'Speaker', 'Volunteer']
@@ -190,14 +191,14 @@ class BadgeForm:
         status = self.status_var.get()
 
         # Write the information to a file called badge.txt
-        with open(badge_file, "w") as f:
+        with open(badger_badge_file, "w") as f:
             f.write(f"{status}\n{firstname}\n{firstname} {lastname}\n\n{company}\n\n{badge_logo}")
 
         # Transfer the files to the Badger 2040 board
         subprocess.run(['rshell', '--timing', '-p', 
                   serial_port, 
                   'cp', 
-                  badge_file, 
+                  badger_badge_file, 
                   badge_image, 
                   '/badges'])
         
@@ -215,6 +216,10 @@ class BadgeForm:
         self.status_var.set(self.options[0])
         self.entry_firstname.focus_set()
 
+        # Remove badger_badge_file file
+        if os.path.exists(badger_badge_file):
+            os.remove(badger_badge_file)
+
     def create_badge_bsfw_2025_badge(self):
         # Get the user input
         firstname = self.entry_firstname.get().strip()
@@ -223,7 +228,7 @@ class BadgeForm:
         status = self.status_var.get()
 
         # Write user information to name.json file
-        with open(f"{local_path}name.json", "w") as f:
+        with open(f"{gigtel_badge_file}", "w") as f:
             f.write(
                 f"""
                     {{
@@ -236,7 +241,7 @@ class BadgeForm:
             )
         
         # Push name.json file to badge
-        os.system(f"uv run mpremote cp {local_path}name.json :")
+        os.system(f"uv run mpremote cp {gigtel_badge_file} :")
     
         # Send soft reboot to MicroPython
         os.system("uv run mpremote reset")
@@ -251,6 +256,10 @@ class BadgeForm:
         self.entry_company.delete(0, tk.END)
         self.status_var.set(self.options[0])
         self.entry_firstname.focus_set()
+
+        # Remove name.json file
+        if os.path.exists(gigtel_badge_file):
+            os.remove(gigtel_badge_file)
 
 
 root = tk.Tk()
