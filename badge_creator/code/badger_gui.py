@@ -20,7 +20,7 @@ args = parser.parse_args()
 # Set global variables
 local_path = args.localpath
 conference = args.conference
-badge_logo = '../images/badges/BadgeLogo.jpg'
+badge_logo = 'badges/BadgeLogo.jpg'
 badge_creator_logo = local_path + 'images/BSidesLogo.png'
 badge_file = local_path + "code/badge.txt"
 badge_image = local_path + args.formimage
@@ -213,7 +213,6 @@ class BadgeForm:
         self.entry_lastname.delete(0, tk.END)
         self.entry_company.delete(0, tk.END)
         self.status_var.set(self.options[0])
-        self.badgetype_var.set(self.badge_options[0])
         self.entry_firstname.focus_set()
 
     def create_badge_bsfw_2025_badge(self):
@@ -224,7 +223,7 @@ class BadgeForm:
         status = self.status_var.get()
 
         # Write user information to name.json file
-        with open("name.json", "w") as f:
+        with open(f"{local_path}name.json", "w") as f:
             f.write(
                 f"""
                     {{
@@ -237,7 +236,7 @@ class BadgeForm:
             )
         
         # Push name.json file to badge
-        os.system("uv run mpremote cp name.json :")
+        os.system(f"uv run mpremote cp {local_path}name.json :")
     
         # Send soft reboot to MicroPython
         os.system("uv run mpremote reset")
@@ -251,7 +250,6 @@ class BadgeForm:
         self.entry_lastname.delete(0, tk.END)
         self.entry_company.delete(0, tk.END)
         self.status_var.set(self.options[0])
-        self.badgetype_var.set(self.badge_options[0])
         self.entry_firstname.focus_set()
 
 
