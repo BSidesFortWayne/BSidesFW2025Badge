@@ -203,6 +203,9 @@ def deploy_app_to_device(files: list[str] = []):
     os.system("mpremote cp -r src/* :")
 
 
+@app.command(
+    help="Simple program to write name data to the badge. Sample for registration programming"
+)
 def program_name(
     first_name: str,
     last_name: str,
@@ -223,7 +226,9 @@ def program_name(
         )
     
     # Execute this shell command
-    os.system("uv run mpremote cp name.json :")
+    os.system("uv run mpremote mkdir :config")
+    os.system("uv run mpremote mkdir :config/apps")
+    os.system("uv run mpremote cp name.json :config/apps/Badge.json + reset")
 
 if __name__ == "__main__":
     app()
