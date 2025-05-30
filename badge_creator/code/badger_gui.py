@@ -240,11 +240,15 @@ class BadgeForm:
                     """
             )
         
+        # Verify path exists
+        os.system(f"uv run mpremote mkdir :config")
+        os.system(f"uv run mpremote mkdir :config/apps")
+        
         # Push name.json file to badge
-        os.system(f"uv run mpremote cp {gigtel_badge_file} :")
+        os.system(f"uv run mpremote cp {gigtel_badge_file} :config/apps/Badge.json")
     
         # Send soft reboot to MicroPython
-        os.system("uv run mpremote reset")
+        os.system(f"uv run mpremote reset")
 
         # Show a message box to confirm the badge was created
         messagebox.showinfo("Badge Created", 
