@@ -4,6 +4,7 @@ from PIL import ImageTk, Image
 import subprocess
 import argparse
 import serial
+import os
 
 # Create an ArgumentParser object
 parser = argparse.ArgumentParser()
@@ -11,7 +12,7 @@ parser = argparse.ArgumentParser()
 # Add command-line arguments for name, company, and title
 parser.add_argument("--conference", help="Enter Conference Name", default="BSides Fort Wayne 2025")
 parser.add_argument("--formimage", help="Enter location of form logo", default="images/BadgeLogo.jpg")
-parser.add_argument("--localpath", help="Enter location of local files", default="/home/registration/Documents/Badger_2040/")
+parser.add_argument("--localpath", help="Enter location of local files", default="/home/registration/Documents/badge_creator/")
 
 # Parse the command-line arguments
 args = parser.parse_args()
@@ -19,12 +20,14 @@ args = parser.parse_args()
 # Set global variables
 local_path = args.localpath
 conference = args.conference
-badge_logo = '/badges/BadgeLogo.jpg'
+badge_logo = 'badges/BadgeLogo.jpg'
 badge_creator_logo = local_path + 'images/BSidesLogo.png'
-badge_file = local_path + "code/badge.txt"
+badger_badge_file = local_path + "code/badge.txt"
+gigtel_badge_file = local_path + "code/name.json"
 badge_image = local_path + args.formimage
 serial_port = '/dev/ttyACM0'
 status = ['Attendee', 'Sponsor', 'Speaker', 'Volunteer']
+badges = ['BSFW 2025 Badge', 'Badger2040']
 
 class BadgeForm:
     def __init__(self, master):
@@ -90,6 +93,13 @@ class BadgeForm:
         self.label_status.grid(row=3, 
                                sticky='e')
 
+        # Add Badge Type Label
+        self.label_badgetype = tk.Label(self.label_container, 
+                                     text="Badge Type: ", 
+                                     font=("Ariel, 18"))
+        self.label_badgetype.grid(row=4, 
+                               sticky='e')
+
         # Create a frame for the entry widgets
         self.entry_container = tk.Frame(self.field_container)
         self.entry_container.pack(side=tk.LEFT)
@@ -129,6 +139,23 @@ class BadgeForm:
         self.status_menu = root.nametowidget(self.status_dropdown.menuname)
         self.status_menu.config(font=("Ariel",18))
 
+        # Add Dropdown for Badge Type
+        self.badge_options = badges
+        self.badgetype_var = tk.StringVar()
+        self.badgetype_var.set(self.badge_options[0])
+        self.badgetype_dropdown = tk.OptionMenu(self.entry_container, 
+                                             self.badgetype_var, 
+                                             *self.badge_options)
+        self.badgetype_dropdown.config(font=("Ariel",16))
+        self.badgetype_dropdown.grid(row=4, 
+                                  column=1, 
+                                  sticky='ew')
+        
+        # Set font for the Bage Type dropdown
+        self.badgetype_menu = root.nametowidget(self.badgetype_dropdown.menuname)
+        self.badgetype_menu.config(font=("Ariel",18))
+
+        # Submit Button for "Create Badge"
         self.submit_button = tk.Button(master, 
                                        text="Create Badge", 
                                        command=self.create_badge, 
@@ -151,6 +178,12 @@ class BadgeForm:
         ser.close()
 
     def create_badge(self):
+        if (self.badgetype_var.get() == "Badger2040"):
+            self.create_badge_badger2040()
+        elif (self.badgetype_var.get() == "BSFW 2025 Badge"):
+            self.create_badge_bsfw_2025_badge()
+
+    def create_badge_badger2040(self):
         # Get the user input
         firstname = self.entry_firstname.get().strip()
         lastname = self.entry_lastname.get().strip()
@@ -158,14 +191,14 @@ class BadgeForm:
         status = self.status_var.get()
 
         # Write the information to a file called badge.txt
-        with open(badge_file, "w") as f:
+        with open(badger_badge_file, "w") as f:
             f.write(f"{status}\n{firstname}\n{firstname} {lastname}\n\n{company}\n\n{badge_logo}")
 
         # Transfer the files to the Badger 2040 board
         subprocess.run(['rshell', '--timing', '-p', 
                   serial_port, 
                   'cp', 
-                  badge_file, 
+                  badger_badge_file, 
                   badge_image, 
                   '/badges'])
         
@@ -182,6 +215,52 @@ class BadgeForm:
         self.entry_company.delete(0, tk.END)
         self.status_var.set(self.options[0])
         self.entry_firstname.focus_set()
+
+        # Remove badger_badge_file file
+        if os.path.exists(badger_badge_file):
+            os.remove(badger_badge_file)
+
+    def create_badge_bsfw_2025_badge(self):
+        # Get the user input
+        firstname = self.entry_firstname.get().strip()
+        lastname = self.entry_lastname.get().strip()
+        company = self.entry_company.get().strip()
+        status = self.status_var.get()
+
+        # Write user information to name.json file
+        with open(f"{gigtel_badge_file}", "w") as f:
+            f.write(
+                f"""
+                    {{
+                        "first_name": "{firstname}",
+                        "last_name": "{lastname}",
+                        "company": "{company}",
+                        "title": "{status}"
+                    }}
+                    """
+            )
+        
+        # Push name.json file to badge
+        os.system(f"uv run mpremote cp {gigtel_badge_file} :")
+    
+        # Send soft reboot to MicroPython
+        os.system("uv run mpremote reset")
+
+        # Show a message box to confirm the badge was created
+        messagebox.showinfo("Badge Created", 
+                            "Badge has been created.")
+
+        # Clear the form
+        self.entry_firstname.delete(0, tk.END)
+        self.entry_lastname.delete(0, tk.END)
+        self.entry_company.delete(0, tk.END)
+        self.status_var.set(self.options[0])
+        self.entry_firstname.focus_set()
+
+        # Remove name.json file
+        if os.path.exists(gigtel_badge_file):
+            os.remove(gigtel_badge_file)
+
 
 root = tk.Tk()
 
