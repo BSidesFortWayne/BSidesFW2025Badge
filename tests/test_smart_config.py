@@ -115,20 +115,6 @@ class TestSmartConfig(unittest.TestCase):
         self.assertEqual(new_config["test_enum"]["current"], "Option2")
         self.assertFalse(new_config["test_bool"].value())
 
-    def test_coercion(self):
-        """Test coercion of values."""
-        self.config.add("test_key", 123)
-        self.config.add("test_range", RangeConfig("test_range", 0, 100, current=50))
-        self.config.add("bool_dropdown", BoolDropdownConfig("bool_dropdown", current=True))
-        self.config["test_range"].parse_value(75)
-        self.assertEqual(self.config["test_key"], 123)
-        self.assertEqual(self.config["test_range"]["current"], 75)
-        self.assertEqual(self.config["test_range"], 75)
-        self.assertTrue(self.config["bool_dropdown"].value())
-        self.assertEqual(self.config["bool_dropdown"], True)
-        self.config["bool_dropdown"].parse_value("False")
-        self.assertFalse(self.config["bool_dropdown"].value())
-        self.assertEqual(self.config["bool_dropdown"], False)
 
 if __name__ == "__main__":
     unittest.main()

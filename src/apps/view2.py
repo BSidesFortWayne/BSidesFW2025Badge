@@ -1,14 +1,11 @@
 import apps.app
+import gc9a01
 
 class App(apps.app.BaseApp):
     name = "Green View"
-    def __init__(self, views):
+    def __init__(self, controller: apps.app.IController):
         self.view = 2
-        self.views = views
-        self.views.displays.display1.fill(self.views.displays.gc9a01.GREEN)
-        self.views.displays.display2.fill(self.views.displays.gc9a01.GREEN)
-
-    def button_press(self, button):
-        if button == 1:
-            # Back to home
-            self.views.switch_view(0)
+        self.views = controller
+        self.views.displays.display1.fill(gc9a01.GREEN)
+        self.views.displays.display2.fill(gc9a01.GREEN)
+        

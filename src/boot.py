@@ -2,6 +2,11 @@
 import machine
 import asyncio
 import json
+import drivers.displays
+
+# Loading the dispalys first to show the boot screen
+print('Showing boot screen..')
+displays = drivers.displays.Displays()
 
 frequency = 240_000_000
 

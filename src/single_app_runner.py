@@ -1,9 +1,9 @@
 import time
-def run_app(constructor, perf: bool = False, perf_rate_s: int = 5):
+def run_app(constructor, perf: bool = False, perf_rate_s: int = 5, displays=None):
     from controller import Controller
     import asyncio
 
-    controller = Controller(load_menu=False)
+    controller = Controller(displays, load_menu=False)
     app = constructor(controller)
     last_loop_time_ns = time.time_ns()
     renders = 0

@@ -1,5 +1,6 @@
 # Home
 
+import asyncio
 import gc9a01
 from apps.app import BaseApp
 import fonts.arial32px as arial32px
@@ -15,16 +16,27 @@ class App(BaseApp):
         super().__init__(controller)
         self.view = 0
         displays = self.controller.bsp.displays
-        first_name = self.config.add('first_name', 'WhatAbout')
-        last_name = self.config.add('last_name', 'Bob')
-        company = self.config.add('company', 'BSidesFW')
-        title = self.config.add('title', '2025')
-        image = self.config.add('background_image', "img/bsides_logo.jpg")
-        fg_color = self.config.add('fg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['white']))
-        bg_color = self.config.add('bg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['black']))
+        self.config.add('first_name', 'WhatAbout')
+        self.config.add('last_name', 'Bob')
+        self.config.add('company', 'BSidesFW')
+        self.config.add('title', '2025')
+        self.config.add('background_image', "img/bsides_logo.jpg")
+        self.config.add('fg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['gc9a01']['white']))
+        self.config.add('bg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['gc9a01']['black']))
+
+        self.last_checksum = self.config.checksum()
+
+    async def setup(self):
+        first_name = self.config['first_name']
+        last_name = self.config['last_name']
+        company = self.config['company']
+        title = self.config['title']
+        image = self.config['background_image']
+        displays = self.controller.bsp.displays
         # if there is a space in the name, split it
-        white = displays.COLOR_LOOKUP['white']
-        black = displays.COLOR_LOOKUP['black']
+        white = displays.COLOR_LOOKUP['gc9a01']['white']
+        black = displays.COLOR_LOOKUP['gc9a01']['black']
+        # if there is a space in the name, split it
         if not first_name and not last_name:
             displays.display_center_text(
                 'NO',
@@ -92,3 +104,9 @@ class App(BaseApp):
                 black
             )
 
+    async def update(self):
+        if self.config.checksum() != self.last_checksum:
+            await self.setup()
+            self.last_checksum = self.config.checksum()
+        
+        await asyncio.sleep(3)

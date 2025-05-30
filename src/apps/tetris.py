@@ -1,7 +1,5 @@
 import asyncio
 
-import micropython
-
 import time
 from apps.app import BaseApp
 import random
@@ -12,14 +10,6 @@ import framebuf
 from single_app_runner import run_app
 from drivers.displays import rgb
 import gc9a01
-
-
-@micropython.viper
-def swap16(buf: ptr8, n: int):
-    for i in range(n):
-        t         = buf[i*2]
-        buf[i*2]  = buf[i*2+1]
-        buf[i*2+1]= t
 
 
 class View(BaseApp):
@@ -113,6 +103,12 @@ class View(BaseApp):
             # Move right
             self.move_block_horizontal(1)
             self.draw_scene()
+        elif button == 0:
+            # Mute Toggle
+            if self.controller.bsp.speaker.state == 2: # AUDIO_PAUSED
+                self.controller.bsp.speaker.resume_song()
+            elif self.controller.bsp.speaker.state == 1: # AUDIO_PLAYING
+                self.controller.bsp.speaker.pause_song()
     
     def button_click(self, button):
         if button == 6:
@@ -188,6 +184,7 @@ class View(BaseApp):
         }
 
         if self.collision(x, y, self.next_block):
+            asyncio.run(self.game_over())
             self.is_game_over = True
             return
 
@@ -408,8 +405,12 @@ class View(BaseApp):
             black
         )
         self.update_stats()
-        while self.is_game_over:
-            await asyncio.sleep(0.05)
+        await asyncio.sleep(0.05)
+    
+    async def teardown(self):
+        self.controller.bsp.speaker.stop_song()
+        self.controller.neopixel.fill((0, 0, 0))
+        self.controller.neopixel.write()
 
 if __name__ == "__main__":
     run_app(View, perf=True)

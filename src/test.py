@@ -4,6 +4,7 @@ from machine import Pin
 import gc9a01
 import math
 import vga1_bold_16x32 as font
+import neopixel
 try:
     from collections import namedtuple
 except ImportError:
@@ -177,7 +178,7 @@ class LIS3DH:
 
         return struct.unpack('<h', self._read_register((_REG_OUTADC1_L+((adc-1)*2)) | 0x80, 2))[0]
 
-    def read_adc_mV(self, adc): 
+    def read_adc_mV(self, adc):
         """Read the specified analog to digital converter value in millivolts.
         ADC must be a value 1, 2, or 3.  NOTE the ADC can only measure voltages
         in the range of ~900-1200mV!
@@ -314,7 +315,7 @@ IO32.value(1)
 # Pin where WS2812 LEDs are connected
 LEDpin = machine.Pin(26)
 
-# Initialize I2C on an ESP32 
+# Initialize I2C on an ESP32
 i2c = machine.I2C(1, scl=machine.Pin(22), sda=machine.Pin(21), freq=400_000)
 # If your board only has one hardware I2C, you may need to use I2C(0, ...) instead.
 
@@ -340,6 +341,8 @@ imu = LIS3DH_I2C(i2c)
 
 speaker_pin = Pin(15, Pin.OUT)
 speaker = machine.PWM(speaker_pin)
+
+leds = neopixel.NeoPixel(Pin(26), 7, timing=(400, 5000, 5000, 450))
 
 speaker.duty(0)
 speaker.freq(100)
@@ -393,45 +396,60 @@ while True:
           "IO1_2:", pressed_IO1_2,
           "Acceleration:", imu.acceleration
           )
-    
+   
     freq = 1
     duty = 0
 
     if pressed_IO0_1:
+        for led in range(7):
+            leds[led-1] = (20, 0, 0)
+            leds.write()
         display1.fill_rect(100, 200, 10, 10, gc9a01.GREEN)
         duty = 128
         freq = 100
     else:
         display1.fill_rect(100, 200, 10, 10, gc9a01.RED)
-    
+   
     if pressed_IO0_2:
+        for led in range(7):
+            leds[led-1] = (0, 20, 0)
+            leds.write()
         duty = 128
         freq = 125
         display1.fill_rect(110, 200, 10, 10, gc9a01.GREEN)
     else:
         display1.fill_rect(110, 200, 10, 10, gc9a01.RED)
-    
+   
     if pressed_IO1_0:
+        for led in range(7):
+            leds[led-1] = (0, 0, 20)
+            leds.write()
         duty = 128
         freq = 150
         display1.fill_rect(120, 200, 10, 10, gc9a01.GREEN)
     else:
         display1.fill_rect(120, 200, 10, 10, gc9a01.RED)
-    
+   
     if pressed_IO1_1:
+        for led in range(7):
+            leds[led-1] = (20, 20, 0)
+            leds.write()
         duty = 128
         freq = 175
         display1.fill_rect(130, 200, 10, 10, gc9a01.GREEN)
     else:
         display1.fill_rect(130, 200, 10, 10, gc9a01.RED)
-    
+   
     if pressed_IO1_2:
+        for led in range(7):
+            leds[led-1] = (20, 0, 20)
+            leds.write()
         duty = 128
         freq = 200
         display1.fill_rect(140, 200, 10, 10, gc9a01.GREEN)
     else:
         display1.fill_rect(140, 200, 10, 10, gc9a01.RED)
-    
+   
     speaker.duty(duty)
     speaker.freq(freq)
 
@@ -454,5 +472,3 @@ while True:
         )
 
     time.sleep(0.05)  # Poll every half-second
-
-# End

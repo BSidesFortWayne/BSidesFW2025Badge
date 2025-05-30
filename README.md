@@ -250,3 +250,40 @@ IO33   CS1
 IO34   Accelerometer Interrupt
 
 IO35   Not Connected
+
+
+
+## Custom Base Image Instructions
+
+```bash
+# Get esp-idf
+git clone -b v5.2.2 --recursive https://github.com/espressif/esp-idf.git
+cd esp-idf
+git checkout v5.2.2
+git submodule update --init --recursive
+
+# Setup esp-idf
+./install.sh esp32 # (or install.bat on Windows)
+source export.sh   # (or export.bat on Windows)
+
+# Clone micropython + gc9a01 repo for display support
+git clone git@github.com:micropython/micropython.git
+git clone https://github.com/russhughes/gc9a01_mpy.git
+
+cd micropython/ports/esp32
+
+make \
+    BOARD=ESP32_GENERIC \
+    BOARD_VARIANT=SPIRAM \
+    USER_C_MODULES=../../../../gc9a01_mpy/src/micropython.cmake \
+    FROZEN_MANIFEST=../../../../../../gc9a01_mpy/manifest.py \
+    clean submodules all
+
+make \
+    BOARD=ESP32_GENERIC \
+    BOARD_VARIANT=SPIRAM \
+    USER_C_MODULES=../../../../gc9a01_mpy/src/micropython.cmake \
+    FROZEN_MANIFEST=../../../../../../gc9a01_mpy/manifest.py \   
+    erase deploy
+
+```

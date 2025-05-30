@@ -1,4 +1,5 @@
 from machine import Pin, SPI
+
 import gc9a01
 import vga1_bold_16x32
 import machine
@@ -25,7 +26,7 @@ class Displays:
     CS2 = 13
 
     DISP_EN = 32
-    COLOR_LOOKUP = {
+    COLOR_LOOKUP: dict[str, dict[str, int]] = {
         "gc9a01": {
             "black": gc9a01.BLACK,
             "blue": gc9a01.BLUE,
@@ -48,45 +49,46 @@ class Displays:
         },
     }
 
-    def __init__(self):
+    def __init__(self, spi_freq: int = 10_000_000):
         disp_en = Pin(self.DISP_EN, Pin.OUT)
         disp_en.value(1)
 
-        spi_freq = machine.freq() // 2
+        spi_freq = spi_freq or machine.freq() // 2
         print(f"SPI Frequency: {spi_freq}")
-        spi = SPI(
-            1, baudrate=machine.freq() // 2, sck=Pin(self.SCK), mosi=Pin(self.MOSI)
-        )
+        spi = SPI(1, baudrate=spi_freq, sck=Pin(self.SCK), mosi=Pin(self.MOSI))
 
-        self.display1 = gc9a01.GC9A01(
+        # TODO move to smart config?
+        USE_PY_DRIVER = False
+        DisplayDriver = gc9a01.GC9A01
+        if USE_PY_DRIVER:
+            from drivers.gc9a01 import GC9A01
+            DisplayDriver = GC9A01
+
+        self.display1 = DisplayDriver(
             spi,
             240,
             240,
             reset=Pin(self.RST1, Pin.OUT),
             cs=Pin(self.CS1, Pin.OUT),
             dc=Pin(self.DC1, Pin.OUT),
-            rotation=3,
-            options=0,
-            buffer_size=0,
+            rotation=3
         )
 
-        self.display2 = gc9a01.GC9A01(
+        self.display2 = DisplayDriver(
             spi,
             240,
             240,
             reset=Pin(self.RST2, Pin.OUT),
             cs=Pin(self.CS2, Pin.OUT),
             dc=Pin(self.DC2, Pin.OUT),
-            rotation=3,
-            options=0,
-            buffer_size=0,
+            rotation=3
         )
 
         self.display1.init()
         self.display2.init()
 
-        self.display1.fill(gc9a01.BLACK)
-        self.display2.fill(gc9a01.BLUE)
+        self.display1.jpg('/img/bsides_logo.jpg', 0, 0, gc9a01.FAST)
+        self.display2.jpg('/img/gigtel_logo.jpg', 0, 0, gc9a01.FAST)
 
     @staticmethod
     def rgb_to_565(r: int, g: int, b: int):
