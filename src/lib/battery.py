@@ -39,7 +39,7 @@ class Battery:
         self.controller.bsp.imu.adc_callbacks.append(self.adc_callback)
     
     async def adc_callback(self, value):
-        print(f'adc_callback: {value}')
+        # print(f'adc_callback: {value}')
         self.mv_average.add(value)
         now = time.time()
         time_since_log = now - self.last_log_time

@@ -49,7 +49,7 @@ class Displays:
         },
     }
 
-    def __init__(self, spi_freq: int = 80_000_000):
+    def __init__(self, spi_freq: int = 10_000_000):
         disp_en = Pin(self.DISP_EN, Pin.OUT)
         disp_en.value(1)
 

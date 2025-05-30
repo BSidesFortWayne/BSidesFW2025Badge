@@ -19,12 +19,14 @@ class Speaker:
 
         self.current_song_task = None
         self.current_song = None
+        self.duty = 30
 
     def resume_song(self):
         self.state = AUDIO_PLAYING
 
     def start_song(self, song_id, repeat=False):
         if self.current_song == song_id:
+            print(f"Already playing song {song_id}")
             return
 
         song_file = open(f'songs/{song_id}.json')
@@ -57,7 +59,7 @@ class Speaker:
                 
                 if note != 'R':
                     self.pwm.freq(int(note/2))
-                    self.pwm.duty(30)
+                    self.pwm.duty(self.duty)
                 else:
                     self.pwm.duty(0)
 

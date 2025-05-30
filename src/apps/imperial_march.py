@@ -32,7 +32,7 @@ class ImperialMarch(BaseApp):
         self.animate_title_start = ticks_ms()
 
         print("Playing Imperial March")
-        # self.play_song()
+        self.play_song()
         self.display.fill(color565(0, 0, 0))
         self.display2.fill(color565(0, 0, 0))
         # asyncio.create_task(self.controller.switch_app("Menu"))
@@ -106,27 +106,29 @@ class ImperialMarch(BaseApp):
         sleep(0.35)
 
     def play_song(self):
-        self.first_section()
-        self.second_section()
+        self.controller.bsp.speaker.start_song("imperialmarch")
+        print("Started Imperial March song")
+        # self.first_section()
+        # self.second_section()
 
-        for n, d in [
-            ('f', 250), ('gS', 500), ('f', 350), ('a', 125), ('cH', 500),
-            ('a', 375), ('cH', 125), ('eH', 650)
-        ]:
-            # self.animate_title()
-            self.beep(n, d)
+        # for n, d in [
+        #     ('f', 250), ('gS', 500), ('f', 350), ('a', 125), ('cH', 500),
+        #     ('a', 375), ('cH', 125), ('eH', 650)
+        # ]:
+        #     # self.animate_title()
+        #     self.beep(n, d)
 
-        sleep(0.5)
-        self.second_section()
+        # sleep(0.5)
+        # self.second_section()
 
-        for n, d in [
-            ('f', 250), ('gS', 500), ('f', 375), ('cH', 125), ('a', 500),
-            ('f', 375), ('cH', 125), ('a', 650)
-        ]:
-            # self.animate_title()
-            self.beep(n, d)
+        # for n, d in [
+        #     ('f', 250), ('gS', 500), ('f', 375), ('cH', 125), ('a', 500),
+        #     ('f', 375), ('cH', 125), ('a', 650)
+        # ]:
+        #     # self.animate_title()
+        #     self.beep(n, d)
 
-        sleep(0.65)
+        # sleep(0.65)
 
 if __name__ == "__main__":
     from single_app_runner import run_app

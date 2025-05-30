@@ -10,6 +10,7 @@ from bsp import BSP
 from hardware_rev import HardwareRev
 from icontroller import IController
 import lib.battery
+from drivers.displays import Displays
 
 class Controller(IController):
     # This is a singleton pattern which gives us a single instance of the 
@@ -23,6 +24,9 @@ class Controller(IController):
     #     return cls.instance
 
     def __init__(self, displays, load_menu: bool = True):
+        if not displays:
+            displays = Displays()
+        
         # some things that the views will need
         self._bsp = BSP(HardwareRev.V3, displays)
 

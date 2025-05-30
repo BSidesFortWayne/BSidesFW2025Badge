@@ -144,6 +144,7 @@ def program_device(
     reinstall_base_image: bool = False,
     device: str = "/dev/ttyUSB0",
     verbose: bool = True,
+    test_app_only: bool = False,
 ):
     # TODO I wonder if we can import esptool.py and mpremote directly as their python modules
     # Pros: we would get autocomplete and intellisense for running those tools
@@ -158,7 +159,10 @@ def program_device(
 
     # Load python code with mpremote
     start_file_send_time = time.time()
-    deploy_app_to_device()
+    if test_app_only:
+        os.system('mpremote run src/test.py :main.py')
+    else:
+        deploy_app_to_device()
     end_file_send_time = time.time()
     elapsed_file_send_time = end_file_send_time - start_file_send_time
     if verbose:

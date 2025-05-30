@@ -23,7 +23,7 @@ class StackLayout(Widget):
         self.padding = padding
         self.direction = direction
 
-    def add_widget(self, widget: Widget, x: int, y: int):
+    def add_widget(self, widget: Widget):
         self.children.append(widget)
 
     def render(
