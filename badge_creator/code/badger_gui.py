@@ -27,7 +27,7 @@ gigtel_badge_file = local_path + "code/name.json"
 badge_image = local_path + args.formimage
 serial_port = '/dev/ttyACM0'
 status = ['Attendee', 'Sponsor', 'Speaker', 'Volunteer']
-badges = ['BSFW 2025 Badge', 'Badger2040']
+badges = ['GigTel Badge', 'Badger2040']
 
 class BadgeForm:
     def __init__(self, master):
@@ -180,8 +180,8 @@ class BadgeForm:
     def create_badge(self):
         if (self.badgetype_var.get() == "Badger2040"):
             self.create_badge_badger2040()
-        elif (self.badgetype_var.get() == "BSFW 2025 Badge"):
-            self.create_badge_bsfw_2025_badge()
+        elif (self.badgetype_var.get() == "GigTel Badge"):
+            self.create_badge_gigtel_badge()
 
     def create_badge_badger2040(self):
         # Get the user input
@@ -220,7 +220,7 @@ class BadgeForm:
         if os.path.exists(badger_badge_file):
             os.remove(badger_badge_file)
 
-    def create_badge_bsfw_2025_badge(self):
+    def create_badge_gigtel_badge(self):
         # Get the user input
         firstname = self.entry_firstname.get().strip()
         lastname = self.entry_lastname.get().strip()
