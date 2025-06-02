@@ -20,22 +20,24 @@ class ImperialMarch(BaseApp):
         self.task = None
 
         self.display.fill(color565(0, 0, 0))
-        self.display.text(vga1_bold_16x32, "Imperial March", 5, 100, color565(255, 0, 0), color565(0, 0, 0))
+        self.task = asyncio.create_task(self.display_center_text("Imperial March", self.display))
+        # self.display.text(vga1_bold_16x32, "Imperial March", 5, 100, color565(255, 0, 0), color565(0, 0, 0))
         self.display2.fill(color565(0, 0, 0))
-        self.display2.text(vga1_bold_16x32, "Vader is coming!", 0, 100, color565(255, 0, 0), color565(0, 0, 0))
+        self.task = asyncio.create_task(self.display_center_text("Vader is coming!", self.display2))
+        # self.display2.text(vga1_bold_16x32, "Vader is coming!", 0, 100, color565(255, 0, 0), color565(0, 0, 0))
 
         print("Playing Imperial March")
         self.task = asyncio.create_task(self.play_song())
 
-    async def display_center_text(self, text):
+    async def display_center_text(self, text, screen):
         # Get dimensions and font size
         width = self.display.width()
         height = self.display.height()
-        text_width = len(text) * 16  # 16px per character
+        text_width = len(text) * 15  # 15px per character
         text_height = 32  # Font height
         x = (width - text_width) // 2
         y = (height - text_height) // 2
-        self.display.text(vga1_bold_16x32, text, x, y, color565(255, 255, 255), color565(0, 0, 0))
+        screen.text(vga1_bold_16x32, text, x, y, color565(255, 0, 0), color565(0, 0, 0))
 
     async def flash_leds(self, duration_ms):
         dim_red = (51, 0, 0)
