@@ -1,5 +1,8 @@
 import apps.app
 import gc9a01
+import machine
+import micropython
+import time
 
 class App(apps.app.BaseApp):
     name = "Green View"
@@ -8,4 +11,4 @@ class App(apps.app.BaseApp):
         self.views = controller
         self.views.displays.display1.fill(gc9a01.GREEN)
         self.views.displays.display2.fill(gc9a01.GREEN)
-        
+
