@@ -31,6 +31,9 @@ class Sleep:
         self.bsp.imu._write_register_byte(0x22, 0x00)
         self.bsp.imu._write_register_byte(0x25, 0x80)
 
+        # prevent the device from sleeping when pressing buttons
+        self.bsp.buttons.button_pressed_callbacks.append(self.shaken)
+
         self.last_shaken = time.time()
         self.bsp.imu._read_register_byte(0x39)
 
@@ -43,6 +46,7 @@ class Sleep:
                 callback=lambda t: micropython.schedule(self.update, 0))
 
     def shaken(self, pin):
+        print('Board shaken, resetting time to sleep')
         self.last_shaken = time.time()
         self.bsp.imu._read_register_byte(0x39)
 
