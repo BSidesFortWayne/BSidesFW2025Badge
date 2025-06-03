@@ -1,13 +1,8 @@
 from machine import Pin, SPI
-
-import vga1_bold_16x32
 import machine
-
-import micropython
-
 import gc9a01
 
-# @micropython.viper
+# @icropython.viper
 def rgb(color: tuple):
     r, g, b = color
     return (r & 0xF8) | ((g & 0xE0) >> 5) | ((g & 0x1C) << 11) | ((b & 0xF8) << 5)
@@ -28,14 +23,14 @@ class Displays:
     DISP_EN = 32
     COLOR_LOOKUP: dict[str, dict[str, int]] = {
         "gc9a01": {
-            # "black": gc9a01.BLACK,
-            # "blue": gc9a01.BLUE,
-            # "red": gc9a01.RED,
-            # "green": gc9a01.GREEN,
-            # "cyan": gc9a01.CYAN,
-            # "magenta": gc9a01.MAGENTA,
-            # "yellow": gc9a01.YELLOW,
-            # "white": gc9a01.WHITE,
+            "black": gc9a01.BLACK,
+            "blue": gc9a01.BLUE,
+            "red": gc9a01.RED,
+            "green": gc9a01.GREEN,
+            "cyan": gc9a01.CYAN,
+            "magenta": gc9a01.MAGENTA,
+            "yellow": gc9a01.YELLOW,
+            "white": gc9a01.WHITE,
         },
         "fbuf": {
             "black": rgb((0, 0, 0)),

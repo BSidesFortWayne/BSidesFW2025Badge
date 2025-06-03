@@ -7,6 +7,7 @@ def run_app(constructor, perf: bool = False, perf_rate_s: int = 5, displays=None
     app = constructor(controller)
     last_loop_time_ns = time.time_ns()
     renders = 0
+    asyncio.run(app.setup())
     while True:
         asyncio.run(app.update())
         renders += 1

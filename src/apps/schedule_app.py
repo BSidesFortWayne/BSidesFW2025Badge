@@ -11,6 +11,7 @@ from drivers.displays import rgb
 class ScheduleApp(BaseApp, WidgetApp):
     name = "ScheduleApp"
     version = "0.1.0"
+    hidden = True
 
     def __init__(self, controller):
         BaseApp.__init__(self, controller)

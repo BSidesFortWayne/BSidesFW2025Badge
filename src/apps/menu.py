@@ -39,7 +39,7 @@ class Menu(BaseApp):
         self.display_center_text = self.controller.bsp.displays.display_center_text
         self.display_text = self.controller.bsp.displays.display_text
 
-        self.menu_items = sorted([str(app) for app in self.controller.app_directory]) # type: ignore
+        self.menu_items = sorted([str(app) for app in self.controller.app_directory if not app.hidden])
         self.selected_index = 0
         self.focus_index = 2
         item_count = len(self.menu_items)

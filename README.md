@@ -286,4 +286,19 @@ make \
     FROZEN_MANIFEST=../../../../../../gc9a01_mpy/manifest.py \   
     erase deploy
 
+
+make \
+    BOARD=ESP32_GENERIC \
+    USER_C_MODULES=../../../../gc9a01_mpy/src/micropython.cmake \
+    FROZEN_MANIFEST=../../../../../../gc9a01_mpy/manifest.py \
+    clean submodules all
+
+make \
+    BOARD=ESP32_GENERIC \
+    USER_C_MODULES=../../../../gc9a01_mpy/src/micropython.cmake \
+    FROZEN_MANIFEST=../../../../../../gc9a01_mpy/manifest.py \   
+    erase deploy
+
+
+
 ```
