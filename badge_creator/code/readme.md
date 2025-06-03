@@ -8,12 +8,14 @@ Before running the script, one must set the variables in the script.  To do so, 
 
 The script is run as follows from the terminal:
 
-```python3 badger_gui.py```
+Example using default variable values:
 
-## create_badge.py
+``` python
+python3 badger_gui.py
+```
 
-Before running the script, one must set the variables in the script.  To do so, open the script in a text editor.  There is a list of other variables towards the top which need to be verified.  Most do not need to be modified for BSides, but at a minimum, the local file location(s) need updated for the machine it is being run from.  
+Example defining the localpath variable value:
 
-The script is run as follows from the terminal:
-
-```python3 create_badge.py --name "John Doe" --company "Company Name" --status "Attendee"```
+``` python
+python3 "badger_gui.py" --localpath "/home/registration/Documents/badge_creator/"
+```

@@ -33,7 +33,7 @@ This assumes this is a dedicated machine installed for this purpose.  This guide
         1. Blank Screen Delay - Never
         2. Automatic Screen lock - off
         3. Lock Screen on Suspend - off
-2. Install required components and copy scripts to the machine. This can be done by running the reg_station_setup.sh script from the machine.  So, put that on a usb drive and get it copied onto the machine.
+2. Install required components and copy scripts to the machine. This can be done by copying the badge_creator directory to the Documents directory on the registration machine and running the reg_station_setup.sh script from the machine.  So, put that on a usb drive and get it copied onto the machine.
    1. Sometimes, the run_badger_creator.sh file on the Desktop will show a lock on it in File Explorer and be owned by the root user. This will cause it not to work.  To fix that, just create a copy of the file, delete the old one, and rename the copy to the original name.
    2. The same thing happens with the /Documents/Badger_2040_Badge_Creator folder also.  Do the same thing to fix it.  However, after copying it, you can't just move it to trash, you must go to the terminal and run ```sudo rm /home/registration/Documents/Badger_2040_Badge_Creator -r```
 3. Need to make the run_badger_creator.sh file be able to run as an application.
