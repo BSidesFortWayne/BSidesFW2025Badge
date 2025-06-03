@@ -8,29 +8,15 @@ from lib import queue
 from lib.microfont import MicroFont
 from lib.smart_config import BoolDropdownConfig
 
-# class IconMenu(BaseApp):
-#     name = "Icon Menu"
-#     version = "0.0.1"
-#     def __init__(self, controller):
-#         super().__init__(controller)
-#         self.display1 = self.controller.bsp.displays.display1
-#         self.display2 = self.controller.bsp.displays.display2
-
-#         self.display1.fill(gc9a01.WHITE)
-#         self.display2.fill(gc9a01.WHITE)
-
-#         self.icon_size = 40
-#         self.icon_spacing = 10
-#         self.icons_per_row = 5
-#         self.icon_rows = 3
-
-#         # self.icons = [app.icon for app in self.controller.app_directory]
 
 SELECTED_INDEX = 2
-DOWN = 1
-UP = -1
-class Menu(BaseApp):
-    name = "Menu"
+MOVE_DOWN = 1
+MOVE_UP = -1
+MOVE_IN = 2
+MOVE_OUT = -2
+
+class Schedule(BaseApp):
+    name = "Schedule"
     def __init__(self, controller):
         super().__init__(controller)
         
@@ -39,11 +25,38 @@ class Menu(BaseApp):
         self.display_center_text = self.controller.bsp.displays.display_center_text
         self.display_text = self.controller.bsp.displays.display_text
 
-        self.menu_items = sorted([str(app) for app in self.controller.app_directory]) # type: ignore
-        self.selected_index = 0
+        self.schedule = {
+            "By Speaker": {
+                "Alice": "Alice's Talk",
+                "Bob": "Bob's Talk",
+                "Charlie": "Charlie's Talk",
+            },
+            "By Time": {
+                "10:00 AM": "Opening Remarks",
+                "11:00 AM": "Keynote Speech",
+                "12:00 PM": "Lunch Break",
+                "1:00 PM": "Panel Discussion",
+                "2:00 PM": "Workshops",
+                "3:00 PM": "Closing Ceremony",
+            },
+            "By Room": {
+                "Room A": "Workshop A",
+                "Room B": "Workshop B",
+                "Room C": "Panel Discussion",
+                "Room D": "Keynote Speech",
+            },
+            "By Track": {
+                "Track 1": "Introduction to Python",
+                "Track 2": "Advanced Python Techniques",
+                "Track 3": "Python for Data Science",
+                "Track 4": "Python for Web Development",
+            },
+        }
+        self.selected_index = 2
         self.focus_index = 2
-        item_count = len(self.menu_items)
-        self.display_items = [self.menu_items[i % item_count] for i in range(self.selected_index - 2, self.selected_index + 4)]
+        self.path = []
+        self.items = list(self.schedule.keys())
+        self.display_items = [self.items[i % len(self.items)] for i in range(self.selected_index - 2, self.selected_index + 4)]
 
         self.config.add("x_offset", 40)
         self.config.add("y_offset", 0)
@@ -53,13 +66,6 @@ class Menu(BaseApp):
         self.app_selection.fill(gc9a01.BLACK)
 
         self.display_center_text("Main Menu")
-        # for i, item in enumerate(self.menu_items):
-        #     self.display_text(
-        #         item,
-        #         40,
-        #         40 + (i * 40),
-        #         display_index=2
-        #     )
 
         self.fbuf_width = 200
         self.fbuf_height = 240
@@ -77,12 +83,12 @@ class Menu(BaseApp):
         self.queue = queue.Queue(maxsize=10)
         self.index = 0
 
-    def put_queue_action(self, direction):
+    def put_queue_action(self, action):
         try:
-            self.queue.put_nowait(direction)
+            self.queue.put_nowait(action)
         except queue.QueueFull:
             self.queue.get_nowait()
-            self.queue.put_nowait(direction)
+            self.queue.put_nowait(action)
 
     async def teardown(self):
         self.title_display.fill(gc9a01.BLACK)
@@ -90,27 +96,32 @@ class Menu(BaseApp):
 
 
     def menu_move_down(self):
-        self.put_queue_action(DOWN)
+        self.put_queue_action(MOVE_DOWN)
         
     def menu_move_up(self):
         # last = self.menu_items.pop(-1)
         # self.menu_items.insert(0, last)
-        self.put_queue_action(UP)
+        self.put_queue_action(MOVE_UP)
+    
+    def navigate_deeper(self):
+        pass
     
     def button_press(self, button: int):
         print(f"Menu button press {button}")
         if self.controller.bsp.hardware_version == HardwareRev.V3:
+            if button == 7:
+                self.navigate_deeper()
             if button == 4:
                 self.menu_move_down()
             elif button == 5:
                 self.menu_move_up()
             elif button == 6:
-                asyncio.create_task(self.controller.switch_app(self.display_items[SELECTED_INDEX]))
+                asyncio.create_task(self.controller.switch_app(self.items[SELECTED_INDEX]))
         else:
             if button == 5:
                 self.menu_move_down()
             elif button == 4:
-                asyncio.create_task(self.controller.switch_app(self.display_items[SELECTED_INDEX]))
+                asyncio.create_task(self.controller.switch_app(self.items[SELECTED_INDEX]))
 
     async def update(self):
         debug_mode = False
@@ -124,7 +135,7 @@ class Menu(BaseApp):
         display = self.controller.bsp.displays.display2
         animate = self.config['animate'].value()
 
-        display_items = self.display_items
+        display_items = self.items
 
         if not self.queue.empty():
             direction = await self.queue.get()
@@ -132,7 +143,7 @@ class Menu(BaseApp):
                 for i in range(0, menu_item_height, 5):
                     print(fbuf_width*i*2, fbuf_width*(fbuf_height - i)*2, y_offset + (i*direction), fbuf_width, fbuf_height - i)
                     self.controller.bsp.displays.display2.blit_buffer(
-                        fbuf_mv[fbuf_width*i*2:] if direction == UP else fbuf_mv[:fbuf_width*(fbuf_height - i)*2],
+                        fbuf_mv[fbuf_width*i*2:] if direction == MOVE_UP else fbuf_mv[:fbuf_width*(fbuf_height - i)*2],
                         x_offset,
                         y_offset,
                         fbuf_width,
@@ -140,9 +151,9 @@ class Menu(BaseApp):
                     )
                     await asyncio.sleep(0.01)
 
-            self.selected_index = (self.selected_index + direction) % len(self.menu_items)
-            item_count = len(self.menu_items)
-            display_items = [self.menu_items[i % item_count] for i in range(self.selected_index - 2, self.selected_index + 4)]
+            self.selected_index = (self.selected_index + direction) % len(self.items)
+            item_count = len(self.items)
+            display_items = [self.items[i % item_count] for i in range(self.selected_index - 2, self.selected_index + 4)] if (len(self.items) > 5) else self.items
             
 
         fbuf.fill(gc9a01.BLACK)
@@ -184,6 +195,10 @@ class Menu(BaseApp):
             fbuf_height
         )
 
-        self.display_items = display_items
+        self.items = display_items
 
-        self.controller.battery.draw_battery(self.controller.displays.display1, (120-15, 240-60))
+
+if __name__ == "__main__":
+    from single_app_runner import run_app
+    run_app(Schedule) # type: ignore)
+    

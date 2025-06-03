@@ -61,7 +61,7 @@ class ModuleMetadata:
             raise ValueError(f"File {filename} is not a python file")
         
         self.filename = filename
-        self.module_name = filename.replace(".py", "").replace(".pyc", "")
+        self.module_name = filename.replace(".pyc", "").replace(".py", "")
         self.checksum = checksum
         self.apps: list[AppMetadata] = []
 

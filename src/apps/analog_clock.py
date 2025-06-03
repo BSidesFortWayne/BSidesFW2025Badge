@@ -215,7 +215,7 @@ class AnalogClock(BaseApp):
             self.draw_minute_hand_fb(minute + (second / 60), self.config['minutes_hand_color'].value(), radius)
 
             # draw seconds hand with fractional milliseconds
-            # milliseconds vlaue can be 1-6 digits so that needds
+            # milliseconds value can be 1-6 digits so that needds
             # to be accounte for as well
             self.draw_second_hand_fb(second + (ms / 1_000_000), self.config['seconds_hand_color'].value(), radius)
             

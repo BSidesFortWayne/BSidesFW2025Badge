@@ -24,7 +24,7 @@ class FSEventHandler(watchdog.events.FileSystemEventHandler):
             os.system(f'mpremote cp {event.src_path} {event.src_path.replace('src', ':')}')
 
     def on_any_event(self, event: watchdog.events.FileSystemEvent) -> None:
-        if type(event) == watchdog.events.FileModifiedEvent or type(event) == watchdog.events.FileMovedEvent or type(event) == watchdog.events.FileDeletedEvent:
+        if type(event) is watchdog.events.FileModifiedEvent or type(event) is watchdog.events.FileMovedEvent or type(event) is watchdog.events.FileDeletedEvent:
             now = time.time()
             last_time = self.last_modified.get(event.src_path, 0)
             if now - last_time > 3: # debounce
@@ -113,7 +113,7 @@ def write_flash(
     device: str = "/dev/ttyUSB0", 
     erase: bool = True,
     verbose: bool = False,
-    baud_rate: int = 460800,
+    baud_rate: int = 921600,
 ):
     """
     Write a file to the ESP32 device using mpremote.
@@ -136,12 +136,15 @@ def write_flash(
     return elapsed_time
 
 
-@app.command()
+@app.command(
+    help="Write a .bin file to the flash"
+)
 def program_device(
     firmware: str = "firmware_SPIRAM_8MiB.bin", 
     reinstall_base_image: bool = False,
     device: str = "/dev/ttyUSB0",
     verbose: bool = True,
+    test_app_only: bool = False,
 ):
     # TODO I wonder if we can import esptool.py and mpremote directly as their python modules
     # Pros: we would get autocomplete and intellisense for running those tools
@@ -156,7 +159,10 @@ def program_device(
 
     # Load python code with mpremote
     start_file_send_time = time.time()
-    os.system("mpremote cp -r src/* :")
+    if test_app_only:
+        os.system('mpremote run src/test.py :main.py')
+    else:
+        deploy_app_to_device()
     end_file_send_time = time.time()
     elapsed_file_send_time = end_file_send_time - start_file_send_time
     if verbose:
@@ -167,7 +173,9 @@ def program_device(
     os.system('mpremote reset')
 
 
-@app.command()
+@app.command(
+    help="Automatically detect and program devices plugged into new USB ports"
+)
 def auto_programmer():
     """
     Automatically program the device with the latest firmware and code.
@@ -182,7 +190,9 @@ def auto_programmer():
 
     """
 
-@app.command()
+@app.command(
+    help="Offline generate an app cache based on the apps in a specific directory. Useful for debugging app directory issues"
+)
 def generate_app_cache(app_directory="src/apps"):
     from src.app_directory import AppDirectory
     app_dir = AppDirectory(app_directory)
@@ -191,17 +201,24 @@ def generate_app_cache(app_directory="src/apps"):
     
 
     
-@app.command()
+@app.command(
+    help="Recursively copy `files` to the device root using mpremote. By default uses our src/ directory which is why this is called a 'deployment script'"
+)
 def deploy_app_to_device(files: list[str] = []):
     # Use mpremote to sync src/ folder to the device root
     # Execute this shell command
     # mpremote cp src/* :
 
+    # Remove all .pyc before deployment
+    os.system("find src/ -name '*.pyc' -delete")
+
+    # Remove all __pycache__ folders before deployment
+    os.system("find src/ -name '__pycache__' -delete")
+
     print("Syncing files to device")
     print(files)
 
     os.system("mpremote cp -r src/* :")
-
 
 @app.command(
     help="Simple program to write name data to the badge. Sample for registration programming"

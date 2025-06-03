@@ -296,6 +296,8 @@ class LIS3DH:
         # Subclasses MUST implement this!
         raise NotImplementedError
 
+import asyncio
+
 class LIS3DH_I2C(LIS3DH):
     """Driver for the LIS3DH accelerometer connected over I2C."""
 
@@ -303,7 +305,60 @@ class LIS3DH_I2C(LIS3DH):
         self._i2c = i2c
         self._address = address
         super().__init__(int1=int1, int2=int2)
+        self.imu_callbacks = []
+        self.adc_callbacks = []
+        self._imu_read_rate_s = 0.1  # Default read rate in seconds
+        self._adc_read_rate_s = 1.0  # Default read rate in seconds
+        self.debug = False
 
+        self.imu_read_task = None
+        self.adc_read_task = None
+
+        self.restart_tasks()
+
+    def restart_tasks(self):
+        if self.imu_read_task:
+            self.imu_read_task.cancel()
+        if self.adc_read_task:
+            self.adc_read_task.cancel()
+
+        self.imu_read_task = asyncio.create_task(self._read_loop(lambda: self.acceleration, self.imu_callbacks, self._imu_read_rate_s, "IMU"))
+        self.adc_read_task = asyncio.create_task(self._read_loop(lambda: self.read_adc_mV(1), self.adc_callbacks, self._adc_read_rate_s, "ADC"))
+
+
+    def log(self, message, tag: str = "None"):
+        """Log a message to the console."""
+        if self.debug:
+            print(f"{time.time_ns() // 1_000_000}: [{tag}] {message}")
+
+    async def _read_loop(self, read_value, callbacks, read_rate_s: float, tag: str):
+        while True:
+            try:
+                start_time = time.time()
+                sleep_time = None
+                if not callbacks and not self.debug:
+                    self.log("No callbacks registered, would skip read when not debugging", tag)
+                    continue
+                
+                # Read the accelerometer values
+                value = read_value()
+                self.log(f"Read value: {value}", tag)
+                await asyncio.gather(*(callback(value) for callback in callbacks))
+
+                end_time = time.time()
+                elapsed_time = (end_time - start_time)
+                sleep_time = max(0, read_rate_s - elapsed_time)
+                
+            finally:
+                self.log(f"Sleeping for {sleep_time} seconds", tag)
+                await asyncio.sleep(sleep_time or read_rate_s)
+                
+
+    def read_values(self):
+        """Read the accelerometer values."""
+        x, y, z = struct.unpack('<hhh', self._read_register(_REG_OUT_X_L | 0x80, 6))
+        return (x, y, z)
+    
     def _read_register(self, register, length):
         return self._i2c.readfrom_mem(self._address, register, length)
 

@@ -6,11 +6,15 @@ class App(BaseApp):
     def __init__(self, controller):
         super().__init__(controller)
 
-        # This button callback will be automatically unregistered once this object is cleaned up/not in view
-        # self.register_button_pressed(self.button_press)
+        self.config.add("lucky_range", 10000)
+
+
+    async def setup(self):
+        self.button_press(0)
 
     def button_press(self, button: int):
         print(f"Button Press {button}")
-        self.controller.bsp.displays.display_center_text(
-            f"Your lucky number is {random.randint(1, 100)}"
-        )
+        displays = self.controller.bsp.displays
+        displays.display1.fill(0x0000)
+        lucky_range: int = self.config['lucky_range']
+        displays.display_center_text(str(random.randint(0, lucky_range)))

@@ -1,4 +1,4 @@
-from machine import Pin  
+from machine import Pin
 import neopixel 
 import time
 
@@ -27,7 +27,7 @@ def wheel(pos):
 class LEDs:
     def __init__(self):
         # Pin where WS2812 LEDs are connected
-        LEDpin = Pin(26)
+        self.LEDpin = Pin(26)
 
         # Maximum brightness constant (0 to 1)
         self.max_brightness = 0.1
@@ -58,7 +58,7 @@ class LEDs:
         CUSTOM_TIMINGS = (400, 5000, 5000, 450)
         
         # Create a NeoPixel object
-        self.leds = neopixel.NeoPixel(LEDpin, NUM_LEDS, timing=CUSTOM_TIMINGS)
+        self.leds = neopixel.NeoPixel(self.LEDpin, NUM_LEDS, timing=CUSTOM_TIMINGS)
 
 
     def set_led_color(self, led_index: int, color: LED_COLOR):
@@ -107,7 +107,7 @@ class LEDs:
     def color_bounce(self, start_color, wait, fade=True, color_alternate=False):
         """Move up and down the LED strip with the specified color "Bounce" at 
         the ends of the strip. This is really more of a test routine but it 
-        certianly could be used as an effect, or could at least be a selectable 
+        certainly could be used as an effect, or could at least be a selectable 
         fun routine in a list of routines
 
         Args:
