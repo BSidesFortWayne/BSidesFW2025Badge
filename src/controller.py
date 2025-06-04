@@ -4,6 +4,7 @@ import random
 
 import time
 
+import machine
 from app_directory import AppDirectory, AppMetadata
 import apps.app
 from bsp import BSP
@@ -11,6 +12,70 @@ from hardware_rev import HardwareRev
 from icontroller import IController
 import lib.battery
 from drivers.displays import Displays
+import esp32
+import micropython
+from drivers.audio import AUDIO_PLAYING, AUDIO_PAUSED, AUDIO_STOPPED
+
+class Sleep:
+    """
+    Handles everything related to the device sleeping. Saves and restores the state of different parts of the hardware while sleeping.
+    """
+
+    def __init__(self, bsp):
+        print('Configuring sleep')
+        self.bsp = bsp
+        self.state_before_sleeping = {}
+        self.lis3dh_int2_pin = machine.Pin(34, machine.Pin.IN)
+        self.bsp.imu.set_tap(tap=1, threshold=100)
+        self.bsp.imu._write_register_byte(0x24, 0x28)
+        self.bsp.imu._write_register_byte(0x22, 0x00)
+        self.bsp.imu._write_register_byte(0x25, 0x80)
+
+        # prevent the device from sleeping when pressing buttons
+        self.bsp.buttons.button_pressed_callbacks.append(self.shaken)
+
+        self.last_shaken = time.time()
+        self.bsp.imu._read_register_byte(0x39)
+
+        self.lis3dh_int2_pin.irq(trigger=machine.Pin.IRQ_RISING, handler=self.shaken)
+        esp32.wake_on_ext0(pin=self.lis3dh_int2_pin, level=esp32.WAKEUP_ANY_HIGH)
+
+        # machine.lightsleep cannot be called in a task
+        timer = machine.Timer(2)
+        timer.init(period=100, mode=machine.Timer.PERIODIC,
+                callback=lambda t: micropython.schedule(self.update, 0))
+
+    def shaken(self, pin):
+        print('Board shaken, resetting time to sleep')
+        self.last_shaken = time.time()
+        self.bsp.imu._read_register_byte(0x39)
+
+    def save_state(self):
+        self.state_before_sleeping['audio_state'] = self.bsp.speaker.state
+        self.state_before_sleeping['leds'] = list(self.bsp.leds.leds)
+    
+    def restore_state(self):
+        self.bsp.imu._read_register_byte(0x39) # irq latch
+        for led, color in enumerate(self.state_before_sleeping['leds']):
+            self.bsp.leds.leds[led] = color
+        self.bsp.leds.leds.write()
+        if self.state_before_sleeping['audio_state'] == AUDIO_PLAYING:
+            self.bsp.speaker.resume_song()
+        self.bsp.displays.disp_en.value(1)
+    
+    def sleep(self):
+        self.save_state()
+        self.bsp.leds.turn_off_all()
+        self.bsp.displays.disp_en.value(0)
+        if self.state_before_sleeping['audio_state'] == AUDIO_PLAYING:
+            self.bsp.speaker.pause_song()
+        
+        machine.lightsleep()
+
+    def update(self, _):
+        if time.time()-self.last_shaken >= 120:
+            self.sleep()
+            self.restore_state()
 
 class Controller(IController):
     # This is a singleton pattern which gives us a single instance of the 
@@ -62,6 +127,7 @@ class Controller(IController):
                 'title': 'Title'
            }
 
+        self.sleep = Sleep(self.bsp)
 
         print("Register buttons")
         self.bsp.buttons.button_pressed_callbacks.append(self.button_press)
@@ -73,7 +139,6 @@ class Controller(IController):
 
         if load_menu:
             asyncio.create_task(self.switch_app("Menu"))
-
 
     async def run(self):
         total_times = 0

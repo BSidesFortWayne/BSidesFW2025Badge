@@ -50,8 +50,8 @@ class Displays:
     }
 
     def __init__(self, spi_freq: int = 10_000_000):
-        disp_en = Pin(self.DISP_EN, Pin.OUT)
-        disp_en.value(1)
+        self.disp_en = Pin(self.DISP_EN, Pin.OUT)
+        self.disp_en.value(1)
 
         spi_freq = spi_freq or machine.freq() // 2
         print(f"SPI Frequency: {spi_freq}")
