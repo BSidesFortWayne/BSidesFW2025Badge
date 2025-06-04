@@ -228,6 +228,8 @@ class BadgeForm:
         company = self.entry_company.get().strip()
         status = self.status_var.get()
 
+        template = ""
+
         with open("name_provisioner.py.template", "r") as f:
             template = f.read()
         
