@@ -3,6 +3,7 @@ import json
 import random
 
 import time
+import os
 
 from app_directory import AppDirectory, AppMetadata
 import apps.app
@@ -11,6 +12,7 @@ from hardware_rev import HardwareRev
 from icontroller import IController
 import lib.battery
 from drivers.displays import Displays
+import utime
 
 class Controller(IController):
     # This is a singleton pattern which gives us a single instance of the 
@@ -61,6 +63,12 @@ class Controller(IController):
                 'company': 'Company',
                 'title': 'Title'
            }
+        
+        print('Bluetooth callbacks')
+        self.bsp.bluetooth.ble_callbacks.append(self.update_time)
+        self.bsp.bluetooth.ble_callbacks.append(self.lights)
+
+        self.reset_buttons_pressed = 0
 
 
         print("Register buttons")
@@ -92,13 +100,65 @@ class Controller(IController):
                 print(f"Average: {average} ms")
                 print(f"Average Hz: {int(1000/average)} Hz")
 
+    def update_time(self, payload):
+        if payload.startswith('time'):
+            payload = payload.split(':')
+            unix_time = int(payload[1])
+            epoch_difference = 946_684_800 # 0 seconds is January 1, 2000 instead of January 1, 1970
+            tz_offset = -4 * 3600 # UTC-5 with DST
+            t = utime.localtime(tz_offset + unix_time - epoch_difference)
+            self.bsp.rtc.datetime((t[0], t[1], t[2], t[6], t[3], t[4], t[5], 0))
+            print(f'Time updated, new time: {self.bsp.rtc.datetime()}, {time.time()}')
+
+    def lights(self, payload):
+        if payload == 'turn_on_lights':
+            time_now = self.bsp.rtc.datetime()
+            if not time_now[4] == 10:
+                print(f'Lights triggered at the wrong time: {time_now}')
+                return
+            try:
+                open('led_flag', 'r')
+            except:
+                pass
+            else:
+                print('Lights triggered but flag exists')
+                return
+            
+            open('led_flag', 'x').close()
+            for led in range(7):
+                self.bsp.leds.leds[led] = (30, 0, 0)
+            self.bsp.leds.leds.write()
+
+            time.sleep(10)
+
+            self.bsp.leds.turn_off_all()
 
     def button_long_press(self, button: int):
         print(f'Button long press {button}')
+
+        # if up and down are long pressed it clears the led flag if it is there
+        if button == 5 or button == 4:
+            self.reset_buttons_pressed += 1
+            print(self.reset_buttons_pressed)
+
         if self.current_view:
             self.current_view.button_long_press(button)
         if button == 3:
             asyncio.create_task(self.switch_app("Menu"))
+        
+        if self.reset_buttons_pressed == 2:
+            print('Clearing LED flag')
+            try:
+                os.remove('led_flag')
+            except Exception as e:
+                print('failed clearing flag: ' + str(e))
+            else:
+                for led in range(7):
+                    self.bsp.leds.leds[led] = (50, 0, 0)
+                self.bsp.leds.leds.write()
+                for led in range(7):
+                    self.bsp.leds.leds[led] = (0, 0, 0)
+                self.bsp.leds.leds.write()
 
     def button_press(self, button: int):
         if self.current_view:
@@ -111,6 +171,9 @@ class Controller(IController):
             self.current_view.button_click(button)
 
     def button_release(self, button: int):
+        if button == 5 or button == 4:
+            self.reset_buttons_pressed -= 1
+        
         if self.current_view:
             self.current_view.button_release(button)
         print(f"Button Released {button}")
