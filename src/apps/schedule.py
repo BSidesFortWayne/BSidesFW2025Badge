@@ -17,6 +17,8 @@ MOVE_OUT = -2
 
 class Schedule(BaseApp):
     name = "Schedule"
+    hidden = True
+    
     def __init__(self, controller):
         super().__init__(controller)
         

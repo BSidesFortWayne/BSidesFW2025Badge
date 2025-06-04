@@ -220,6 +220,29 @@ def deploy_app_to_device(files: list[str] = []):
 
     os.system("mpremote cp -r src/* :")
 
+@app.command()
+def fast_program_name(
+    first_name: str,
+    last_name: str,
+    company: str = "",
+    title: str = "",
+):
+    """
+    Simple program to write name data to the badge. Sample for registration programming.
+    """
+    with open("name_provisioner.py.template", "r") as f:
+        template = f.read()
+    
+    template = template.replace("FIRST_NAME", first_name)
+    template = template.replace("LAST_NAME", last_name)
+    template = template.replace("COMPANY", company)
+    template = template.replace("TITLE", title)
+
+    with open("name_provisioner.py", "w") as f:
+        f.write(template)
+
+    os.system("mpremote run name_provisioner.py + reset")
+
 @app.command(
     help="Simple program to write name data to the badge. Sample for registration programming"
 )

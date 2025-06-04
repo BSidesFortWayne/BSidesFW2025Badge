@@ -7,7 +7,7 @@ from drivers.audio import Speaker
 from drivers.bluetooth import Bluetooth
 
 class BSP:
-    def __init__(self, hardware_version: str, displays, debug: bool = False):
+    def __init__(self, hardware_version: str, displays: Displays, debug: bool = False):
         def print_debug(message: str):
             if debug:
                 print(message)

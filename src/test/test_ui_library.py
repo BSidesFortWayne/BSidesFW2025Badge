@@ -1,6 +1,7 @@
 import framebuf
 import time
 
+from ui.menu import TextMenuWidget
 from ui.table_layout import TableLayout
 from ui.common import Direction
 from ui.stack_layout import StackLayout
@@ -27,7 +28,7 @@ CS1 = 33
 DISP_EN = 32
 
 machine.freq(240_000_000)
-spi = SPI(1, baudrate=80_000_000 // 2, sck=Pin(SCK), mosi=Pin(MOSI))
+spi = SPI(1, baudrate=80_000_000, sck=Pin(SCK), mosi=Pin(MOSI))
 
 dc = Pin(DC1, Pin.OUT)
 rst = Pin(RST1, Pin.OUT)
@@ -86,16 +87,42 @@ fbuf = framebuf.FrameBuffer(
 # )
 
 # Example 3: TableLayout
+# layout = AbsoluteLayout(
+#     TableLayout(
+#         ["R1C1", "R1C2", "R1C3"], # , "R1C4"],
+#         ["R2C1", "R2C2", "R2C3"], # , "R2C4"],
+#         ["R3C1", "R3C2", "R3C3"], # , "R3C4"],
+#         ["R4C1", "R4C2", "R4C3"], # , "R4C4"],
+#         padding=5,
+#         cell_highlight=(3, 2),
+#     ),
+#     30,
+#     40
+# )
+
+# Example 4: Menu
 layout = AbsoluteLayout(
-    TableLayout(
-        ["R1C1", "R1C2", "R1C3"], # , "R1C4"],
-        ["R2C1", "R2C2", "R2C3"], # , "R2C4"],
-        ["R3C1", "R3C2", "R3C3"], # , "R3C4"],
-        ["R4C1", "R4C2", "R4C3"], # , "R4C4"],
-        padding=5,
-        cell_highlight=(3, 2),
+    TextMenuWidget(
+        {
+            "Item 1": "Description 1",
+            "Item 2": {
+                "Sub Item 1": "Sub Description 1",
+                "Sub Item 2": "Sub Description 2",
+                "Sub Item 3": {
+                    "Deep Sub Item 1": "Deep Sub Description 1",
+                    "Deep Sub Item 2": "Deep Sub Description 2",
+                },
+            },
+            "Item 3": "Description 3",
+            "Item 4": {
+                "Sub Item 1": "Sub Description 1",
+                "Sub Item 2": "Sub Description 2",
+            },
+        },
+        title="Menu Example",
+        path=["Item 2"]
     ),
-    30,
+    40,
     40
 )
 

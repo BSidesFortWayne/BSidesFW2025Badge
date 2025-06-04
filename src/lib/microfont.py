@@ -91,7 +91,23 @@ class MicroFont:
     # the actual drawing of the character to the target framebuffer memory
     # with rotation, oversampling and so forth.
     @micropython.viper
-    def draw_ch_blit(self, fb:ptr8, fb_width:int, fb_len:int, ch_buf:ptr8, ch_width:int, ch_height:int, dst_x:int, dst_y:int, off_x:int, off_y:int, color:int, sin_a:int, cos_a:int, colormode:int):
+    def draw_ch_blit(
+        self, 
+        fb:ptr8, 
+        fb_width:int, 
+        fb_len:int, 
+        ch_buf:ptr8, 
+        ch_width:int, 
+        ch_height:int,
+        dst_x:int, 
+        dst_y:int, 
+        off_x:int, 
+        off_y:int, 
+        color:int, 
+        sin_a:int, 
+        cos_a:int, 
+        colormode:int
+    ):
         for y in range(ch_height):
             for x in range(ch_width):
                 ch_byte = (ch_width>>3)*y + (x>>3)
@@ -150,7 +166,7 @@ class MicroFont:
         ch_width = ((ch[2] + 7) // 8) * 8
 
         # The lower-level drawing functions take the angle as integers
-        # representing the sin() and cos() value of the angle multiplyed
+        # representing the sin() and cos() value of the angle multiplied
         # by 64. This is needed since lower-level functions are implemented
         # using Viper, that only allows to use integer math.
         # We have a fast-path for obvious rotations (it makes a difference).
@@ -197,6 +213,22 @@ class MicroFont:
             ch = self.get_ch(c)
             self.draw_ch(ch,fb,fb_fmt,fb_width,fb_height,x,y,color,off_x,off_y,rot)
             off_x += x_spacing + ch[2]
-    
+
         off_y = off_y or self.height
         return off_x, off_y
+
+    # Measure the width and height of the text 'txt' when rendered with this font.
+    def measure(self, txt, *, x_spacing=0, y_spacing=0) -> tuple[int, int]:
+        off_x = 0
+        off_y = 0
+        max_width = 0
+        for c in txt:
+            if c == '\n':
+                off_y += self.height + y_spacing
+                off_x = 0
+                continue
+            ch = self.get_ch(c)
+            off_x += x_spacing + ch[2]
+            max_width = max(max_width, off_x)
+        off_y = off_y or self.height
+        return max_width, off_y

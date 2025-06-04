@@ -3,6 +3,8 @@ from icontroller import IController
 import badgechal
 from apps.app import BaseApp
 import vga1_bold_16x32
+import micropython
+import _thread
 
 class BadgeChal2(BaseApp):
     name = "CTF Challenge 2"
@@ -16,5 +18,5 @@ class BadgeChal2(BaseApp):
         self.display1.text(vga1_bold_16x32, "Verifying", 50, 100)
         self.display2.text(vga1_bold_16x32, "Keys...", 70, 100)
         print("Running Badge Challenge 2")
-        badgechal.chal2()
+        _thread.start_new_thread(badgechal.chal2, ())
         return None
