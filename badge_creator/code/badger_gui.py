@@ -220,6 +220,7 @@ class BadgeForm:
         if os.path.exists(badger_badge_file):
             os.remove(badger_badge_file)
 
+
     def create_badge_gigtel_badge(self):
         # Get the user input
         firstname = self.entry_firstname.get().strip()
@@ -227,28 +228,18 @@ class BadgeForm:
         company = self.entry_company.get().strip()
         status = self.status_var.get()
 
-        # Write user information to name.json file
-        with open(f"{gigtel_badge_file}", "w") as f:
-            f.write(
-                f"""
-                    {{
-                        "first_name": "{firstname}",
-                        "last_name": "{lastname}",
-                        "company": "{company}",
-                        "title": "{status}"
-                    }}
-                    """
-            )
+        with open("name_provisioner.py.template", "r") as f:
+            template = f.read()
         
-        # Verify path exists
-        os.system(f"uv run mpremote mkdir :config")
-        os.system(f"uv run mpremote mkdir :config/apps")
-        
-        # Push name.json file to badge
-        os.system(f"uv run mpremote cp {gigtel_badge_file} :config/apps/Badge.json")
-    
-        # Send soft reboot to MicroPython
-        os.system(f"uv run mpremote reset")
+        template = template.replace("FIRST_NAME", firstname)
+        template = template.replace("LAST_NAME", lastname)
+        template = template.replace("COMPANY", company)
+        template = template.replace("TITLE", status)
+
+        with open("name_provisioner.py", "w") as f:
+            f.write(template)
+
+        os.system("mpremote run name_provisioner.py + reset")
 
         # Show a message box to confirm the badge was created
         messagebox.showinfo("Badge Created", 
