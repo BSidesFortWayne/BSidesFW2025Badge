@@ -26,6 +26,21 @@ class App(BaseApp):
 
         self.last_checksum = self.config.checksum()
 
+    def wrap_text(self, text, font, max_width, display):
+        words = text.split(' ')
+        lines = []
+        current_line = ''
+
+        for word in words:
+            if display.write_len(font, current_line + word + ' ') <= max_width:
+                current_line += word + ' '
+            else:
+                lines.append(current_line.strip())
+                current_line = word + ' '
+        if current_line:
+            lines.append(current_line.strip())
+        return lines
+
     async def setup(self):
         first_name = self.config['first_name']
         last_name = self.config['last_name']
@@ -36,7 +51,7 @@ class App(BaseApp):
         # if there is a space in the name, split it
         white = displays.COLOR_LOOKUP['gc9a01']['white']
         black = displays.COLOR_LOOKUP['gc9a01']['black']
-        # if there is a space in the name, split it
+
         if not first_name and not last_name:
             displays.display_center_text(
                 'NO',
@@ -58,10 +73,6 @@ class App(BaseApp):
             display2_fg_color = self.config['fg_color'].value()
             display1_bg_color = self.config['bg_color'].value()
             display2_bg_color = self.config['bg_color'].value()
-            # display1_fg_color = tuple(int(self.config['fg_color'][0].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
-            # display2_fg_color = tuple(int(self.config['fg_color'][1].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
-            # display1_bg_color = tuple(int(self.config['bg_color'][0].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
-            # display2_bg_color = tuple(int(self.config['bg_color'][1].replace('#', '')[i:i+2], 16) for i in (0, 2, 4))
 
             if 'background_image' not in self.config:
                 displays.display1.fill(display1_bg_color)
@@ -70,43 +81,78 @@ class App(BaseApp):
                 displays[0].jpg(image, 0, 0, gc9a01.FAST)
                 displays[1].jpg(image, 0, 0, gc9a01.FAST)
 
-            displays.display1.write(
-                arial32px,
-                first_name,
-                int((displays.display1.width()/2) - ((displays.display1.write_len(arial32px, first_name)/2))),
-                int((displays.display1.height()/2) - arial32px.HEIGHT),
-                white,
-                black
-            )
-            displays.display1.write(
-                arial32px,
-                last_name,
-                int((displays.display1.width()/2) - ((displays.display1.write_len(arial32px, last_name)/2))),
-                int((displays.display1.height()/2)),
-                white,
-                black,
-            )
+            max_width = displays.display1.width() - 40  # Adjust padding as needed
+            wrapped_first_name = self.wrap_text(first_name, arial32px, max_width, displays.display1)
+            wrapped_last_name = self.wrap_text(last_name, arial32px, max_width, displays.display1)
+            wrapped_company = self.wrap_text(company, arial32px, max_width, displays.display2)
+            wrapped_title = self.wrap_text(title, arial32px, max_width, displays.display2)
 
-            displays.display2.write(
-                arial32px,
-                company,
-                int((displays.display2.width()/2) - ((displays.display2.write_len(arial32px, company)/2))),
-                int((displays.display2.height()/2) - arial32px.HEIGHT),
-                white,
-                black
-            )
-            displays.display2.write(
-                arial32px,
-                title,
-                int((displays.display2.width()/2) - ((displays.display2.write_len(arial32px, title)/2))),
-                int((displays.display2.height()/2)),
-                white,
-                black
-            )
+            # Debugging information
+            print("Wrapped First Name:", wrapped_first_name)
+            print("Wrapped Last Name:", wrapped_last_name)
+            print("Wrapped Company:", wrapped_company)
+            print("Wrapped Title:", wrapped_title)
+
+            # Calculate total height of the wrapped text
+            total_height_first_name = len(wrapped_first_name) * arial32px.HEIGHT
+            total_height_last_name = len(wrapped_last_name) * arial32px.HEIGHT
+            total_height_company = len(wrapped_company) * arial32px.HEIGHT
+            total_height_title = len(wrapped_title) * arial32px.HEIGHT
+
+            # Move veritical alignment up by X pixels
+            adjustment = 10
+
+            # Calculate y-offset to center the text vertically
+            y_offset_first_name = (displays.display1.height() - total_height_first_name) // 2 - adjustment
+            y_offset_last_name = (displays.display1.height() - total_height_last_name) // 2 - adjustment
+            y_offset_company = (displays.display2.height() - total_height_company) // 2 - adjustment
+            y_offset_title = (displays.display2.height() - total_height_title) // 2 - adjustment
+
+            # Render first name and last name on display1
+            for i, line in enumerate(wrapped_first_name):
+                displays.display1.write(
+                    arial32px,
+                    line,
+                    int((displays.display1.width() / 2) - (displays.display1.write_len(arial32px, line) / 2)),
+                    y_offset_first_name + i * arial32px.HEIGHT,
+                    white,
+                    black
+                )
+
+            for i, line in enumerate(wrapped_last_name):
+                displays.display1.write(
+                    arial32px,
+                    line,
+                    int((displays.display1.width() / 2) - (displays.display1.write_len(arial32px, line) / 2)),
+                    y_offset_last_name + i * arial32px.HEIGHT + total_height_first_name,
+                    white,
+                    black
+                )
+
+            # Render company and title on display2
+            for i, line in enumerate(wrapped_company):
+                displays.display2.write(
+                    arial32px,
+                    line,
+                    int((displays.display2.width() / 2) - (displays.display2.write_len(arial32px, line) / 2)),
+                    y_offset_company + i * arial32px.HEIGHT,
+                    white,
+                    black
+                )
+
+            for i, line in enumerate(wrapped_title):
+                displays.display2.write(
+                    arial32px,
+                    line,
+                    int((displays.display2.width() / 2) - (displays.display2.write_len(arial32px, line) / 2)),
+                    y_offset_title + i * arial32px.HEIGHT + total_height_company,
+                    white,
+                    black
+                )
 
     async def update(self):
         if self.config.checksum() != self.last_checksum:
             await self.setup()
             self.last_checksum = self.config.checksum()
-        
+
         await asyncio.sleep(3)
