@@ -72,7 +72,7 @@ class Controller(IController):
         self.current_app_lock = asyncio.Lock()
 
         if load_menu:
-            asyncio.run(self.switch_app("Menu"))
+            asyncio.create_task(self.switch_app("Menu"))
 
 
     async def run(self):
