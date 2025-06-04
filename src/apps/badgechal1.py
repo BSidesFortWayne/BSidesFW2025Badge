@@ -1,7 +1,10 @@
+import asyncio
 from lib.smart_config import Config
 from icontroller import IController
 import badgechal
 from apps.app import BaseApp
+import micropython
+import _thread
 
 class BadgeChal1(BaseApp):
     name = "CTF Challenge 1"
@@ -16,5 +19,6 @@ class BadgeChal1(BaseApp):
     async def setup(self):
         self.display_center_text("You Art?")
         print("Running Badge Challenge 1")
+        # TODO This is intentionally blocking for the sakfe of the CTF...
         badgechal.chal1()
         return None
