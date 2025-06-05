@@ -23,7 +23,8 @@ conference = args.conference
 badge_logo = 'badges/BadgeLogo.jpg'
 badge_creator_logo = local_path + 'images/BSidesLogo.png'
 badger_badge_file = local_path + "code/badge.txt"
-gigtel_badge_file = local_path + "code/name.json"
+gigtel_badge_file = local_path + "code/name_provisioner.py"
+template_file = local_path + "code/name_provisioner.py.template"
 badge_image = local_path + args.formimage
 serial_port = '/dev/ttyACM0'
 status = ['Attendee', 'Sponsor', 'Speaker', 'Volunteer']
@@ -230,7 +231,7 @@ class BadgeForm:
 
         template = ""
 
-        with open("name_provisioner.py.template", "r") as f:
+        with open(template_file, "r") as f:
             template = f.read()
         
         template = template.replace("FIRST_NAME", firstname)
@@ -238,10 +239,15 @@ class BadgeForm:
         template = template.replace("COMPANY", company)
         template = template.replace("TITLE", status)
 
-        with open("name_provisioner.py", "w") as f:
+        with open(gigtel_badge_file, "w") as f:
             f.write(template)
 
-        os.system("mpremote run name_provisioner.py + reset")
+        try:
+            subprocess.run(["mpremote", "run", gigtel_badge_file, "reset"])
+        except FileNotFoundError:
+            print("mpremote executable not found")
+        except Exception as e:
+            print(f"Error: {e}")
 
         # Show a message box to confirm the badge was created
         messagebox.showinfo("Badge Created", 
