@@ -1,0 +1,27 @@
+import os
+
+try:
+    os.mkdir("config")
+except:
+    pass
+
+try:
+    os.mkdir("config/apps")
+except:
+    pass
+
+try:
+    with open("config/apps/Badge.json", "w") as f:
+        f.write(
+            """
+            {
+                "first_name": "FIRST_NAME",
+                "last_name": "LAST_NAME",
+                "company": "COMPANY",
+                "title": "TITLE "
+            }
+            """
+        )
+except:
+    pass
+

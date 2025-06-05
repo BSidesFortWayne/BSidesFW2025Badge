@@ -12,12 +12,14 @@ class AppMetadata:
         friendly_name: str,
         icon_file: str | bytes | None = None,
         constructor: type[apps.app.BaseApp] | None = None,
+        hidden: bool = False,
     ):
         self.friendly_name = friendly_name
         self.module_name = module_name
         self.class_name = class_name
         self.constructor = constructor
         self.icon_file = icon_file
+        self.hidden = hidden
 
     @staticmethod
     def from_module(module_name: str) -> list["AppMetadata"]:
@@ -41,6 +43,7 @@ class AppMetadata:
                     class_name=obj.__name__,
                     module_name=module_name,
                     constructor=obj,
+                    hidden=obj.hidden if hasattr(obj, 'hidden') else False,
                 )
                 results.append(new_app)
         
@@ -119,6 +122,7 @@ class AppDirectory:
                             module_name=app_data["module_name"],
                             class_name=app_data["class_name"],
                             icon_file=app_data["icon_file"],
+                            hidden=app_data["hidden"],
                         )
                         for app_data in module_data["apps"]
                     ]
@@ -182,6 +186,7 @@ class AppDirectory:
                             "class_name": app.class_name,
                             "module_name": app.module_name,
                             "icon_file": app.icon_file,
+                            "hidden": app.hidden,
                         }
                         for app in module.apps
                     ],

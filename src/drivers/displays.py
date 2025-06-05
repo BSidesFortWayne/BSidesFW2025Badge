@@ -1,13 +1,8 @@
 from machine import Pin, SPI
-
-import gc9a01
-import vga1_bold_16x32
 import machine
+import gc9a01
 
-# import micropython
-
-
-# @micropython.viper
+# @icropython.viper
 def rgb(color: tuple):
     r, g, b = color
     return (r & 0xF8) | ((g & 0xE0) >> 5) | ((g & 0x1C) << 11) | ((b & 0xF8) << 5)
@@ -50,8 +45,8 @@ class Displays:
     }
 
     def __init__(self, spi_freq: int = 80_000_000):
-        disp_en = Pin(self.DISP_EN, Pin.OUT)
-        disp_en.value(1)
+        self.disp_en = Pin(self.DISP_EN, Pin.OUT)
+        self.disp_en.value(1)
 
         spi_freq = spi_freq or machine.freq() // 2
         print(f"SPI Frequency: {spi_freq}")
@@ -59,10 +54,10 @@ class Displays:
 
         # TODO move to smart config?
         USE_PY_DRIVER = False
-        DisplayDriver = gc9a01.GC9A01
         if USE_PY_DRIVER:
-            from drivers.gc9a01 import GC9A01
-            DisplayDriver = GC9A01
+            from drivers.gc9a01 import GC9A01 as DisplayDriver
+        else:
+            from gc9a01 import GC9A01 as DisplayDriver
 
         self.display1 = DisplayDriver(
             spi,
@@ -100,8 +95,11 @@ class Displays:
         fg=gc9a01.WHITE,
         bg=gc9a01.BLACK,
         display_index: int = 1,
-        font=vga1_bold_16x32,
+        font=None,
     ):
+        if not font:
+            import vga1_bold_16x32
+            font = vga1_bold_16x32
         display = self[display_index - 1]
         self.display_text(
             text,
@@ -121,8 +119,11 @@ class Displays:
         fg=gc9a01.WHITE,
         bg=gc9a01.BLACK,
         display_index: int = 1,
-        font=vga1_bold_16x32,
+        font=None,
     ):
+        if not font:
+            import vga1_bold_16x32
+            font = vga1_bold_16x32
         display = self[display_index - 1]
         display.text(font, text, x, y, fg, bg)
 

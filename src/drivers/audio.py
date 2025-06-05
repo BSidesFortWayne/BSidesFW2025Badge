@@ -9,22 +9,21 @@ AUDIO_PAUSED = 2
 class Speaker:
     def __init__(self):
         self.pwm_pin = machine.Pin(15)
-        self.pwm = machine.PWM(self.pwm_pin)
-
-        self.pwm.duty(0)
-
+        self.pwm = machine.PWM(self.pwm_pin, freq=50, duty_u16=200)
+        self.pwm.duty_u16(0)
+        
         self.speed = 1
-
         self.state = AUDIO_STOPPED
-
         self.current_song_task = None
         self.current_song = None
+        self.duty = 30
 
     def resume_song(self):
         self.state = AUDIO_PLAYING
 
     def start_song(self, song_id, repeat=False):
         if self.current_song == song_id:
+            print(f"Already playing song {song_id}")
             return
 
         song_file = open(f'songs/{song_id}.json')
@@ -57,7 +56,7 @@ class Speaker:
                 
                 if note != 'R':
                     self.pwm.freq(int(note/2))
-                    self.pwm.duty(30)
+                    self.pwm.duty(self.duty)
                 else:
                     self.pwm.duty(0)
 

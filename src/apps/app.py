@@ -5,6 +5,8 @@ class BaseApp:
     name = ""
     version = "0.0.1"
     module = "no_module"
+    hidden = False
+    
     def __init__(self, controller: IController):
         super().__init__()
         self.controller = controller

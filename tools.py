@@ -144,6 +144,7 @@ def program_device(
     reinstall_base_image: bool = False,
     device: str = "/dev/ttyUSB0",
     verbose: bool = True,
+    test_app_only: bool = False,
 ):
     # TODO I wonder if we can import esptool.py and mpremote directly as their python modules
     # Pros: we would get autocomplete and intellisense for running those tools
@@ -158,7 +159,10 @@ def program_device(
 
     # Load python code with mpremote
     start_file_send_time = time.time()
-    deploy_app_to_device()
+    if test_app_only:
+        os.system('mpremote run src/test.py :main.py')
+    else:
+        deploy_app_to_device()
     end_file_send_time = time.time()
     elapsed_file_send_time = end_file_send_time - start_file_send_time
     if verbose:
@@ -215,6 +219,29 @@ def deploy_app_to_device(files: list[str] = []):
     print(files)
 
     os.system("mpremote cp -r src/* :")
+
+@app.command()
+def fast_program_name(
+    first_name: str,
+    last_name: str,
+    company: str = "",
+    title: str = "",
+):
+    """
+    Simple program to write name data to the badge. Sample for registration programming.
+    """
+    with open("name_provisioner.py.template", "r") as f:
+        template = f.read()
+    
+    template = template.replace("FIRST_NAME", first_name)
+    template = template.replace("LAST_NAME", last_name)
+    template = template.replace("COMPANY", company)
+    template = template.replace("TITLE", title)
+
+    with open("name_provisioner.py", "w") as f:
+        f.write(template)
+
+    os.system("mpremote run name_provisioner.py + reset")
 
 @app.command(
     help="Simple program to write name data to the badge. Sample for registration programming"

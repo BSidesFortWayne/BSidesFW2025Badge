@@ -4,9 +4,10 @@ from machine import Pin, I2C, RTC
 from drivers.pca9535 import PCA9535
 from drivers.buttons import Buttons
 from drivers.audio import Speaker
+from drivers.bluetooth import Bluetooth
 
 class BSP:
-    def __init__(self, hardware_version: str, displays, debug: bool = False):
+    def __init__(self, hardware_version: str, displays: Displays, debug: bool = False):
         def print_debug(message: str):
             if debug:
                 print(message)
@@ -14,6 +15,8 @@ class BSP:
         self.displays = displays
         self.i2c = I2C(1, scl=Pin(22), sda=Pin(21), freq=400_000)
         print_debug("I2C initialized")
+        self.bluetooth = Bluetooth()
+        print_debug("Bluetooth initialized")
         self.leds = LEDs()
         print_debug("LEDs initialized")
         self.iox = PCA9535(self.i2c)

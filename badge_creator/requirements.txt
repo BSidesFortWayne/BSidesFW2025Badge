@@ -1,0 +1,11 @@
+badger2040
+qrcode
+time
+os
+badger_os
+tkinter
+PIL
+subprocess
+argparse
+serial
+machine

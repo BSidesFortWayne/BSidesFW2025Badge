@@ -1,6 +1,7 @@
 import apps.app
 
 class App(apps.app.BaseApp):
+    hidden = True
     def __init__(self, controller):
         super().__init__(controller)
         displays = self.controller.bsp.displays

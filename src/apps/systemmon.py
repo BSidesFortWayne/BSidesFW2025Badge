@@ -29,8 +29,8 @@ class SysMon(BaseApp):
             framebuf.RGB565
         )
 
-        self.config.add("x_offset", 0)
-        self.config.add("y_offset", 0)
+        self.config.add("x_offset", 40)
+        self.config.add("y_offset", 80)
 
         
     async def update(self):
