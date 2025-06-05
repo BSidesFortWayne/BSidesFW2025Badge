@@ -154,6 +154,9 @@ class ButtonFidget(BaseApp):
             self.fbuf_height,
         )
 
+    async def teardown(self):
+        self.controller.neopixel.fill((0, 0, 0))
+        self.controller.neopixel.write()
 
 if __name__ == "__main__":
     from single_app_runner import run_app

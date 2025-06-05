@@ -31,6 +31,8 @@ DOWN = 1
 UP = -1
 class Menu(BaseApp):
     name = "Menu"
+    hidden = True
+    
     def __init__(self, controller):
         super().__init__(controller)
         
