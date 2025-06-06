@@ -5,6 +5,8 @@ import gc9a01
 from apps.app import BaseApp
 import fonts.arial32px as arial32px
 from lib.smart_config import ColorConfig
+from lib.microfont import MicroFont
+import framebuf
 
 class App(BaseApp):
     """
@@ -23,8 +25,23 @@ class App(BaseApp):
         self.config.add('background_image', "img/bsides_logo.jpg")
         self.config.add('fg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['gc9a01']['white']))
         self.config.add('bg_color', ColorConfig('FG Color', displays.COLOR_LOOKUP['gc9a01']['black']))
-
+        self.showing_time = False
+        self.switch_to_badge = False
         self.last_checksum = self.config.checksum()
+
+        # framebuffer for showing time
+        self.fbuf_width = 200
+        self.fbuf_height = 240
+
+        self.fbuf_mem = bytearray(self.fbuf_width*self.fbuf_height*2)
+        self.fbuf = framebuf.FrameBuffer(
+            self.fbuf_mem, 
+            self.fbuf_width, 
+            self.fbuf_height, 
+            framebuf.RGB565
+        )
+        self.fbuf_mv = memoryview(self.fbuf_mem)
+        self.font = MicroFont("fonts/victor_B_32.mfnt", cache_index=True, cache_chars=True)
 
     def wrap_text(self, text, font, max_width, display):
         words = text.split(' ')
@@ -149,10 +166,51 @@ class App(BaseApp):
                     white,
                     black
                 )
+    
+    def update_time(self):
+        time_now = self.controller.bsp.rtc.datetime()
+
+        self.fbuf.fill(gc9a01.BLACK)
+
+        off_x, off_y = self.font.write(
+            '{:02}:{:02}'.format(time_now[4], time_now[5]),
+            self.fbuf_mv,
+            framebuf.RGB565,
+            self.fbuf_width,
+            self.fbuf_height,
+            int(self.fbuf_width/2)-30,
+            int(self.fbuf_height/2)-int(self.font.height/2),
+            gc9a01.WHITE
+        )
+
+        self.controller.bsp.displays.display1.blit_buffer(
+            self.fbuf_mv,
+            0,
+            0,
+            self.fbuf_width,
+            self.fbuf_height
+        )
+
+    def button_press(self, button):
+        if button == 6:
+            self.controller.bsp.displays.display1.fill(gc9a01.BLACK)
+            self.controller.bsp.displays.display2.fill(gc9a01.BLACK)
+            self.update_time()
+            self.showing_time = True
+ 
+    def button_release(self, button):
+        if button == 6:
+            self.switch_to_badge = True
 
     async def update(self):
-        if self.config.checksum() != self.last_checksum:
-            await self.setup()
-            self.last_checksum = self.config.checksum()
-
-        await asyncio.sleep(3)
+        if self.showing_time:
+            self.update_time()
+            if self.switch_to_badge:
+                self.showing_time = False
+                self.switch_to_badge = False
+                await self.setup()
+        else:
+            if self.config.checksum() != self.last_checksum:
+                await self.setup()
+                self.last_checksum = self.config.checksum()
+            await asyncio.sleep(3)
