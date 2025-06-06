@@ -48,7 +48,6 @@ class App(BaseApp):
         title = self.config['title']
         image = self.config['background_image']
         displays = self.controller.bsp.displays
-        # if there is a space in the name, split it
         white = displays.COLOR_LOOKUP['gc9a01']['white']
         black = displays.COLOR_LOOKUP['gc9a01']['black']
 
@@ -74,12 +73,15 @@ class App(BaseApp):
             display1_bg_color = self.config['bg_color'].value()
             display2_bg_color = self.config['bg_color'].value()
 
-            if 'background_image' not in self.config:
-                displays.display1.fill(display1_bg_color)
-                displays.display2.fill(display1_bg_color)
-            else:
-                displays[0].jpg(image, 0, 0, gc9a01.FAST)
-                displays[1].jpg(image, 0, 0, gc9a01.FAST)
+            # if 'background_image' not in self.config:
+            #     displays.display1.fill(display1_bg_color)
+            #     displays.display2.fill(display2_bg_color)
+            # else:
+            #     displays[0].jpg(image, 0, 0, gc9a01.FAST)
+            #     displays[1].jpg(image, 0, 0, gc9a01.FAST)
+
+            displays.display1.fill(display1_bg_color)
+            displays.display2.fill(display2_bg_color)
 
             max_width = displays.display1.width() - 40  # Adjust padding as needed
             wrapped_first_name = self.wrap_text(first_name, arial32px, max_width, displays.display1)
