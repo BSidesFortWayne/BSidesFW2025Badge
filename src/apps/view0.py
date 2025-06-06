@@ -205,7 +205,6 @@ class App(BaseApp):
             self.update_time()
             self.showing_time = True
         else:
-            print('testing')
             asyncio.create_task(self.handle_button_press(button))
 
     def button_click(self, button):
