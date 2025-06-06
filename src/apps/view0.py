@@ -2,7 +2,6 @@ import asyncio
 import gc9a01
 from apps.app import BaseApp
 import fonts.arial32px as arial32px
-from lib.smart_config import ColorConfig
 
 class App(BaseApp):
     """
