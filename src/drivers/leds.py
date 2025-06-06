@@ -71,8 +71,8 @@ class LEDs(Driver):
         # The V3 board may have the same issue, but the trace distances are being adjusted
         # for the VX board that will hopefully resolve the issue, and the timings could be 
         # set back to the default.
-        DEFAULT_TIMINGS = (400, 850, 800, 450)  # noqa: F841
-        CUSTOM_TIMINGS = (400, 5000, 5000, 450)
+        DEFAULT_TIMINGS = (400, 850, 800, 450)   # noqa: F841
+        CUSTOM_TIMINGS = (400, 5000, 5000, 450)  # noqa: F841
         
         # Create a NeoPixel object
         self.leds = neopixel.NeoPixel(self.LEDpin, NUM_LEDS, timing=CUSTOM_TIMINGS)
