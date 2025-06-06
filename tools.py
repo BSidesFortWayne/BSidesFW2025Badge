@@ -131,7 +131,8 @@ def write_flash(
     end_time = time.time()
     elapsed_time = end_time - start_time
     if verbose:
-        print(f"Flash write time: {elapsed_time:.2f} seconds")
+        action = 'Erase + flash' if erase else 'Flash'
+        print(f"{action} time: {elapsed_time:.2f} seconds")
     
     return elapsed_time
 
@@ -140,7 +141,7 @@ def write_flash(
     help="Write a .bin file to the flash"
 )
 def program_device(
-    firmware: str = "firmware_SPIRAM_8MiB.bin", 
+    firmware: str = "firmware/BSFWCustom_firmware_SPIRAM_with_GC9A01.bin", 
     reinstall_base_image: bool = False,
     device: str = "/dev/ttyUSB0",
     verbose: bool = True,
@@ -162,7 +163,7 @@ def program_device(
     if test_app_only:
         os.system('mpremote run src/test.py :main.py')
     else:
-        deploy_app_to_device()
+        deploy_app_to_device('src_temp')
     end_file_send_time = time.time()
     elapsed_file_send_time = end_file_send_time - start_file_send_time
     if verbose:
@@ -204,7 +205,7 @@ def generate_app_cache(app_directory="src/apps"):
 @app.command(
     help="Recursively copy `files` to the device root using mpremote. By default uses our src/ directory which is why this is called a 'deployment script'"
 )
-def deploy_app_to_device(files: list[str] = []):
+def deploy_app_to_device(root: str = ''):
     # Use mpremote to sync src/ folder to the device root
     # Execute this shell command
     # mpremote cp src/* :
@@ -216,9 +217,44 @@ def deploy_app_to_device(files: list[str] = []):
     os.system("find src/ -name '__pycache__' -delete")
 
     print("Syncing files to device")
-    print(files)
+    
+    if root:
+        os.system(f"mpremote cp -r {os.path.join(root, '*')} :")
+    else:
+        os.system("mpremote cp -r src/* :")
 
-    os.system("mpremote cp -r src/* :")
+
+@app.command(
+    help="Program wifi crednetials to the device"
+)
+def program_wifi(
+    ssid: str,
+    password: str,
+    device: str = "/dev/ttyUSB0",
+    verbose: bool = True,
+):
+    """
+    Program the wifi credentials to the device.
+    """
+    # Write to temporary JSON file
+    with open("wifi.json", "w") as f:
+        f.write(
+            f"""
+                {{
+                    "essid": "{ssid}",
+                    "password": "{password}"
+                }}
+                """
+        )
+    
+    # Execute this shell command
+    os.system("uv run mpremote cp wifi.json : + reset")
+
+    if verbose:
+        print(f"Wifi credentials programmed for SSID: {ssid}")
+    
+    # Remove the temporary file
+    os.remove("wifi.json")
 
 @app.command()
 def fast_program_name(
@@ -242,6 +278,8 @@ def fast_program_name(
         f.write(template)
 
     os.system("mpremote run name_provisioner.py + reset")
+
+    os.remove("name_provisioner.py") # Delete the temporary file after running
 
 @app.command(
     help="Simple program to write name data to the badge. Sample for registration programming"

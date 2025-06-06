@@ -3,7 +3,7 @@ def run_app(constructor, perf: bool = False, perf_rate_s: int = 5, displays=None
     from controller import Controller
     import asyncio
 
-    controller = Controller(displays, load_menu=False)
+    controller = Controller(displays, start_app_on_launch=False)
     app = constructor(controller)
     last_loop_time_ns = time.time_ns()
     renders = 0

@@ -2,13 +2,15 @@ from machine import Pin, SPI
 import machine
 import gc9a01
 
+from drivers.base import Driver
+
 # @icropython.viper
 def rgb(color: tuple):
     r, g, b = color
     return (r & 0xF8) | ((g & 0xE0) >> 5) | ((g & 0x1C) << 11) | ((b & 0xF8) << 5)
 
 
-class Displays:
+class Displays(Driver):
     SCK = 18
     MOSI = 23
 
@@ -45,6 +47,7 @@ class Displays:
     }
 
     def __init__(self, spi_freq: int = 80_000_000):
+        super().__init__()
         self.disp_en = Pin(self.DISP_EN, Pin.OUT)
         self.disp_en.value(1)
 

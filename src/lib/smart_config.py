@@ -140,8 +140,6 @@ class Config(dict):
         :param force: If True, the key will be added even if it already exists
         :return: None
         """
-        print(f"Adding {key} to config")
-        
         if force:
             self[key] = value
             return value
@@ -149,7 +147,6 @@ class Config(dict):
             return self.setdefault(key, value)
 
     def checksum(self):
-        print(f'Calculating checksum for {self.filename}')
         return calculate_file_hash(self.filename)
 
     def update(self, data: dict):
@@ -203,7 +200,7 @@ class Config(dict):
                         # Just set the value
                         self[key] = value
         except OSError:
-            print("No file found?")
+            pass # likely no file found, this isn't an issue right now
         except Exception as e:
             print(e)
             print("Error loading config file")
@@ -217,7 +214,7 @@ class Config(dict):
                 print("Data to save:", data)
                 json.dump(self, f)
         except OSError:
-            print("No file found?")
+            pass # likely no file found, this isn't an issue right now
             # Make the file
             os.mkdir("/".join(self.filename.split("/")[:-1]))
             with open(self.filename, "w") as f:

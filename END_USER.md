@@ -1,17 +1,5 @@
 # End User Usage
 
-## Menus
-
-- Badge
-- Clock
-- Tetris
-- Config
-- Start AP Mode
-
-## Programming Badges
-
-TODO add steps
-
 ## Types of Users
 
 - [ ] Badge Barry
@@ -27,7 +15,7 @@ TODO add steps
 - [x] Hacker Hanna
   - Wants to set up the dev environment on their computer to play with the badge, largely by playing with the exiting micropython code base, but wants to do it in their editor for full deployment control
   - Need access to the GitHub repo for the source code (to be released post conference because of CTF things on the badge)
-- [x] Programmer Paul
+- [x] Embedded Eddie
   - Will set up the `esp-idf` himself and load his own custom images
   - Would benefit most from schematics
 
@@ -47,4 +35,4 @@ TODO add steps
 - Edit configs in recursive menu
   - Make HTML tables based on
   - `bool`, `str`, `int`, and `float` properties can be editable fields in table
-  - `dict` objets in config can be sub-tables (should be avoided)
+  - `dict` objects in config can be sub-tables (should be avoided)

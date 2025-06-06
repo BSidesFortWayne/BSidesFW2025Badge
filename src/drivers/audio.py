@@ -2,12 +2,15 @@ import asyncio
 import machine
 import json
 
+from drivers.base import Driver
+
 AUDIO_STOPPED = 0
 AUDIO_PLAYING = 1
 AUDIO_PAUSED = 2
 
-class Speaker:
+class Speaker(Driver):
     def __init__(self):
+        super().__init__()
         self.pwm_pin = machine.Pin(15)
         self.pwm = machine.PWM(self.pwm_pin, freq=50, duty_u16=200)
         self.pwm.duty_u16(0)

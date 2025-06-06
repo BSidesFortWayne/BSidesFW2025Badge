@@ -11,6 +11,5 @@ def calculate_file_hash(filepath: str):
             checksum = binascii.hexlify(checksum_bytes).decode("utf-8")
         return checksum
     except Exception as e:
-        print(f"Error calculating hash for {filepath}: {e}")
         return ""
         

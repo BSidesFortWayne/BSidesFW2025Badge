@@ -16,6 +16,7 @@ MicroPython library for the LIS3DH accelerometer.
 
 import time
 import math
+
 try:
     from collections import namedtuple
 except ImportError:
@@ -25,6 +26,7 @@ try:
 except ImportError:
     import ustruct as struct
 
+from drivers.base import Driver
 from micropython import const
 
 __version__ = "0.0.0-auto.0"
@@ -71,9 +73,10 @@ DEV_ID = 0x33
 # the named tuple returned by the class
 AccelerationTuple = namedtuple("acceleration", ("x", "y", "z"))
 
-class LIS3DH:
+class LIS3DH(Driver):
     """Driver base for the LIS3DH accelerometer."""
     def __init__(self, int1=None, int2=None):
+        super().__init__()
         # Check device ID.
         device_id = self._read_register_byte(_REG_WHOAMI)
         if device_id != 0x33:

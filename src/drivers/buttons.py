@@ -2,14 +2,16 @@ from hardware_rev import HardwareRev
 from machine import Pin, Timer 
 import time 
 from drivers.pca9535 import PCA9535
+from drivers.base import Driver
 
 LONG_CLICK_DURATION_MS = 750
 def no_callback(button: int):
     print(f'Button {button} pressed')
 
 
-class Buttons():
+class Buttons(Driver):
     def __init__(self, hardware_rev, iox: PCA9535):
+        super().__init__()
         if hardware_rev == HardwareRev.V1:
             self.gpio_button_pins: list[int] = [0, 33, 35, 34]
         else:
