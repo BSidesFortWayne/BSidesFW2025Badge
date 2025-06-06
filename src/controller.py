@@ -36,7 +36,7 @@ class Sleep:
         # prevent the device from sleeping when pressing buttons
         self.bsp.buttons.button_pressed_callbacks.append(self.shaken)
 
-        self.last_shaken = time.time()
+        self.last_shaken = time.ticks_ms()
         self.bsp.imu._read_register_byte(0x39)
 
         self.lis3dh_int2_pin.irq(trigger=machine.Pin.IRQ_RISING, handler=self.shaken)
@@ -49,7 +49,7 @@ class Sleep:
 
     def shaken(self, pin):
         print('Board shaken, resetting time to sleep')
-        self.last_shaken = time.time()
+        self.last_shaken = time.ticks_ms()
         self.bsp.imu._read_register_byte(0x39)
 
     def save_state(self):
@@ -75,7 +75,7 @@ class Sleep:
         machine.lightsleep()
 
     def update(self, _):
-        if time.time()-self.last_shaken >= 120:
+        if time.ticks_ms()-self.last_shaken >= 120_000:
             self.sleep()
             self.restore_state()
 
