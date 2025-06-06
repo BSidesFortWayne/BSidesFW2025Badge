@@ -2,6 +2,8 @@ import asyncio
 import gc9a01
 from apps.app import BaseApp
 import fonts.arial32px as arial32px
+from lib.microfont import MicroFont
+import framebuf
 
 class App(BaseApp):
     """
@@ -32,8 +34,25 @@ class App(BaseApp):
         self.config.add('bg_color_index', 0)
         self.config.add('fg_color_index', 1)
 
+        self.showing_time = False
+        self.switch_to_badge = False
+
         self.last_checksum = self.config.checksum()
         self.color_options = [self.black, self.white, self.red, self.blue, self.magenta, self.yellow, self.cyan, self.green]
+
+        # framebuffer for showing time
+        self.fbuf_width = 200
+        self.fbuf_height = 240
+
+        self.fbuf_mem = bytearray(self.fbuf_width*self.fbuf_height*2)
+        self.fbuf = framebuf.FrameBuffer(
+            self.fbuf_mem, 
+            self.fbuf_width, 
+            self.fbuf_height, 
+            framebuf.RGB565
+        )
+        self.fbuf_mv = memoryview(self.fbuf_mem)
+        self.font = MicroFont("fonts/victor_B_32.mfnt", cache_index=True, cache_chars=True)
 
     def wrap_text(self, text, font, max_width, display):
         words = text.split(' ')
@@ -153,11 +172,17 @@ class App(BaseApp):
                 )
 
     async def update(self):
-        if self.config.checksum() != self.last_checksum:
-            await self.setup()
-            self.last_checksum = self.config.checksum()
-
-        await asyncio.sleep(3)
+        if self.showing_time:
+            self.update_time()
+            if self.switch_to_badge:
+                self.showing_time = False
+                self.switch_to_badge = False
+                await self.setup()
+        else:
+            if self.config.checksum() != self.last_checksum:
+                await self.setup()
+                self.last_checksum = self.config.checksum()
+            await asyncio.sleep(3)
 
     async def handle_button_press(self, button):
         image = self.config['background_image']
@@ -171,16 +196,48 @@ class App(BaseApp):
             # Update font color
             self.config['fg_color_index'] = (self.config['fg_color_index'] - 1) % len(self.color_options)
             self.displays.display2.fill(self.color_options[self.config['fg_color_index']])
-        # elif button == 6:
-            
+
     def button_press(self, button):
-        asyncio.create_task(self.handle_button_press(button))
+        print(button)
+        if button == 6:
+            self.controller.bsp.displays.display1.fill(gc9a01.BLACK)
+            self.controller.bsp.displays.display2.fill(gc9a01.BLACK)
+            self.update_time()
+            self.showing_time = True
+        else:
+            print('testing')
+            asyncio.create_task(self.handle_button_press(button))
 
     def button_click(self, button):
         pass
 
+    def update_time(self):
+        time_now = self.controller.bsp.rtc.datetime()
+
+        self.fbuf.fill(gc9a01.BLACK)
+
+        off_x, off_y = self.font.write(
+            '{:02}:{:02}'.format(time_now[4], time_now[5]),
+            self.fbuf_mv,
+            framebuf.RGB565,
+            self.fbuf_width,
+            self.fbuf_height,
+            int(self.fbuf_width/2)-30,
+            int(self.fbuf_height/2)-int(self.font.height/2),
+            gc9a01.WHITE
+        )
+
+        self.controller.bsp.displays.display1.blit_buffer(
+            self.fbuf_mv,
+            0,
+            0,
+            self.fbuf_width,
+            self.fbuf_height
+        )
+ 
     def button_release(self, button):
-        pass
+        if button == 6:
+            self.switch_to_badge = True
 
     def button_long_press(self, button):
         pass
