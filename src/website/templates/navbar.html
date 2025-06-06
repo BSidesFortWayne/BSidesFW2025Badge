@@ -1,5 +1,5 @@
 <ul class="navbar">
-    {% set paths = {'/': 'Home', '/config': 'Config'} %}
+    {% set paths = {'/': 'Home', '/config': 'Config', '/add_app': 'Add App'} %}
     {% for path in paths %}
     <li class="navbar-item"><a {% if d["args"]["path"]==path %}class="active"{% endif %} href="{{path}}">{{paths[path]}}</a></li>
     {% endfor %}

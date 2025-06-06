@@ -167,7 +167,39 @@ class App(BaseApp):
                 battery_percentage='{}%'.format(self.controller.battery.get_battery_percentage()),
                 current_app=self.controller.current_view.name if self.controller.current_view else 'None',
             )
-        
+
+
+
+        @app.get('/add_app')
+        async def add_app(request):
+            # Get list of existing app files
+            apps = [f[:-3] for f in os.listdir('apps') if f.endswith('.py') and f != '__init__.py']
+            return Template('add_app.html').render(
+                path='/add_app',
+                apps=apps
+            )
+
+        @app.get('/get_app_code')
+        async def get_app_code(request):
+            app_name = request.args.get('app_name')
+            if app_name:
+                try:
+                    with open(f'apps/{app_name}.py', 'r') as f:
+                        return f.read()
+                except:
+                    return 'Error: App not found', 404
+            return 'Error: No app specified', 400
+
+        @app.post('/add_app/submit')
+        @with_form_data
+        async def handle_add_app(request):
+            app_name = request.form['app_name']
+            app_code = request.form['app_code']
+
+            # Save the new app file
+            with open(f'apps/{app_name}.py', 'w') as f:
+                f.write(app_code)
+
         @app.get('/config')
         async def config(request):
             return Template('config.html').render(
@@ -175,6 +207,7 @@ class App(BaseApp):
                 rgb565_to_hex=rgb565_to_hex,
                 app_configs=self.controller.app_configs.items()
             )
+        
         
         @app.post('/config/update')
         @with_form_data
