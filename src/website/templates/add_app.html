@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Add App</title>
+        <link rel="stylesheet" href="/static/main.css">
+    </head>
+    <body>
+        {% include 'navbar.html' args=d %}
+        <div class="center">
+            <h1>Add New App</h1>
+            <form action="/add_app/submit" method="POST" enctype="multipart/form-data">
+                <label for="app_name">App Name:</label>
+                <input type="text" id="app_name" name="app_name" required><br><br>
+
+                <label for="app_code">App Code:</label>
+                <textarea id="app_code" name="app_code" rows="20" cols="80" required></textarea><br><br>
+
+                <div>
+                    <label for="existing_app">Copy from existing app:</label>
+                    <select id="existing_app" name="existing_app">
+                        <option value="">-- Select an app --</option>
+                        {% for app in d["apps"] %}
+                        <option value="{{app}}">{{app}}</option>
+                        {% endfor %}
+                    </select>
+                    <button class="button" type="button" onclick="copyAppCode()">Copy App</button>
+                </div><br>
+
+                <button class="button" type="submit">Submit</button>
+            </form>
+        </div>
+        <script>
+            function copyAppCode() {
+                var appName = document.getElementById('existing_app').value;
+                if (appName) {
+                    fetch('/get_app_code?app_name=' + appName)
+                        .then(response => response.text())
+                        .then(data => {
+                            document.getElementById('app_code').value = data;
+                        });
+                }
+            }
+        </script>
+        <script src="/static/theme.js"></script>
+    </body>
+</html>

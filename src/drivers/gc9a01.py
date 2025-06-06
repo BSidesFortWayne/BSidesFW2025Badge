@@ -50,6 +50,8 @@ import time
 from micropython import const
 import ustruct as struct
 
+from drivers.base import Driver
+
 # commands
 GC9A01_SWRESET = const(0x01)
 GC9A01_SLPIN = const(0x10)
@@ -124,7 +126,7 @@ def _encode_pixel(color):
     return struct.pack(_ENCODE_PIXEL, color)
 
 
-class GC9A01():
+class GC9A01(Driver):
     """
     GC9A01 driver class
 
@@ -151,6 +153,7 @@ class GC9A01():
         """
         Initialize display.
         """
+        super().__init__()
         if spi is None:
             raise ValueError("SPI object is required.")
 

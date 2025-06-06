@@ -1,6 +1,9 @@
+from drivers.base import Driver
+
 I2C_ADDR = 0x20  # PCA9535 address
-class PCA9535():
+class PCA9535(Driver):
     def __init__(self, i2c):
+        super().__init__()
         # Initialize I2C on an ESP32 
         self.i2c = i2c
 

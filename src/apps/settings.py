@@ -12,6 +12,8 @@ import asyncio
 import os
 import json
 
+from lib.smart_config import BoolDropdownConfig, ColorConfig, EnumConfig
+
 def hex_to_rgb565(hex_color: str) -> int:
     hex_color = hex_color.lower().lstrip('#')
     if len(hex_color) != 6:
@@ -63,6 +65,9 @@ class App(BaseApp):
         self.badge_id = generate_random_password()
 
         self.config['test_config_var'] = 'test'
+        self.config.add('test_bool_config', BoolDropdownConfig('Test Bool Config', True))
+        self.config.add('test_color_config', ColorConfig('Test Color Config', gc9a01.BLACK))
+        self.config.add('test_enum_config', EnumConfig('Test Enum Config', ['Option 1', 'Option 2', 'Option 3'], 'Option 1'))
 
         self.draw_status()
 
@@ -130,7 +135,7 @@ class App(BaseApp):
             sta_if.active(True)
             sta_if.connect(essid, password)
 
-            while not sta_if.active():
+            while not sta_if.isconnected():
                 sleep_ms(10)
         
             MicroDNSSrv.Create({ '*' : sta_if.ifconfig()[0] })
@@ -140,6 +145,7 @@ class App(BaseApp):
     async def start_website(self):
         import json
         app = Microdot()
+        app.debug = True
 
         Template.initialize('website/templates')
 
@@ -159,10 +165,42 @@ class App(BaseApp):
                 badge_id=self.badge_id,
                 battery_voltage=str(self.controller.battery.mv_average.average()/100) + 'v',
                 battery_percentage='{}%'.format(self.controller.battery.get_battery_percentage()),
-                current_app=self.controller.current_view.name
+                current_app=self.controller.current_view.name if self.controller.current_view else 'None',
             )
-        
-        @app.route('/config')
+
+
+
+        @app.get('/add_app')
+        async def add_app(request):
+            # Get list of existing app files
+            apps = [f[:-3] for f in os.listdir('apps') if f.endswith('.py') and f != '__init__.py']
+            return Template('add_app.html').render(
+                path='/add_app',
+                apps=apps
+            )
+
+        @app.get('/get_app_code')
+        async def get_app_code(request):
+            app_name = request.args.get('app_name')
+            if app_name:
+                try:
+                    with open(f'apps/{app_name}.py', 'r') as f:
+                        return f.read()
+                except:
+                    return 'Error: App not found', 404
+            return 'Error: No app specified', 400
+
+        @app.post('/add_app/submit')
+        @with_form_data
+        async def handle_add_app(request):
+            app_name = request.form['app_name']
+            app_code = request.form['app_code']
+
+            # Save the new app file
+            with open(f'apps/{app_name}.py', 'w') as f:
+                f.write(app_code)
+
+        @app.get('/config')
         async def config(request):
             return Template('config.html').render(
                 path='/config',
@@ -170,28 +208,53 @@ class App(BaseApp):
                 app_configs=self.controller.app_configs.items()
             )
         
+        
         @app.post('/config/update')
         @with_form_data
         async def update_config(request):
+            print(request.form['appSelection'])
             app = request.form['appSelection']
-            for name, value in request.form.items():
-                value = value[0]
-                if not name == 'appSelection':
-                    if type(self.controller.app_configs[app][name]) == str or type(self.controller.app_configs[app][name]) == int:
-                        try:
-                            self.controller.app_configs[app][name] = int(value)
-                        except ValueError:
-                            self.controller.app_configs[app][name] = value
+            app_config = self.controller.app_configs[app]
+            for config_name, value in request.form.items():
+                if config_name not in app_config:
+                    print(f"Skipping unknown config: {config_name} for app {app}")
+                    continue
+                existing_config = app_config[config_name]
+                existing_type = type(existing_config)
+                print(f"Updating {app} config: {config_name} = {value}")
+
+                if existing_type is not str and existing_type is not int and 'type' in existing_config:
+                    existing_config_type = existing_config['type']
+
+                    # Convert value
+                    if existing_config_type == 'BoolDropdownConfig':
+                        # TODO weird hack for bools... fine for now, need to work it out better
+                        # Don't ask :-) 
+                        value = True if len(value) == 2 else False
                     else:
-                        if self.controller.app_configs[app][name]['type'] == 'BoolDropdownConfig' or self.controller.app_configs[app][name]['type'] == 'EnumConfig':
-                            self.controller.app_configs[app][name]['current'] = value
-                        elif self.controller.app_configs[app][name]['type'] == 'ColorConfig':
-                            self.controller.app_configs[app][name]['current'] = hex_to_rgb565(value)
-                        elif self.controller.app_configs[app][name]['type'] == 'RangeConfig':
-                            self.controller.app_configs[app][name]['current'] = int(value)
-            response = Response()
-            return response.redirect('/config')
-        
+                        value = value[0]
+
+                    
+                    if existing_config_type == 'BoolDropdownConfig':
+                        existing_config['current'] = value
+                    if existing_config_type == 'EnumConfig':
+                        existing_config['current'] = value
+                    elif existing_config_type == 'ColorConfig':
+                        existing_config['current'] = hex_to_rgb565(value)
+                    elif existing_config_type == 'RangeConfig':
+                        existing_config['current'] = int(value)
+                elif existing_type is str:
+                    self.controller.app_configs[app][config_name] = str(value[0])
+                elif existing_type is int:
+                    try:
+                        self.controller.app_configs[app][config_name] = int(value[0])
+                    except ValueError:
+                        pass
+                else:
+                    print(f"Unknown config type for {app} {config_name}: {existing_type}")
+                    
+
+            # return Response.redirect('/config')
         app.run(port=80)
 
     def draw_status(self, status: str = 'Loading...'):
@@ -203,4 +266,8 @@ class App(BaseApp):
             gc9a01.BLACK,
             gc9a01.WHITE
         )
-    
+
+
+if __name__ == "__main__":
+    from single_app_runner import run_app
+    run_app(App, perf=True)

@@ -25,25 +25,26 @@
             {% for app_name, app_config in d["app_configs"] %}
             <div id="config_{{app_name}}">
                 {% for name, value in app_config.items() %}
-                {% if type(value) == str or type(value) == int %}
-                <p class="center">{{ name }}: <input name="{{name}}" value="{{value}}" /></p>
-                {% else %}
-                {% if value["type"] == "RangeConfig" %}
-                <p class="center">{{ name }}: <input type="range" min="{{value["min"]}}" max="{{value["max"]}}" name="{{name}}" value="{{value["current"]}}" /></p>
-                {% elif value["type"] == "ColorConfig" %}
-                <p class="center">{{ name }}: <input type="color" name="{{name}}" value="{{d["rgb565_to_hex"](value["current"])}}" /></p>
-                {% elif value["type"] == "EnumConfig" %}
-                <p class="center">{{ name }}: <select name="{{name}}" value="{{value["current"]}}">
-                {% for option in value["options"] %}
-                <option>{{option}}</option>
-                {% endfor %}
-                </select>
-                </p>
-                {% elif value["type"] == "BoolDropdownConfig" %}
-                <input type="hidden" name="{{name}}" value="False" />
-                <p class="center">{{ name }}: <input type="checkbox" name="{{name}}" value="True" /></p>
-                {% endif %}
-                {% endif %}
+                    {% if type(value) == str or type(value) == int %}
+                        <p class="center">{{ name }}: <input name="{{name}}" value="{{value}}" /></p>
+                    {% else %}
+                        {% if value["type"] == "RangeConfig" %}
+                            <p class="center">{{ name }}: <input type="range" min="{{value["min"]}}" max="{{value["max"]}}" name="{{name}}" value="{{value["current"]}}" /></p>
+                        {% elif value["type"] == "ColorConfig" %}
+                            <p class="center">{{ name }}: <input type="color" name="{{name}}" value="{{d["rgb565_to_hex"](value["current"])}}" /></p>
+                        {% elif value["type"] == "EnumConfig" %}
+                            <p class="center">{{ name }}:
+                                <select name="{{name}}" value="{{value["current"]}}">
+                                {% for option in value["options"] %}
+                                    <option>{{option}}</option>
+                                {% endfor %}
+                                </select>
+                            </p>
+                        {% elif value["type"] == "BoolDropdownConfig" %}
+                            <input type="hidden" name="{{name}}" value="{{value["current"]}}" {{"checked" if value["current"] else ""}} />
+                            <p class="center">{{ name }}: <input type="checkbox" name="{{name}}" value="{{value["current"]}}" /></p>
+                        {% endif %}
+                    {% endif %}
                 {% endfor %}
             </div>
             {% endfor %}

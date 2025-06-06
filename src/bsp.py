@@ -5,6 +5,7 @@ from drivers.pca9535 import PCA9535
 from drivers.buttons import Buttons
 from drivers.audio import Speaker
 from drivers.bluetooth import Bluetooth
+from drivers.displays import Displays
 
 class BSP:
     def __init__(self, hardware_version: str, displays: Displays, debug: bool = False):

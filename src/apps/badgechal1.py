@@ -1,10 +1,5 @@
-import asyncio
-from lib.smart_config import Config
-from icontroller import IController
 import badgechal
 from apps.app import BaseApp
-import micropython
-import _thread
 
 class BadgeChal1(BaseApp):
     name = "CTF Challenge 1"

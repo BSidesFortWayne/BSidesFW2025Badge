@@ -1,12 +1,14 @@
 import bluetooth, machine, micropython, time, errno
 from micropython import const
+from drivers.base import Driver
 
 SENDER_ID   = bytes([0xA2, 0x3F, 0x51])
 ADV_INT_MS  = 50
 ON_TIME_MS  = 10_000
 
-class Bluetooth:
+class Bluetooth(Driver):
     def __init__(self):
+        super().__init__()
         self.last_counter  = -1
         self.rebroadcasted = False
         self.ble = bluetooth.BLE()

@@ -17,13 +17,15 @@ import utime
 import esp32
 import micropython
 from drivers.audio import AUDIO_PLAYING, AUDIO_PAUSED, AUDIO_STOPPED
+from lib.smart_config import BoolDropdownConfig, Config
+from drivers.base import Driver
 
-class Sleep:
+class Sleep(Driver):
     """
     Handles everything related to the device sleeping. Saves and restores the state of different parts of the hardware while sleeping.
     """
-
     def __init__(self, bsp):
+        super().__init__()
         print('Configuring sleep')
         self.bsp = bsp
         self.state_before_sleeping = {}
@@ -33,6 +35,9 @@ class Sleep:
         self.bsp.imu._write_register_byte(0x22, 0x00)
         self.bsp.imu._write_register_byte(0x25, 0x80)
 
+        self.config.add('sleep_timeout_s', 120_000)
+        self.config.add('sleep_enabled', BoolDropdownConfig("Sleep Enabled", True))
+
         # prevent the device from sleeping when pressing buttons
         self.bsp.buttons.button_pressed_callbacks.append(self.shaken)
 
@@ -40,11 +45,11 @@ class Sleep:
         self.bsp.imu._read_register_byte(0x39)
 
         self.lis3dh_int2_pin.irq(trigger=machine.Pin.IRQ_RISING, handler=self.shaken)
-        esp32.wake_on_ext0(pin=self.lis3dh_int2_pin, level=esp32.WAKEUP_ANY_HIGH)
+        esp32.wake_on_ext0(self.lis3dh_int2_pin, esp32.WAKEUP_ANY_HIGH)
 
         # machine.lightsleep cannot be called in a task
         timer = machine.Timer(2)
-        timer.init(period=100, mode=machine.Timer.PERIODIC,
+        timer.init(period=1000, mode=machine.Timer.PERIODIC,
                 callback=lambda t: micropython.schedule(self.update, 0))
 
     def shaken(self, pin):
@@ -75,31 +80,30 @@ class Sleep:
         machine.lightsleep()
 
     def update(self, _):
-        if time.ticks_ms()-self.last_shaken >= 120_000:
+        enabled = self.config['sleep_enabled']
+        if not enabled:
+            return
+        timeout = self.config['sleep_timeout_s']
+        if time.ticks_ms()-self.last_shaken >= timeout:
             self.sleep()
             self.restore_state()
 
 class Controller(IController):
-    # This is a singleton pattern which gives us a single instance of the 
-    # controller object. This is useful for global state 
-    # def __new__(cls, load_menu: bool = True):
-    #     """ creates a singleton object, if it is not created, 
-    #     or else returns the previous singleton object"""
-        
-    #     if not hasattr(cls, 'instance'):
-    #         cls.instance = super(Controller, cls).__new__(cls, load_menu=load_menu)
-    #     return cls.instance
-
-    def __init__(self, displays, load_menu: bool = True):
+    def __init__(self, displays, start_app_on_launch: bool = True):
         if not displays:
             displays = Displays()
+        
+        super().__init__(HardwareRev.V3, displays)
+
+        self.config = Config("config/controller.json")
+        self.config.add('default_app', 'Badge')
         
         # some things that the views will need
         self._bsp = BSP(HardwareRev.V3, displays)
 
         self.battery = lib.battery.Battery(self)
 
-        self.app_configs = {}
+        self.app_configs: dict[str, Config] = {}
 
         print("Callback handlers")
 
@@ -147,8 +151,8 @@ class Controller(IController):
 
         self.current_app_lock = asyncio.Lock()
 
-        if load_menu:
-            asyncio.create_task(self.switch_app("Badge"))
+        if start_app_on_launch:
+            asyncio.create_task(self.switch_app(self.config['default_app']))
 
     async def run(self):
         total_times = 0

@@ -2,6 +2,8 @@ from machine import Pin
 import neopixel 
 import time
 
+from drivers.base import Driver
+
 # Number of LEDs in the chain
 NUM_LEDS = 7
 FORWARD = 1
@@ -24,13 +26,28 @@ def wheel(pos):
         pos -= 170
         return (0, pos * 3, 255 - pos * 3)
 
-class LEDs:
+class LEDs(Driver):
     def __init__(self):
+        super().__init__()
+        self.config.add('led_pin', 26)
+        self.config.add('max_brightness_percent', 50)
+
         # Pin where WS2812 LEDs are connected
-        self.LEDpin = Pin(26)
+        led_pin = self.config['led_pin']
+        if led_pin is None:
+            raise ValueError("LED pin configuration is missing. Please set 'led_pin' in the config.")
+        
+        if not isinstance(led_pin, int):
+            raise TypeError(f"LED pin must be an integer, got {type(led_pin).__name__} instead.")
+        
+        self.LEDpin = Pin(self.config['led_pin'])
 
         # Maximum brightness constant (0 to 1)
-        self.max_brightness = 0.1
+        max_brightness_percent = self.config['max_brightness_percent']
+        if not (0 <= max_brightness_percent <= 100):
+            raise ValueError(f"max_brightness_percent must be between 0 and 100, got {max_brightness_percent}.")
+        # Convert percentage to a scale factor (0.0 to 1.0)
+        self.max_brightness = max_brightness_percent / 100.0
 
         # SVH 2025-03-19 on V2 versions of the board, the LEDs have a very strange
         # timing bug that is causing LED artifacts. This is a workaround for that
