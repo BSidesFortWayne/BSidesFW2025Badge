@@ -129,6 +129,8 @@ class App(BaseApp):
                 sleep_ms(10)
 
             MicroDNSSrv.Create({ '*' : ap.ifconfig()[0] })
+
+            if_config = ap.ifconfig()
         
         else:
             sta_if = network.WLAN(network.STA_IF)
@@ -140,12 +142,19 @@ class App(BaseApp):
         
             MicroDNSSrv.Create({ '*' : sta_if.ifconfig()[0] })
 
-            print(sta_if.ifconfig())
+            if_config = sta_if.ifconfig()
+        
+        ip = if_config[0] if if_config and len(if_config) > 0 else 'Not Connected'
+
+        self.controller.bsp.displays.display_center_text(
+            ip,
+            fg=gc9a01.BLACK,
+            bg=gc9a01.WHITE,
+            display_index=2
+        )
     
     async def start_website(self):
-        import json
         app = Microdot()
-        app.debug = True
 
         Template.initialize('website/templates')
 
