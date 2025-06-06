@@ -1,0 +1,96 @@
+:root {
+    --background-color: white;
+    --foreground-color: black;
+    --navbar-background-color: #333;
+    --accent-color: #006eff;
+    --navbar-foreground-color: white;
+    --button-foreground-color: white;
+    --input-background-color: white;
+    --input-foreground-color: black;
+    --input-border-color: #333;
+    --input-border-radius: 6px;
+    --button-rounding: 6px;
+}
+
+body {
+    margin: 0;
+    background-color: var(--background-color);
+}
+
+h1, h2, h3, h4, h5, h6, p, a, i, button {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--foreground-color)
+}
+
+.center {
+    text-align: center;
+}
+
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--navbar-background-color);
+}
+
+.navbar-item {
+  float: left;
+}
+
+.navbar-item-right {
+    float: right;
+}
+
+.navbar-item a {
+  display: block;
+  color: var(--navbar-foreground-color);
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.navbar-item a:hover:not(.active) {
+  background-color: var(--navbar-foreground-color);
+}
+
+.navbar-item-right button {
+    display: block;
+    color: var(--navbar-foreground-color);
+    background-color: var(--navbar-background-color);
+    border: none;
+    font-size: 16px;
+    margin: 0;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.active {
+  background-color: var(--accent-color);
+}
+
+.configs {
+    display: none;
+}
+
+input {
+    color: var(--input-foreground-color);
+    background-color: var(--input-background-color);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+}
+
+.button {
+    background-color: var(--accent-color);
+    border: none;
+    color: var(--button-foreground-color);
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: var(--button-rounding);
+}

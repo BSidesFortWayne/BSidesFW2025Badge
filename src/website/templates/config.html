@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Settings</title>
+        <link rel="stylesheet" href="/static/main.css">
+    </head>
+    <body>
+        {% include 'navbar.html' args=d %}
+        <form class="center" action="/config/update" method="POST">
+            <i>(If you do not see an app, it has not been loaded yet. Run the app and reload this page for it to show up.)</i>
+            <p>App: <select name="appSelection" id="appSelection">
+                {% for app_name, app_config in d["app_configs"] %}
+                <option>{{app_name}}</option>
+                {% endfor %}
+                </select>
+            </p>
+            <div id="config"></div>
+            <button class="button" type="submit">Update</button>
+        </form>
+        <div id="configs" class="configs"> 
+            <!-- This is hidden, it is just to make it easier to 
+            move things from Python to JS-->
+
+            {% for app_name, app_config in d["app_configs"] %}
+            <div id="config_{{app_name}}">
+                {% for name, value in app_config.items() %}
+                {% if type(value) == str or type(value) == int %}
+                <p class="center">{{ name }}: <input name="{{name}}" value="{{value}}" /></p>
+                {% else %}
+                {% if value["type"] == "RangeConfig" %}
+                <p class="center">{{ name }}: <input type="range" min="{{value["min"]}}" max="{{value["max"]}}" name="{{name}}" value="{{value["current"]}}" /></p>
+                {% elif value["type"] == "ColorConfig" %}
+                <p class="center">{{ name }}: <input type="color" name="{{name}}" value="{{d["rgb565_to_hex"](value["current"])}}" /></p>
+                {% elif value["type"] == "EnumConfig" %}
+                <p class="center">{{ name }}: <select name="{{name}}" value="{{value["current"]}}">
+                {% for option in value["options"] %}
+                <option>{{option}}</option>
+                {% endfor %}
+                </select>
+                </p>
+                {% elif value["type"] == "BoolDropdownConfig" %}
+                <input type="hidden" name="{{name}}" value="False" />
+                <p class="center">{{ name }}: <input type="checkbox" name="{{name}}" value="True" /></p>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <script>
+            function updateConfigSection() {
+                let app = document.getElementById("appSelection").value;
+                let app_config = document.getElementById("config_" + app);
+                let configs = document.getElementById("configs");
+                let config = document.getElementById("config");
+                if (config.children.length > 0) { // Move config out if one is already there
+                    configs.appendChild(config.children[0])
+                }
+                config.appendChild(app_config);
+            }
+            
+            if (window.location.href.split('#').length > 1) { // App specified in URL
+                console.log("Test")
+                let app = window.location.href.split('#')[1];
+                document.getElementById("appSelection").value = app;
+            }
+
+            document.getElementById("appSelection").addEventListener("change", updateConfigSection)
+
+            updateConfigSection();
+        </script>
+        <script src="/static/theme.js"></script>
+    </body>
+</html>

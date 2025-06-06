@@ -2,7 +2,6 @@ import time
 import gc
 
 from controller import Controller
-from web.http_server import start_http_server
 
 gc.enable()
 gc.collect()
@@ -10,10 +9,6 @@ gc.collect()
 
 async def main(displays):
     controller = Controller(displays)
-    # TODO conditionally start based on 
-    # - Network is started
-    # - User has setup configuration to auto-run HTTP server
-    asyncio.create_task(start_http_server(controller))
 
     # Main thread, should be last to run
     asyncio.create_task(controller.run())
