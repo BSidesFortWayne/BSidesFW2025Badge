@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Settings</title>
+        <link rel="stylesheet" href="/static/main.css">
+    </head>
+    <body>
+        {% include 'navbar.html' args=d %}
+        <div class="center">
+            <h1>Badge ID: {{d['badge_id']}}</h1>
+            <h1>Battery Voltage: {{d['battery_voltage']}}</h1>
+            <h1>Battery Percentage: {{d['battery_percentage']}}</h1>
+            <h1>Current App: {{d['current_app']}} <a href="/config#{{d['current_app']}}">(config)</a></h1>
+        </div>
+        <script src="/static/theme.js"></script>
+    </body>
+</html>
