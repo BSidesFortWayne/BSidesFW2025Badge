@@ -17,6 +17,7 @@ import utime
 import esp32
 import micropython
 from drivers.audio import AUDIO_PLAYING, AUDIO_PAUSED, AUDIO_STOPPED
+from lib.smart_config import Config
 
 class Sleep:
     """
@@ -40,7 +41,7 @@ class Sleep:
         self.bsp.imu._read_register_byte(0x39)
 
         self.lis3dh_int2_pin.irq(trigger=machine.Pin.IRQ_RISING, handler=self.shaken)
-        esp32.wake_on_ext0(pin=self.lis3dh_int2_pin, level=esp32.WAKEUP_ANY_HIGH)
+        esp32.wake_on_ext0(self.lis3dh_int2_pin, esp32.WAKEUP_ANY_HIGH)
 
         # machine.lightsleep cannot be called in a task
         timer = machine.Timer(2)
@@ -94,12 +95,14 @@ class Controller(IController):
         if not displays:
             displays = Displays()
         
+        super().__init__(HardwareRev.V3, displays)
+        
         # some things that the views will need
         self._bsp = BSP(HardwareRev.V3, displays)
 
         self.battery = lib.battery.Battery(self)
 
-        self.app_configs = {}
+        self.app_configs: dict[str, Config] = {}
 
         print("Callback handlers")
 

@@ -17,9 +17,10 @@ class IApp:
         raise NotImplementedError("update method not implemented in the derived class.")
 
 class IController:
-    def __init__(self, hardware_version: str):
-        self._bsp = BSP(hardware_version)
+    def __init__(self, hardware_version: str, displays):
+        self._bsp = BSP(hardware_version, displays)
         self.current_view: IApp | None = None
+        self.app_configs: dict[str, Config] = {}
 
     # TODO still have a circular import issue when we import AppDirectory....
     # @property
