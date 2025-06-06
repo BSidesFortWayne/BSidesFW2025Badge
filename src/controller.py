@@ -148,7 +148,7 @@ class Controller(IController):
         self.current_app_lock = asyncio.Lock()
 
         if load_menu:
-            asyncio.create_task(self.switch_app("Menu"))
+            asyncio.create_task(self.switch_app("Badge"))
 
     async def run(self):
         total_times = 0
