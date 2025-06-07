@@ -6,7 +6,7 @@ Here are some basic instructions to get you started using your BSides 2025 Badge
 
 ### Navigating the Menu
 
-When your badge initially boots it will load the default badge application and show your name. 
+When your badge initially boots it will load the default badge application and show your name.
 If you would like to explore other features of the badge, you can press and hold (long press) button D.
 
 Button D is located at the top corner of the badge and can be long pressed while using any of the
@@ -30,8 +30,18 @@ SEL: SEL (Select) button is used in most Apps and the Menu for making a selectio
 
 (Right): Used in Apps and Menu to navigate Right or Up.
 
+### Badge App Functionality
 
+(Left): This button will cycle through available colors for the font.
 
+(Right): This button will cycle through available colors for the background.
+
+A: This button will change the lower display to have the BSides Fort Wayne 2025 logo.  
+++++_note: using the (Left) or (Right) buttons will switch the display back to showing company name and status_++++
+
+D: Long press (hold) D to return to the Main Menu
+
+Settings will save between power cycles.
 
 ## Development: Getting Started
 
@@ -79,12 +89,11 @@ the following command
 uv run pytest tests
 ```
 
-This runs the pytest command out of the `tests` folder. 
+This runs the pytest command out of the `tests` folder.
 
 TODO: Perhaps we can reference the src/ folder so that we can move the files in `src/test` to
 `tests` to keep as functional tests? But they are different in that we will run the functional
 onboard tests with `mpremote run src/test/<test_file.py>`
-
 
 ## Custom Base Image Instructions
 
