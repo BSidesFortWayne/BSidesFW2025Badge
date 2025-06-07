@@ -1,6 +1,37 @@
 # BSidesFW2025Badge
 
-BSides Fort Wayne Badge Programming
+## How to use your badge
+
+Here are some basic instructions to get you started using your BSides 2025 Badge!
+
+### Navigating the Menu
+
+When your badge initially boots it will load the default badge application and show your name. 
+If you would like to explore other features of the badge, you can press and hold (long press) button D.
+
+Button D is located at the top corner of the badge and can be long pressed while using any of the
+applications to return to the main menu.
+
+### Badge Button Descriptions
+
+RST: Pressing RST will reset the badge.
+
+A: Function button, varies by App.
+
+B: Function button, varies by App.
+
+C: Function button, varies by App.
+
+D: Long press (hold) D to return to menu screen from any App.
+
+SEL: SEL (Select) button is used in most Apps and the Menu for making a selection.
+
+(Left): Used in Apps and Menu to navigate Left or Down.
+
+(Right): Used in Apps and Menu to navigate Right or Up.
+
+
+
 
 ## Development: Getting Started
 
