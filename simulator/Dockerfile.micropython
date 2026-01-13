@@ -1,0 +1,19 @@
+# Lightweight container for running ONLY MicroPython
+# The pygame GUI runs natively on the host
+FROM python:3.12-slim
+
+# Install only MicroPython and minimal dependencies
+RUN apt-get update && apt-get install -y \
+    micropython \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# No GUI dependencies needed - this container only runs MicroPython
+# The pygame GUI runs on the host and connects via socket
+
+# Expose socket ports for communication
+EXPOSE 4455 4456
+
+# Default command runs the MicroPython side of the simulator
+CMD ["micropython", "src/main.py"]

@@ -88,6 +88,67 @@ def check_dependency(name: str, import_name: str = None, command: str = None) ->
     return False
 
 
+def get_platform_info():
+    """Detect current platform"""
+    import platform
+    system = platform.system().lower()
+    return system
+
+
+def is_running_in_container():
+    """Detect if running inside a container (Docker/devcontainer)"""
+    # Check for VS Code devcontainer environment variable
+    if os.getenv('REMOTE_CONTAINERS') or os.getenv('CODESPACES'):
+        return True
+    
+    # Check for .dockerenv file
+    if os.path.exists('/.dockerenv'):
+        return True
+    
+    # Check cgroup for docker/containerd
+    try:
+        with open('/proc/1/cgroup', 'r') as f:
+            if any(keyword in line for line in f for keyword in ['docker', 'containerd', 'lxc']):
+                return True
+    except:
+        pass
+    
+    return False
+
+
+def install_micropython_instructions():
+    """Show platform-specific MicroPython installation instructions"""
+    system = get_platform_info()
+    
+    print('\nMicroPython Installation Options:')
+    print('=' * 60)
+    
+    if system == 'linux':
+        print('\nOption 1: System Package Manager (Recommended)')
+        print('  Debian/Ubuntu: sudo apt update && sudo apt install micropython')
+        print('  Fedora:        sudo dnf install micropython')
+        print('  Arch:          sudo pacman -S micropython')
+        
+    elif system == 'darwin':
+        print('\nOption 1: Homebrew (Recommended)')
+        print('  brew install micropython')
+        print('\nOption 2: MacPorts')
+        print('  sudo port install micropython')
+        
+    elif system == 'windows':
+        print('\nOption 1: Windows Support via WSL')
+        print('  1. Install WSL: wsl --install')
+        print('  2. Open Ubuntu/WSL terminal')
+        print('  3. Run: sudo apt install micropython')
+    
+    print('\nOption 2: Auto-Installer (Downloads pre-built binary)')
+    print('  python3 install_micropython.py')
+    
+    print('\nOption 3: Build from Source')
+    print('  https://github.com/micropython/micropython/wiki/Getting-Started')
+    print('=' * 60)
+
+
 def install_dependency(name: str, package: str, pip: bool = True) -> bool:
     """Attempt to install a dependency"""
     if pip:
@@ -111,6 +172,56 @@ def run_setup_wizard() -> int:
     """Run the interactive setup wizard"""
     
     print_header('BSides FW 2025 Badge Simulator - Setup Wizard')
+    
+    # Check if running in container
+    if is_running_in_container():
+        print('⚠  CONTAINER ENVIRONMENT DETECTED')
+        print('=' * 60)
+        print()
+        print('You appear to be running inside a Docker/dev container.')
+        print()
+        print('IMPORTANT: The pygame GUI simulator requires display access,')
+        print('which is complex and unreliable in containers.')
+        print()
+        print('RECOMMENDED OPTIONS:')
+        print()
+        print('  1. HYBRID MODE (Best) - MicroPython in Docker, GUI native')
+        print('     • No MicroPython installation needed')
+        print('     • Reliable GUI display')
+        print('     • Run: ./run.sh --docker (in native terminal)')
+        print('     • See: HYBRID_MODE.md')
+        print()
+        print('  2. NATIVE MODE - Everything runs natively')
+        print('     • Fastest performance')
+        print('     • Run this wizard natively')
+        print('     • Requires MicroPython installation')
+        print()
+        print('WHY? Because:')
+        print('  • X11 forwarding requires host-side configuration')
+        print('  • Display permissions often fail in containers')
+        print('  • macOS/Windows require extra tools (XQuartz/VcXsrv)')
+        print('  • Native/hybrid execution is faster and more reliable')
+        print()
+        print('=' * 60)
+        print()
+        
+        if not ask_yes_no('Continue anyway (not recommended)?', default=False):
+            print()
+            print('Setup cancelled.')
+            print()
+            print('Recommended next steps:')
+            print()
+            print('  Option 1 - Hybrid Mode (Easiest):')
+            print('    1. Open a native terminal')
+            print('    2. cd simulator/')
+            print('    3. ./run.sh --docker')
+            print()
+            print('  Option 2 - Native Mode:')
+            print('    1. Exit the container (or open a native terminal)')
+            print('    2. cd simulator/')
+            print('    3. uv run ./setup_wizard.py')
+            print()
+            return 0
     
     print('Welcome! This wizard will help you set up the simulator.')
     print()
@@ -171,10 +282,20 @@ def run_setup_wizard() -> int:
                     elif 'command' in dep:
                         print(f'\n{name} must be installed manually:')
                         if name == 'MicroPython':
-                            print('  Option 1: apt install micropython')
-                            print('  Option 2: uv run micropython')
-                            print('  Option 3: Build from source: https://micropython.org/')
-                        input('Press Enter when ready...')
+                            install_micropython_instructions()
+                            
+                            if ask_yes_no('\nRun auto-installer now?'):
+                                print('\nLaunching MicroPython auto-installer...\n')
+                                try:
+                                    result = subprocess.run([sys.executable, 'install_micropython.py'])
+                                    if result.returncode == 0:
+                                        print('\n✓ MicroPython installation successful!')
+                                    else:
+                                        print('\n⚠ Please install MicroPython manually using the options above.')
+                                except Exception as e:
+                                    print(f'\n✗ Auto-installer failed: {e}')
+                                    print('Please install MicroPython manually using the options above.')
+                        input('\nPress Enter when ready...')
         
         if missing_optional:
             print()
@@ -202,17 +323,26 @@ def run_setup_wizard() -> int:
         project_path = ask_text('Enter path to project directory (containing main.py)',
                                default='../src')
     
-    while not os.path.exists(os.path.join(project_path, 'main.py')):
-        print(f'✗ No main.py found in {project_path}')
-        project_path = ask_text('Enter path to project directory (containing main.py)')
+    while not os.path.exists(o
+        'micropython',
+        str(Path.home() / '.local' / 'bin' / 'micropython'),
+        str(Path.cwd() / 'bin' / 'micropython'),
+    ]
+    micropython_path = None
     
-    print(f'✓ Using project directory: {project_path}')
+    for candidate in micropython_candidates:
+        if shutil.which(candidate) or (Path(candidate).exists() and Path(candidate).is_file()):
+            print(f'✓ Found MicroPython: {candidate}')
+            micropython_path = candidate
+            break
     
-    # Step 3: MicroPython configuration
-    print_step(3, 5, 'MicroPython Configuration')
-    
-    # Try to find MicroPython
-    micropython_candidates = ['micropython', 'uv run micropython']
+    if not micropython_path:
+        print('Could not auto-detect MicroPython.')
+        print('\nIf you just installed it, you may need to:')
+        print('  1. Restart your shell')
+        print('  2. Source your shell config (e.g., source ~/.bashrc)')
+        print('  3. Use the full path')
+        print(un micropython']
     micropython_path = None
     
     for candidate in micropython_candidates:

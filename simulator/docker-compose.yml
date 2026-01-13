@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  micropython:
+    build:
+      context: ..
+      dockerfile: simulator/Dockerfile.micropython
+    volumes:
+      # Mount the source code (read-only for safety)
+      - ../src:/workspace/src:ro
+      # Mount config if it exists
+      - ./config.json:/workspace/simulator/config.json:ro
+    network_mode: host
+    # Keep container running and restart if MicroPython crashes
+    restart: unless-stopped
+    # Optional: resource limits
+    # mem_limit: 512m
+    # cpus: 1
