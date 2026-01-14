@@ -1104,3 +1104,203 @@ class BinaryProtocolHandler:
         # Convert from GRB to RGB for rendering
         self.gui.leds = [(r, b, g) for g, r, b in leds_grb]
         return (0, None)
+
+
+if __name__ == '__main__':
+    """Standalone GUI mode - connects to MicroPython backend via sockets"""
+    import argparse
+    import socket
+    import json
+    import select
+    
+    # Parse arguments
+    parser = argparse.ArgumentParser(description='Badge Simulator GUI (Standalone Mode)')
+    parser.add_argument('--port', type=int, default=4455, help='JSON protocol port')
+    parser.add_argument('--binary-port', type=int, default=4456, help='Binary protocol port')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
+    args = parser.parse_args()
+    
+    # Load config
+    config = {}
+    try:
+        with open('config.json', 'r') as f:
+            config = json.load(f)
+    except FileNotFoundError:
+        print('No config.json found, using defaults')
+    
+    # Create logger if available
+    logger = None
+    try:
+        from logger import create_logger
+        logger = create_logger(config)
+    except ImportError:
+        pass
+    
+    # Create GUI
+    print('Starting GUI...')
+    gui_instance = GUIEnhanced(config, logger)
+    binary_handler = BinaryProtocolHandler(gui_instance)
+    
+    # Connect to backend sockets
+    json_port = args.port
+    binary_port = args.binary_port
+    
+    json_sock = None
+    binary_sock = None
+    
+    print(f'Connecting to MicroPython backend on ports {json_port}/{binary_port}...')
+    
+    # Try to connect with retries
+    import time
+    for attempt in range(10):
+        try:
+            # Connect to JSON socket
+            if json_sock is None:
+                json_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                json_sock.connect(('localhost', json_port))
+                json_sock.setblocking(False)
+                print(f'✓ Connected to JSON protocol on port {json_port}')
+            
+            # Connect to binary socket  
+            if binary_sock is None:
+                binary_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                binary_sock.connect(('localhost', binary_port))
+                binary_sock.setblocking(False)
+                print(f'✓ Connected to binary protocol on port {binary_port}')
+            
+            break
+        except (ConnectionRefusedError, OSError) as e:
+            if attempt < 9:
+                print(f'Connection attempt {attempt + 1}/10 failed, retrying...')
+                time.sleep(0.5)
+            else:
+                print(f'✗ Failed to connect to backend after 10 attempts')
+                print(f'  Make sure MicroPython container is running')
+                exit(1)
+    
+    print('✓ GUI connected to backend')
+    print('Starting main loop...')
+    
+    # Main event loop
+    clock = pygame.time.Clock()
+    
+    try:
+        while gui_instance.running:
+            time_delta = clock.tick(60) / 1000.0
+            current_time = pygame.time.get_ticks()
+            
+            # Handle pygame events (copied from gameloop method)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    gui_instance.running = False
+                elif event.type == pygame.KEYDOWN:
+                    # F12 for screenshot
+                    if event.key == pygame.K_F12:
+                        gui_instance.take_screenshot()
+                    else:
+                        button_idx = gui_instance.key_to_button.get(event.key)
+                        if button_idx is not None and gui_instance.button_states[button_idx] == 0:
+                            gui_instance.button_states[button_idx] = current_time
+                            if logger:
+                                logger.log_info(f'Button {button_idx} pressed (key {event.key})')
+                            gui_instance.add_log_message(f'Button {button_idx} pressed (keyboard)', 'INFO')
+                elif event.type == pygame.KEYUP:
+                    button_idx = gui_instance.key_to_button.get(event.key)
+                    if button_idx is not None and gui_instance.button_states[button_idx] > 0:
+                        held_duration = current_time - gui_instance.button_states[button_idx]
+                        gui_instance.button_states[button_idx] = 0
+                        if logger:
+                            logger.log_info(f'Button {button_idx} released after {held_duration}ms')
+                        gui_instance.add_log_message(f'Button {button_idx} released after {held_duration}ms', 'INFO')
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        mouse_x, mouse_y = event.pos
+                        for bx, by, bradius, button_idx in gui_instance.button_click_areas:
+                            distance = ((mouse_x - bx) ** 2 + (mouse_y - by) ** 2) ** 0.5
+                            if distance <= bradius and gui_instance.button_states[button_idx] == 0:
+                                gui_instance.button_states[button_idx] = current_time
+                                if logger:
+                                    logger.log_info(f'Button {button_idx} pressed (mouse click)')
+                                gui_instance.add_log_message(f'Button {button_idx} pressed (mouse click)', 'INFO')
+                                break
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        mouse_x, mouse_y = event.pos
+                        for bx, by, bradius, button_idx in gui_instance.button_click_areas:
+                            distance = ((mouse_x - bx) ** 2 + (mouse_y - by) ** 2) ** 0.5
+                            if distance <= bradius and gui_instance.button_states[button_idx] > 0:
+                                held_duration = current_time - gui_instance.button_states[button_idx]
+                                gui_instance.button_states[button_idx] = 0
+                                if logger:
+                                    logger.log_info(f'Button {button_idx} released after {held_duration}ms')
+                                gui_instance.add_log_message(f'Button {button_idx} released after {held_duration}ms', 'INFO')
+                                break
+                
+                # Let UI manager handle its events
+                gui_instance.ui_manager.process_events(event)
+            
+            # Check for socket data
+            readable, _, _ = select.select([json_sock, binary_sock], [], [], 0)
+            
+            for sock in readable:
+                try:
+                    if sock == binary_sock:
+                        # Handle binary protocol messages
+                        data = sock.recv(8192)
+                        if data:
+                            binary_handler.handle_data(data)
+                    elif sock == json_sock:
+                        # Handle JSON protocol messages
+                        data = sock.recv(8192)
+                        if data:
+                            # Process JSON commands if needed
+                            pass
+                except Exception as e:
+                    if args.verbose:
+                        print(f'Socket error: {e}')
+            
+            # Update GUI
+            gui_instance.ui_manager.update(time_delta)
+            
+            # Render (copied from gameloop)
+            gui_instance.display.fill((30, 30, 30))
+            gui_instance.display.blit(gui_instance.board_texture, (0, 0))
+            
+            # Render screens
+            gui_instance.display.blit(gui_instance.screen1, (160, 180))
+            gui_instance.display.blit(gui_instance.screen2, (160, 640))
+            
+            # Render LEDs if enabled
+            if gui_instance.show_leds:
+                gui_instance.render_leds()
+            
+            # Render button click areas if enabled
+            if gui_instance.config.get('gui', {}).get('show_button_areas', False):
+                gui_instance.render_button_click_areas()
+            
+            # Draw UI
+            gui_instance.ui_manager.draw_ui(gui_instance.display)
+            
+            # Render log panel if expanded
+            if not gui_instance.log_panel_collapsed:
+                gui_instance.render_log_panel()
+            
+            # Show FPS if enabled
+            if gui_instance.show_fps:
+                gui_instance.frame_count += 1
+                fps = gui_instance.clock.get_fps()
+                fps_text = gui_instance.fps_display_font.render(f'FPS: {fps:.1f}', True, (255, 255, 255))
+                gui_instance.display.blit(fps_text, (10, 10))
+            
+            pygame.display.flip()
+
+            
+    except KeyboardInterrupt:
+        print('\nShutting down GUI...')
+    finally:
+        if json_sock:
+            json_sock.close()
+        if binary_sock:
+            binary_sock.close()
+        pygame.quit()
+        print('GUI shutdown complete')

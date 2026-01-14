@@ -8,7 +8,8 @@
 # - Auto-installs dependencies as needed
 #
 
-set -e
+# Note: set -e removed to prevent premature exit during installation flow
+# set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -38,7 +39,7 @@ trap cleanup EXIT INT TERM
 
 print_banner() {
     echo -e "${GREEN}╔════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║  BSides FW 2025 Badge Simulator               ║${NC}"
+    echo -e "${GREEN}║  BSides FW 2025 Badge Simulator                ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════════════╝${NC}"
     echo ""
 }
@@ -168,11 +169,21 @@ offer_micropython_install() {
             if install_micropython; then
                 echo ""
                 print_info "MicroPython installed! Will use Native Mode."
+                echo ""
                 return 2  # Signal to retry MicroPython check
             fi
             
             print_warning "Automatic installation failed"
         fi
+    else
+        # Non-interactive: try auto-install
+        if install_micropython; then
+            echo ""
+            print_info "MicroPython installed! Will use Native Mode."
+            echo ""
+            return 2  # Signal to retry MicroPython check
+        fi
+        print_warning "Automatic installation failed"
     fi
     
     # If installation failed or declined, offer Docker
@@ -228,23 +239,69 @@ build_docker_image() {
 }
 
 start_micropython_container() {
+    print_step "Preparing simulator environment..."
+    
+    # Clean old src directory if it exists (may need sudo if container created files)
+    if [ -d "src" ]; then
+        if ! rm -rf src 2>/dev/null; then
+            print_warning "Need elevated permissions to clean container files"
+            sudo rm -rf src
+        fi
+    fi
+    
+    # Use Python to prepare the src directory with simulator libraries
+    # This runs natively so we have access to shutil, etc.
+    python3 <<'PREPARE_SCRIPT'
+import shutil
+from pathlib import Path
+import os
+
+simulator_dir = Path.cwd()
+src_dir = simulator_dir / 'src'
+project_path = Path('../src').resolve()
+libraries_dir = simulator_dir / 'libraries'
+
+# Copy project files
+print(f'Copying project from {project_path}')
+shutil.copytree(project_path, src_dir)
+
+# Overlay simulator libraries (hardware mocks)
+print(f'Overlaying simulator libraries from {libraries_dir}')
+shutil.copytree(libraries_dir, src_dir, dirs_exist_ok=True)
+
+# Create boot script
+boot_main_script = src_dir / '_boot_then_main.py'
+boot_main_content = '''# Auto-generated script to run boot.py then main.py
+# This replicates the hardware behavior where boot.py runs first
+
+# Execute boot.py in the global namespace
+with open('boot.py', 'r') as f:
+    exec(f.read(), globals())
+
+# Execute main.py in the same global namespace
+with open('main.py', 'r') as f:
+    exec(f.read(), globals())
+'''
+with open(boot_main_script, 'w') as f:
+    f.write(boot_main_content)
+
+print('✓ Simulator environment prepared')
+PREPARE_SCRIPT
+    
     print_step "Starting MicroPython container..."
     
     # Stop any existing container with same name
     docker stop "$MICROPYTHON_CONTAINER_NAME" &>/dev/null || true
     docker rm "$MICROPYTHON_CONTAINER_NAME" &>/dev/null || true
     
-    # Start container
+    # Start container with pre-prepared src directory
     docker run -d \
         --name "$MICROPYTHON_CONTAINER_NAME" \
         --network host \
-        -v "$(cd .. && pwd)/src:/workspace/src:ro" \
+        -v "$(pwd)/src:/workspace/src" \
+        -w /workspace/src \
         bsides-badge-micropython \
-        micropython -c "
-import sys
-sys.path.append('/workspace')
-import src.main
-" || {
+        micropython -X heapsize=8M _boot_then_main.py || {
         print_error "Failed to start MicroPython container"
         docker logs "$MICROPYTHON_CONTAINER_NAME" 2>&1 | head -20
         exit 1
@@ -270,12 +327,23 @@ run_native_mode() {
     print_info "MicroPython and pygame both running natively"
     echo ""
     
+    # Verify MicroPython is available before trying to run
+    if ! check_micropython; then
+        print_error "MicroPython check failed just before running!"
+        print_warning "This might be a shell cache issue. Trying anyway..."
+    fi
+    
     # Run with uv if available, otherwise direct python
     if command -v uv &>/dev/null; then
-        exec uv run python3 simulator.py "$@"
+        uv run python3 simulator.py "$@"
+        exit_code=$?
     else
-        exec python3 simulator.py "$@"
+        python3 simulator.py "$@"
+        exit_code=$?
     fi
+    
+    # If we get here, simulator exited
+    exit $exit_code
 }
 
 run_hybrid_mode() {
@@ -396,18 +464,37 @@ main() {
             print_info "Auto-detected: MicroPython available → using NATIVE mode"
         else
             # Try to install MicroPython or use Docker
-            install_result=$(offer_micropython_install)
+            offer_micropython_install
             result_code=$?
             
             if [ $result_code -eq 2 ]; then
                 # MicroPython was installed, retry check
+                # Give the system a moment to update command cache
+                sleep 1
+                
+                # Force refresh the command cache
+                hash -r 2>/dev/null || true
+                type micropython &>/dev/null || true  # Force shell to re-lookup the command
+                
+                # Try multiple methods to find micropython
                 if check_micropython; then
                     MODE="native"
                     print_info "Using newly installed MicroPython → NATIVE mode"
+                elif command -v micropython >/dev/null 2>&1; then
+                    MODE="native"
+                    print_info "Using newly installed MicroPython → NATIVE mode"
+                elif which micropython >/dev/null 2>&1; then
+                    MODE="native"
+                    print_info "Using newly installed MicroPython → NATIVE mode"
+                elif micropython --version >/dev/null 2>&1; then
+                    # Direct execution test - if this works, it's definitely installed
+                    MODE="native"
+                    print_info "Using newly installed MicroPython → NATIVE mode"
                 else
-                    print_error "MicroPython installation reported success but not found in PATH"
-                    echo "You may need to restart your shell or add it to PATH manually"
-                    exit 1
+                    print_warning "MicroPython installation reported success but not immediately available"
+                    print_info "This is a common shell cache issue. The simulator will attempt to run anyway."
+                    # Trust the installation was successful and try to run
+                    MODE="native"
                 fi
             elif [ $result_code -eq 0 ]; then
                 # User chose Docker

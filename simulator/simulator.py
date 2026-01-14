@@ -140,12 +140,20 @@ def setup_project_directory(project_path: str):
             
             # Verify cache is still valid
             if cache_data.get('project_path') == str(project_path):
-                # Quick validation - check if key files exist and haven't changed
-                cached_mtime = cache_data.get('mtime', 0)
-                current_mtime = project_path.stat().st_mtime
+                # Check hash of all Python files to detect changes
+                cached_hash = cache_data.get('file_hash', '')
                 
-                # If project directory hasn't been modified, use cache
-                if abs(current_mtime - cached_mtime) < 1.0:  # 1 second tolerance
+                # Calculate current hash of all Python files
+                import hashlib
+                hasher = hashlib.sha256()
+                for py_file in sorted(project_path.rglob('*.py')):
+                    if py_file.is_file():
+                        hasher.update(str(py_file.relative_to(project_path)).encode())
+                        hasher.update(str(py_file.stat().st_mtime).encode())
+                current_hash = hasher.hexdigest()
+                
+                # If hashes match, use cache
+                if current_hash == cached_hash:
                     print('✓ Using cached project files (no changes detected)')
                     use_cache = True
         except (json.JSONDecodeError, KeyError, FileNotFoundError):
@@ -155,17 +163,33 @@ def setup_project_directory(project_path: str):
         # Clean old src directory
         if src_dir.exists():
             print('Cleaning old project copy...')
-            shutil.rmtree(src_dir)
+            # Use ignore_errors to handle permission issues with runtime-created files
+            shutil.rmtree(src_dir, ignore_errors=True)
+            # If directory still exists (some files couldn't be deleted), try harder
+            if src_dir.exists():
+                import stat
+                def handle_remove_readonly(func, path, exc):
+                    """Error handler for Windows/permission issues"""
+                    os.chmod(path, stat.S_IWRITE)
+                    func(path)
+                shutil.rmtree(src_dir, onerror=handle_remove_readonly)
         
         # Copy project files
         print(f'Copying project from {project_path}')
         shutil.copytree(project_path, src_dir)
         
-        # Save cache info
+        # Calculate and save cache info with file hash
+        import hashlib
+        hasher = hashlib.sha256()
+        for py_file in sorted(project_path.rglob('*.py')):
+            if py_file.is_file():
+                hasher.update(str(py_file.relative_to(project_path)).encode())
+                hasher.update(str(py_file.stat().st_mtime).encode())
+        
         with open(cache_file, 'w') as f:
             json.dump({
                 'project_path': str(project_path),
-                'mtime': project_path.stat().st_mtime
+                'file_hash': hasher.hexdigest()
             }, f)
         
         print('✓ Project files copied')

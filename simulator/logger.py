@@ -78,9 +78,8 @@ class SimulatorLogger:
         if not self.config.get('log_micropython', True):
             return
         
-        # Always print to console
-        prefix = 'MP-ERR' if stream == 'stderr' else 'MP'
-        print(f"[{prefix}] {line.rstrip()}")
+        # Don't print to console - messages are displayed in GUI log window
+        # to avoid duplicate output
         
         self.log_event('micropython', stream=stream, line=line.rstrip())
     

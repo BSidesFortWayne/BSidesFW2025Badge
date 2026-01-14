@@ -52,8 +52,11 @@ class Battery:
             time_str = f'{rtc_datetime[0]}-{rtc_datetime[1]}-{rtc_datetime[2]} {rtc_datetime[4]}:{rtc_datetime[5]}:{rtc_datetime[6]}'
             csv_line = f'{time_str},{value}'
             print(csv_line)
-            with open('voltages.csv', 'a') as f:
-                f.write(f'{time_str},{self.mv_average.average()}\n')
+            try:
+                with open('voltages.csv', 'a') as f:
+                    f.write(f'{time_str},{self.mv_average.average()}\n')
+            except OSError:
+                pass  # Fail silently if unable to write (e.g., in simulator)
             self.last_log_time = now
     
     def find_closest_voltage(self, current_voltage):
