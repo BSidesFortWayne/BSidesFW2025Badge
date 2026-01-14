@@ -45,19 +45,29 @@ Settings will save between power cycles.
 
 ## Development: Getting Started
 
-### Quick Setup (3 Options)
+### Quick Setup
 
-#### Option 1: VS Code Dev Container (Easiest - Zero Config)
-If you use VS Code, simply:
-1. Open this folder in VS Code
-2. Click "Reopen in Container" when prompted
-3. Everything is pre-configured! ✨
+#### Simulator (No Hardware Needed - Fastest Start)
 
-The dev container includes Python, MicroPython, and all dependencies.
+Perfect for badge app development without physical hardware.
 
-#### Option 2: Native Setup (Recommended for Active Development)
+```shell
+cd simulator/
+./run.sh    # That's it! Auto-detects everything
+```
 
-**Install uv:**
+The script automatically:
+- Detects and uses MicroPython if available (fastest)
+- Offers to install MicroPython if not found
+- Falls back to Docker mode if needed (easiest)
+- Installs pygame if needed
+- Always prompts before any installations
+
+📖 **Full docs:** [simulator/README.md](simulator/README.md)
+
+#### Hardware Development Setup
+
+**1. Install uv (Python package manager):**
 ```shell
 # macOS/Linux
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -66,57 +76,24 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -c "irm https://astral.sh/uv/install.sh | iex"
 ```
 
-**Install MicroPython:**
-```shell
-# Linux (Debian/Ubuntu)
-sudo apt update && sudo apt install micropython
-
-# macOS
-brew install micropython
-
-# Windows - Use WSL, then install in Ubuntu:
-sudo apt install micropython
-
-# Or use our auto-installer (downloads pre-built binary):
-python3 install_micropython.py
-```
-
-**Setup Python packages:**
+**2. Install dependencies:**
 ```shell
 uv sync
 ```
 
-**For hardware development** (Linux only):
+**3. For Linux hardware access:**
 ```shell
 sudo chmod a+x /dev/ttyUSB0
 ```
 
-#### Option 3: Simulator First (No Hardware Needed)
+See [PROGRAMMING.md](./PROGRAMMING.md) for `mpremote` usage and deployment.
 
-Perfect for badge app development without physical hardware.
+#### VS Code Dev Container (Optional)
 
-**One-Command Setup:**
-```shell
-cd simulator/
-./run.sh    # Automatic environment detection and setup
-```
-
-The script automatically:
-- Detects if MicroPython is available (uses native mode - fastest)
-- If not found, tries to install MicroPython (brew/apt/dnf/pacman)
-- Falls back to Docker if installation fails (hybrid mode)
-- Installs pygame dependencies if needed
-- Prompts before any installations
-
-**Manual Mode Selection:**
-```shell
-./run.sh --native    # Force native mode
-./run.sh --docker    # Force Docker/hybrid mode
-./run.sh --setup     # Run setup wizard
-```
-
-📖 **Full docs:** [simulator/README.md](simulator/README.md)  
-📖 **Mode comparison:** [SIMULATOR_MODES.md](SIMULATOR_MODES.md)
+If you use VS Code:
+1. Open this folder in VS Code
+2. Click "Reopen in Container" when prompted
+3. Everything is pre-configured! ✨
 
 ### Tools
 

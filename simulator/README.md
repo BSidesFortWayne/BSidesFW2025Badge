@@ -2,9 +2,9 @@
 
 A high-performance simulator for developing and testing badge applications without physical hardware.
 
-## 🚀 Quick Start - Automatic Setup
+## 🚀 Quick Start
 
-### One Command, Any Environment
+### One Command Setup
 
 ```bash
 cd simulator/
@@ -13,56 +13,38 @@ cd simulator/
 
 **That's it!** The script automatically:
 - ✅ Detects if MicroPython is available → uses **Native Mode** (fastest)
-- ✅ If not, tries to install MicroPython (brew/apt/dnf/pacman)
-- ✅ If installation fails/declined → uses **Hybrid Mode** with Docker
+- ✅ If not, offers to install MicroPython (brew/apt/dnf/pacman)
+- ✅ Falls back to **Hybrid Mode** with Docker if needed
 - ✅ Installs pygame if needed
 - ✅ Prompts before any installations
-
-### How It Chooses
-
-```
-./run.sh
-    │
-    ├─ MicroPython found? ──→ YES ──→ Native Mode (fastest) ✨
-    │                         
-    └─ NO ──→ Try install (brew/apt)? ──→ SUCCESS ──→ Native Mode ✨
-                                      
-              └─ FAIL/DECLINED ──→ Docker? ──→ YES ──→ Hybrid Mode 🐳
-                                            
-                                    └─ NO ──→ Error: Install one
-```
 
 ### Manual Mode Selection (Optional)
 
 ```bash
 ./run.sh --native    # Force native mode (requires MicroPython)
 ./run.sh --docker    # Force hybrid/Docker mode
-./run.sh --setup     # Run interactive setup wizard
+./run.sh --setup     # Run interactive setup wizard (deprecated - auto setup recommended)
 ```
 
 ---
 
 ## Modes Explained
 
-### 🔄 Auto Mode (Default)
-**Automatically chooses the best option**
-- Tries native MicroPython first (fastest)
-- Falls back to Docker if needed (easiest)
-- Handles all dependencies
+The script automatically chooses the best mode for your system:
 
-### ⚡ Native Mode
-**Everything runs natively** (auto-selected if MicroPython available)
-- Fastest performance
+### ⚡ Native Mode (Auto-selected if MicroPython available)
+**Everything runs natively** - fastest performance
+- MicroPython and pygame run natively on your system
+- Best performance for development
 - Requires: MicroPython, pygame
 
-### 🐳 Hybrid Mode  
-**MicroPython in Docker, GUI native** (auto-selected if no MicroPython)
+### 🐳 Hybrid Mode (Auto-selected if no MicroPython)
+**MicroPython in Docker, GUI native** - easiest setup
 - No MicroPython installation needed
 - Works everywhere
 - Requires: Docker, pygame
 
-### 📝 Dev Container
-**VS Code for editing only** - See [DEV_CONTAINER_GUIDE.md](DEV_CONTAINER_GUIDE.md)
+You can force a specific mode with `--native` or `--docker` flags if needed.
 
 ---
 - ✅ **Binary protocol** - 10-20x faster rendering
@@ -118,82 +100,60 @@ The bottom panel shows real-time logs:
 
 ## Requirements
 
-### Install Dependencies
+The auto setup handles installation, but here's what you need:
 
-The setup wizard (`uv run ./run.sh --setup`) will guide you through installation, but here are manual options:
+**Python Packages (auto-installed if needed):**
+- pygame
+- pillow
+- pygame-gui
+
+**MicroPython (auto-detected or auto-installed):**
+The script will offer to install MicroPython if not found. Manual installation:
 
 ```bash
-# Python packages (required)
-pip install pygame pillow pygame-gui
-
-# MicroPython (required) - Choose one:
-
 # Linux (Debian/Ubuntu)
 sudo apt update && sudo apt install micropython
 
 # Linux (Fedora)
 sudo dnf install micropython
 
-# Linux (Arch)
-sudo pacman -S micropython
-
 # macOS (Homebrew)
 brew install micropython
 
-# macOS (MacPorts)
-sudo port install micropython
-
-# Auto-installer (downloads pre-built binary)
-python3 ../install_micropython.py
-
-# Build from source (advanced)
-# See: https://micropython.org/
-```
-
-**Windows Users:** Install WSL (Windows Subsystem for Linux) first, then follow Linux instructions:
-```powershell
+# Windows - Use WSL, then follow Linux instructions:
 wsl --install
 ```
 
-The setup wizard can install Python packages automatically and guide you through MicroPython installation.
+**Docker (fallback if MicroPython unavailable):**
+If MicroPython install fails or is declined, the script will use Docker automatically.
+
+> **Note:** Just run `./run.sh` - it handles everything!
 
 ## Usage
 
-### Basic Commands
+### Running the Simulator
 
 ```bash
-# Run simulator with defaults
+# Run with auto-detection (recommended)
 ./run.sh
 
-# First-time setup
-./run.sh --setup
-
-# Use custom project directory
+# With custom project directory
 ./run.sh -p /path/to/your/project
 
 # Verbose output for debugging
 ./run.sh -v
 
+# Force specific mode
+./run.sh --native    # Requires MicroPython
+./run.sh --docker    # Requires Docker
+
 # See all options
 ./run.sh --help
 ```
 
-### Direct Python Invocation
-
-```bash
-# Run directly
-uv run python3 simulator.py
-
-# With options
-uv run python3 simulator.py -p ../src -v
-
-# Setup wizard
-uv run python3 simulator.py --setup
-```
-
 ## Configuration
 
-Settings are stored in `config.json` (created by setup wizard):
+The simulator auto-configures itself. Advanced users can customize `config.json`:
 
 ```json
 {
@@ -212,17 +172,7 @@ Settings are stored in `config.json` (created by setup wizard):
 }
 ```
 
-### Configuration Options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `project_path` | `../src` | Badge project directory |
-| `micropython_path` | `micropython` | MicroPython executable |
-| `socket_port` | `4455` | JSON protocol port |
-| `binary_port` | `4456` | Binary protocol port |
-| `logging.enabled` | `true` | Enable file logging |
-| `gui.show_fps` | `true` | Show FPS counter |
-| `gui.target_fps` | `60` | Target frame rate |
+> **Note:** Config is optional - the script uses sensible defaults.
 
 ## How It Works
 
@@ -429,8 +379,17 @@ See [REGRESSION_TEST_GUIDE.md](REGRESSION_TEST_GUIDE.md) for more details.
 
 ## FAQ
 
+**Q: How do I start the simulator?**  
+A: Just run `./run.sh` - it handles everything automatically!
+
+**Q: Do I need to install anything first?**  
+A: No! The script detects what's missing and offers to install it.
+
+**Q: Which mode should I use?**  
+A: Just run `./run.sh` - it automatically picks the best mode for your system.
+
 **Q: Do I need to run setup every time?**  
-A: No, only once. After setup, just use `./run.sh`.
+A: No, only the first run for installations. After that, just use `./run.sh`.
 
 **Q: Can I use this for WiFi/Bluetooth features?**  
 A: WiFi and Bluetooth state can be mocked, but actual network functionality is not simulated.
@@ -439,28 +398,13 @@ A: WiFi and Bluetooth state can be mocked, but actual network functionality is n
 A: Very close, but not perfect. Always test critical features on real hardware before deployment.
 
 **Q: Can I run multiple simulators at once?**  
-A: Yes, but use different ports for each:
+A: Yes, but use different ports:
 ```bash
 ./run.sh --port 4460 --binary-port 4461
 ```
 
-**Q: What if I don't have a config.json?**  
-A: The simulator will prompt you to run setup, or you can skip and use defaults.
-
 **Q: Why are my changes to `simulator/src/` not persisting?**  
-A: `simulator/src/` is auto-generated at startup. Always edit files in `../src/` instead
-
-**Q: What's the difference between modes?**  
-A: The script automatically chooses:
-- **Native Mode**: If MicroPython is installed (fastest)
-- **Hybrid Mode**: If not, uses Docker (easiest setup)
-- You can force a specific mode with `--native` or `--docker`
-
-**Q: Which mode should I use?**  
-A: Just run `./run.sh` - it automatically picks the best mode for your system!
-
-**Q: Do I need to install anything first?**  
-A: No! The script installs pygame if needed and offers Docker mode if you don't have MicroPython.
+A: `simulator/src/` is auto-generated at startup. Always edit files in `../src/` instead.
 
 ## Support
 

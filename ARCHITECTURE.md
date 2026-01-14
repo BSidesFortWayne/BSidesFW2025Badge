@@ -6,12 +6,12 @@
 - A module can have multiple apps
 - Apps MUST inherit from the base class
 - App minimum requirements are very light
-- Base App class will provide
+- Base App class provides:
   - Automatic app registration (thanks to app directory)
   - Automatic serialization/deserialization of configs
     - Not required to use, but helps group configs for UI and web based config edits
-    - (Not Done) Support for displaying in apps menu with custom icons and names
-    - (Not Done) Abstracted registraiton functions for button handling and other hardware based callbacks that can be automatically de-registered as well
+  - Support for displaying in apps menu with custom names
+  - Abstracted registration functions for button handling and other hardware based callbacks that can be automatically de-registered
 
 ## Button Constructs
 
@@ -49,17 +49,14 @@ flowchart TD
 
 ## Config
 
-- The base app provides a `Config` object that can allow the apps to be dynamically configured via the `/config` 
+- The base app provides a `Config` object that allows apps to be dynamically configured via the `/config` 
 endpoint. When an app is open, the endpoint can be visited and any app settings that were registered can be adjusted. 
 The `analog_clock.py` shows an example of this. Currently basic types like `str` and `int` are supported, as well as 
 various smart config objects. Check out `lib/smart_config.py` for more information. The base `SmartConfig` class is
 itself a dictionary for easy serialization and deserialization to a JSON config file
 - Smart Config Types
-  - `EnumConfig`: Allows you to specify a config object form a list of options. Renders as an HTML dropdown
+  - `EnumConfig`: Allows you to specify a config object from a list of options. Renders as an HTML dropdown
   - `BoolDropdownConfig`: Inherits from enum config for boolean selection. Unfortunately HTML checkboxes don't act in 
-  normal ways in HTML forms so to avoid a larger payload to patch that behavior, we just use this instead for bools
+  normal ways in HTML forms so to avoid a larger payload to patch that behavior, we use this for bools
   - `RangeConfig`: Allows you to specify a number value with a range that is then rendered as an HTML slider
-  - `ColorConfig`: Inherits from `RangeConfig` and specifics the normal 565 color limits for the gc9a01 display
-
-- (Not Done) The Smart Config class will also be renderable as UI elements on the screens themeselves. The inputs
-should generally match what is available on the HTML config page (sliders, dropdowns, numeric entries, etc)
+  - `ColorConfig`: Inherits from `RangeConfig` and specifies the normal 565 color limits for the gc9a01 display
